@@ -1,0 +1,13 @@
+node_modules
+.DS_STORE
+npm-debug.log*
+.env
+/dist
+/build
+/typings
+/.awcache
+/.ssh
+/electron.js*
+/release
+/test/coverage
+/src/scribe.sqlite
