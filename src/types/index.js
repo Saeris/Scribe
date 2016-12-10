@@ -18,8 +18,8 @@ export function definitions() {
   let definitions = {}
 
   loadTypes().forEach((type) => {
-    definitions[type.name] = type.Definition
-    console.log(`✓ Loaded Type Definition: ${type.name}`)
+    definitions[type.Definition.name] = type.Definition
+    console.log(`✓ Loaded Type Definition: ${type.Definition.name}`)
   })
 
   return definitions
