@@ -1,5 +1,6 @@
 import path from 'path'
 import glob from 'glob' // https://github.com/isaacs/node-glob
+import config from '../config/server.config'
 
 export function loadModels() {
   let modelsArray = []
@@ -50,6 +51,7 @@ function create(knex, migrations) {
     toBeCreated.push(
       knex.schema.createTableIfNotExists(migration.name, (table) => {
         migration.fields(table)
+        if(config.ENV === 'test' || config.ENV === 'development') migration.foreignKeys(table)
       })
       .then(() => {
         console.log(`✓ Created table: ${migration.name}`)
@@ -108,24 +110,24 @@ function destroy(knex, migrations) {
 // http://knexjs.org/#Migrations-API
 
 export function up(knex, Promise) {
-  return knex.raw('SET foreign_key_checks = 0;')
+  return knex.raw(`${ config.ENV === 'production' ? 'SET foreign_key_checks = 0;' : 'PRAGMA foreign_keys = ON' }`)
     .then(() => {
       return Promise.all(loadMigrations(knex, create))
     })
     .then(() => {
-      return Promise.all(loadMigrations(knex, update))
+      if(config.ENV === 'production') return Promise.all(loadMigrations(knex, update))
     })
     .then(() => {
-      return knex.raw('SET foreign_key_checks = 1;')
+      if(config.ENV === 'production') return knex.raw('SET foreign_key_checks = 1;')
     })
 }
 
 export function down(knex, Promise) {
-  return knex.raw('SET foreign_key_checks = 0;')
+  return knex.raw(`${ config.ENV === 'production' ? 'SET foreign_key_checks = 0;' : '' }`)
   .then(() => {
     return Promise.all(loadMigrations(knex, destroy))
   })
   .then(() => {
-    return knex.raw('SET foreign_key_checks = 1;')
+    if(config.ENV === 'production') return knex.raw('SET foreign_key_checks = 1;')
   })
 }
