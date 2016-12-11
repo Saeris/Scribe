@@ -1,13 +1,9 @@
 import db from '../../config/bookshelf.config'
-
 import Card from './card'
-import ArtistCards from './artistCards'
+import ArtistCards from '../lists/artistCards'
 
-export default class artist extends db.Model {
-  get tableName() {
-   return `artist`
-  }
-
+export default class Artist extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
@@ -39,6 +35,11 @@ export default class artist extends db.Model {
          .onUpdate(`NO ACTION`)
   }
 
+  // Bookshelf Relation Definitions
+  get tableName() { return `artist` }
+
+  get hasTimestamps() { return true }
+
   card() {
     return this.belongsTo(Card, 'artist')
   }
@@ -48,5 +49,3 @@ export default class artist extends db.Model {
                .through(ArtistCards)
   }
 }
-
-export const Artist = new artist()

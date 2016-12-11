@@ -1,13 +1,9 @@
 import db from '../../config/bookshelf.config'
-
 import Set from './set'
-import BlockSets from './blockSets'
+import BlockSets from '../lists/blockSets'
 
-export default class block extends db.Model {
-  get tableName() {
-   return 'block'
-  }
-
+export default class Block extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
@@ -36,6 +32,11 @@ export default class block extends db.Model {
          .onUpdate(`NO ACTION`)
   }
 
+  // Bookshelf Relation Definitions
+  get tableName() { return 'block' }
+
+  get hasTimestamps() { return true }
+
   set() {
     return this.belongsTo(Set, 'block')
   }
@@ -45,5 +46,3 @@ export default class block extends db.Model {
                .through(BlockSets)
   }
 }
-
-export const Block = new block()

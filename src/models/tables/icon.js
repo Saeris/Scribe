@@ -1,10 +1,7 @@
 import db from '../../config/bookshelf.config'
 
-export default class icon extends db.Model {
-  get tableName() {
-   return 'icon'
-  }
-
+export default class Icon extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
@@ -30,6 +27,9 @@ export default class icon extends db.Model {
   static foreignKeys(table) {
 
   }
-}
 
-export const Icon = new icon()
+  // Bookshelf Relation Definitions
+  get tableName() { return 'icon' }
+
+  get hasTimestamps() { return true }
+}

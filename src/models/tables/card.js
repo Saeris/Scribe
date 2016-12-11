@@ -1,8 +1,7 @@
 import db from '../../config/bookshelf.config'
-
 import Name from './name'
-import Sides from './sides'
-import Variations from './variations'
+import Sides from '../lists/sides'
+import Variations from '../lists/variations'
 import Color from './color'
 import Supertype from './supertype'
 import Type from './type'
@@ -13,13 +12,10 @@ import Keyword from './keyword'
 import Legality from './legality'
 import Ruling from './ruling'
 import Artist from './artist'
-import Printings from './printings'
+import Printings from '../lists/printings'
 
-export default class card extends db.Model {
-  get tableName() {
-   return 'card'
-  }
-
+export default class Card extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
@@ -297,6 +293,11 @@ export default class card extends db.Model {
          .onUpdate(`NO ACTION`)
   }
 
+  // Bookshelf Relation Definitions
+  get tableName() { return 'card' }
+
+  get hasTimestamps() { return true }
+
   names() {
     return this.hasMany(Name, "names")
   }
@@ -353,5 +354,3 @@ export default class card extends db.Model {
     return this.hasMany(Card, "printings")
   }
 }
-
-export const Card = new card()

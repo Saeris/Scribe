@@ -1,10 +1,8 @@
 import db from '../../config/bookshelf.config'
+import Color from './color'
 
-export default class colorIdentity extends db.Model {
-  get tableName() {
-   return 'colorIdentity'
-  }
-
+export default class ColorIdentity extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
@@ -43,6 +41,9 @@ export default class colorIdentity extends db.Model {
          .onDelete(`CASCADE`)
          .onUpdate(`NO ACTION`)
   }
-}
 
-export const ColorIdentity = new colorIdentity()
+  // Bookshelf Relation Definitions
+  get tableName() { return 'colorIdentity' }
+
+  get hasTimestamps() { return true }
+}

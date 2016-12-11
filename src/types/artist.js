@@ -1,13 +1,13 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
 import Models from '../models'
-import { Definition as card } from './card'
+import { Definition as Card } from './card'
 
 export const Definition = new GraphQLObjectType({
   name: 'Artist',
   description: 'An Artist object',
   fields: () => ({
     id: {
-      type: new GraphQLNonNull(GraphQLID),
+      type: GraphQLID,
       description: `A unique id for this artist.`
     },
     name: {
@@ -19,12 +19,13 @@ export const Definition = new GraphQLObjectType({
       description: `A URL to the artist's website, if they have one.`
     },
     cards: {
-      type: new GraphQLList(card),
+      type: new GraphQLList(Card),
       description: `A list of cards featuring art from this artist.`,
       resolve: (root, {artist}) => {
-        return Models.artist.forge({artist: artist.id})
-                            .fetch({withRelated: ['cards']})
-                            .then(artist => artist.toJSON().cards)
+        return Models.Artist
+          .forge({artist: artist.id})
+          .fetch({withRelated: ['cards']})
+          .then(artist => artist.toJSON().cards)
       }
     }
   })
@@ -40,7 +41,7 @@ export const Queries = {
       }
     },
     resolve(root, {id}) {
-      return Models.artist
+      return Models.Artist
         .where('id', 'IN', id)
         .fetchAll()
         .then((collection) => {
@@ -51,7 +52,7 @@ export const Queries = {
   artists: {
     type: new GraphQLList(Definition),
     resolve(root, {id}) {
-      return Models.artist
+      return Models.Artist
         .findAll()
         .then((collection) => {
           return collection.toJSON()

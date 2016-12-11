@@ -6,7 +6,7 @@ export const Definition = new GraphQLObjectType({
   description: 'An Icon object',
   fields: () => ({
     id: {
-      type: new GraphQLNonNull(GraphQLID),
+      type: GraphQLID,
       description: `A unique id for this icon.`
     },
     name: {
@@ -34,7 +34,7 @@ export const Queries = {
       }
     },
     resolve(root, {id}) {
-      return Models.icon
+      return Models.Icon
         .where('id', 'IN', id)
         .fetchAll()
         .then((collection) => {
@@ -45,7 +45,7 @@ export const Queries = {
   icons: {
     type: new GraphQLList(Definition),
     resolve(root, {id}) {
-      return Models.icon
+      return Models.Icon
         .findAll()
         .then((collection) => {
           return collection.toJSON()

@@ -1,10 +1,7 @@
 import db from '../../config/bookshelf.config'
 
-export default class supertype extends db.Model {
-  get tableName() {
-   return 'supertype'
-  }
-
+export default class Supertype extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
@@ -22,6 +19,9 @@ export default class supertype extends db.Model {
   static foreignKeys(table) {
 
   }
-}
 
-export const Supertype = new supertype()
+  // Bookshelf Relation Definitions
+  get tableName() { return 'supertype' }
+
+  get hasTimestamps() { return true }
+}

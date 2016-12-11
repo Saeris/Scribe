@@ -1,10 +1,8 @@
 import db from '../../config/bookshelf.config'
+import Set from './set'
 
-export default class format extends db.Model {
-  get tableName() {
-   return 'format'
-  }
-
+export default class Format extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
@@ -32,6 +30,9 @@ export default class format extends db.Model {
          .onDelete(`CASCADE`)
          .onUpdate(`NO ACTION`)
   }
-}
 
-export const Format = new format()
+  // Bookshelf Relation Definitions
+  get tableName() { return 'format' }
+
+  get hasTimestamps() { return true }
+}

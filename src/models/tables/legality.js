@@ -1,10 +1,8 @@
 import db from '../../config/bookshelf.config'
+import Format from './format'
 
-export default class legality extends db.Model {
-  get tableName() {
-   return 'legality'
-  }
-
+export default class Legality extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Indexes
     table.bigIncrements(`id`)
@@ -16,7 +14,7 @@ export default class legality extends db.Model {
          .comment(`The format associated with this legality.`)
          .notNullable()
          .unsigned()
-         .index(`legality_format`)
+         .index(`format`)
 
     table.boolean(`legal`)
          .comment(`True if the card is legal in the associated format.`)
@@ -30,7 +28,7 @@ export default class legality extends db.Model {
          .comment(`List of cards that have this legality ruling.`)
          .notNullable()
          .unsigned()
-         .index(`legality_cards`)
+         .index(`cards`)
 
     // Timestamps
     table.timestamps()
@@ -49,6 +47,9 @@ export default class legality extends db.Model {
          .onDelete(`CASCADE`)
          .onUpdate(`NO ACTION`)
   }
-}
 
-export const Legality = new legality()
+  // Bookshelf Relation Definitions
+  get tableName() { return 'legality' }
+
+  get hasTimestamps() { return true }
+}

@@ -1,13 +1,13 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLBoolean, GraphQLObjectType } from 'graphql'
 import Models from '../models'
-import { Definition as color } from './color'
+import { Definition as Color } from './color'
 
 export const Definition = new GraphQLObjectType({
   name: 'ColorIdentity',
   description: 'A Color Identity object',
   fields: () => ({
     id: {
-      type: new GraphQLNonNull(GraphQLID),
+      type: GraphQLID,
       description: `A unique id for this color identity.`
     },
     name: {
@@ -19,7 +19,7 @@ export const Definition = new GraphQLObjectType({
       description: `The alias of the color identity. Examples: Bant, Jeskai`
     },
     colors: {
-      type: new GraphQLList(color),
+      type: new GraphQLList(Color),
       description: `A list of colors included in this color identity.`
     },
     multicolored: {
@@ -43,7 +43,7 @@ export const Queries = {
       }
     },
     resolve(root, {id}) {
-      return Models.coloridentity
+      return Models.Coloridentity
         .where('id', 'IN', id)
         .fetchAll()
         .then((collection) => {
@@ -54,7 +54,7 @@ export const Queries = {
   colorIdentities: {
     type: new GraphQLList(Definition),
     resolve(root, {id}) {
-      return Models.coloridentity
+      return Models.Coloridentity
         .findAll()
         .then((collection) => {
           return collection.toJSON()

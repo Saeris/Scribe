@@ -1,10 +1,8 @@
 import db from '../../config/bookshelf.config'
+import LanguageCode from './languageCode'
 
-export default class language extends db.Model {
-  get tableName() {
-   return 'language'
-  }
-
+export default class Language extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
@@ -32,6 +30,9 @@ export default class language extends db.Model {
          .onDelete(`NO ACTION`)
          .onUpdate(`NO ACTION`)
   }
-}
 
-export const Language = new language()
+  // Bookshelf Relation Definitions
+  get tableName() { return 'language' }
+
+  get hasTimestamps() { return true }
+}

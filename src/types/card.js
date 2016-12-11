@@ -1,66 +1,71 @@
 import { GraphQLID, GraphQLNonNull, GraphQLInt, GraphQLString, GraphQLFloat, GraphQLBoolean, GraphQLList, GraphQLObjectType } from 'graphql'
 import Models from '../models'
-import { Definition as name } from './name'
-import { Definition as layout } from './layout'
-import { Definition as color } from './color'
-import { Definition as colorIdentity } from './colorIdentity'
-import { Definition as supertype } from './supertype'
-import { Definition as type } from './type'
-import { Definition as subtype } from './subtype'
-import { Definition as rarity } from './rarity'
-import { Definition as set } from './set'
-import { Definition as category } from './category'
-import { Definition as abilityType } from './abilityType'
-import { Definition as keyword } from './keyword'
-import { Definition as legality } from './legality'
-import { Definition as ruling } from './ruling'
-import { Definition as artist } from './artist'
+import { Definition as Name } from './name'
+import { Definition as Layout } from './layout'
+import { Definition as Color } from './color'
+import { Definition as ColorIdentity } from './colorIdentity'
+import { Definition as Supertype } from './supertype'
+import { Definition as Type } from './type'
+import { Definition as Subtype } from './subtype'
+import { Definition as Rarity } from './rarity'
+import { Definition as Set } from './set'
+import { Definition as Category } from './category'
+import { Definition as AbilityType } from './abilityType'
+import { Definition as Keyword } from './keyword'
+import { Definition as Legality } from './legality'
+import { Definition as Ruling } from './ruling'
+import { Definition as Artist } from './artist'
 
 export const Definition = new GraphQLObjectType({
   name: 'Card',
   description: 'A Card object',
   fields: () => ({
     id: {
-      type: new GraphQLNonNull(GraphQLID),
+      type: GraphQLID,
       description: `A unique id for this card.`,
       resolve: (root, {card}) => {
-        return Models.card.forge({id: card.id})
-                          .then(card => card.toJSON().id)
+        return Models.Card
+          .forge({id: card.id})
+          .then(card => card.toJSON().id)
       }
     },
     multiverseid: {
       type: GraphQLString,
       description: `The multiverseid of the card on Wizard’s Gatherer web page. Cards from sets that do not exist on Gatherer will NOT have a multiverseid. Sets not on Gatherer are: ATH, ITP, DKM, RQS, DPA and all sets with a 4 letter code that starts with a lowercase 'p’.`,
       resolve: (root, {card}) => {
-        return Models.card.forge({id: card.id})
-                          .then(card => card.toJSON().multiverseid)
+        return Models.Card
+          .forge({id: card.id})
+          .then(card => card.toJSON().multiverseid)
       }
     },
     names: {
-      type: new GraphQLList(name),
+      type: new GraphQLList(Name),
       description: `The card names. This includes a list of foreign names indexed by a language code. Example: enUS`,
       resolve: (root, {card}) => {
-        return Models.card.forge({id: card.id})
-                          .fetch({withRelated: ['names']})
-                          .then(card => card.toJSON().names)
+        return Models.Card
+          .forge({id: card.id})
+          .fetch({withRelated: ['names']})
+          .then(card => card.toJSON().names)
       }
     },
     sides: {
       type: new GraphQLList(Definition),
       description: `Only used for split, flip and dual cards. Will contain a lit of cards representing each side of this card, front or back.`,
       resolve: (root, {card}) => {
-        return Models.card.forge({id: card.id})
-                          .fetch({withRelated: ['sides']})
-                          .then(card => card.toJSON().sides)
+        return Models.Card
+          .forge({id: card.id})
+          .fetch({withRelated: ['sides']})
+          .then(card => card.toJSON().sides)
       }
     },
     variations: {
       type: new GraphQLList(Definition),
       description: `If a card has alternate art (for example, 4 different Forests, or the 2 Brothers Yamazaki) then each other variation’s card will be listed here, NOT including the current card.`,
       resolve: (card) => {
-        return Models.card.forge({id: card.id})
-                          .fetch({withRelated: ['variations']})
-                          .then(card => card.toJSON().variations)
+        return Models.Card
+          .forge({id: card.id})
+          .fetch({withRelated: ['variations']})
+          .then(card => card.toJSON().variations)
       }
     },
     border: {
@@ -68,12 +73,13 @@ export const Definition = new GraphQLObjectType({
       description: `If the border for this specific card is DIFFERENT than the border specified in the top level set JSON, then it will be specified here. (Example: Unglued has silver borders, except for the lands which are black bordered)`
     },
     layout: {
-      type: layout,
+      type: Layout,
       description: `The card layout.`,
       resolve: (card) => {
-        return Models.card.forge({id: card.id})
-                          .fetch({withRelated: ['layout']})
-                          .then(card => card.toJSON().layout)
+        return Models.Card
+          .forge({id: card.id})
+          .fetch({withRelated: ['layout']})
+          .then(card => card.toJSON().layout)
       }
     },
     imageUrl: {
@@ -93,21 +99,23 @@ export const Definition = new GraphQLObjectType({
       description: `Converted mana cost.`
     },
     colors: {
-      type: new GraphQLList(color),
+      type: new GraphQLList(Color),
       description: `The card colors.`,
       resolve: (card) => {
-        return Models.card.forge({id: card.id})
-                          .fetch({withRelated: ['colors']})
-                          .then(card => card.toJSON().colors)
+        return Models.Card
+          .forge({id: card.id})
+          .fetch({withRelated: ['colors']})
+          .then(card => card.toJSON().colors)
       }
     },
     colorIdentity: {
-      type: colorIdentity,
+      type: ColorIdentity,
       description: `The card colors by color code. [“Red”, “Blue”] becomes [“R”, “U”]`,
       resolve: (card) => {
-        return Models.card.forge({id: card.id})
-                          .fetch({withRelated: ['colorIdentity']})
-                          .then(card => card.toJSON().colorIdentity)
+        return Models.Card
+          .forge({id: card.id})
+          .fetch({withRelated: ['colorIdentity']})
+          .then(card => card.toJSON().colorIdentity)
       }
     },
     typeLine: {
@@ -119,48 +127,53 @@ export const Definition = new GraphQLObjectType({
       description: `The original type on the card at the time it was printed. This field is not available for promo cards.`
     },
     supertypes: {
-      type: new GraphQLList(supertype),
+      type: new GraphQLList(Supertype),
       description: `The supertypes of the card. These appear to the far left of the card type.`,
       resolve: (card) => {
-        return Models.card.forge({id: card.id})
-                          .fetch({withRelated: ['supertypes']})
-                          .then(card => card.toJSON().supertypes)
+        return Models.Card
+          .forge({id: card.id})
+          .fetch({withRelated: ['supertypes']})
+          .then(card => card.toJSON().supertypes)
       }
     },
     types: {
-      type: new GraphQLList(type),
+      type: new GraphQLList(Type),
       description: `The types of the card. These appear to the left of the dash in a card type.`,
       resolve: (card) => {
-        return Models.card.forge({id: card.id})
-                          .fetch({withRelated: ['types']})
-                          .then(card => card.toJSON().types)
+        return Models.Card
+          .forge({id: card.id})
+          .fetch({withRelated: ['types']})
+          .then(card => card.toJSON().types)
       }
     },
     subtypes: {
-      type: new GraphQLList(subtype),
+      type: new GraphQLList(Subtype),
       description: `The subtypes of the card. These appear to the right of the dash in a card type. Usually each word is its own subtype.`,
       resolve: (card) => {
-        return Models.card.forge({id: card.id})
-                          .fetch({withRelated: ['subtypes']})
-                          .then(card => card.toJSON().subtypes)
+        return Models.Card
+          .forge({id: card.id})
+          .fetch({withRelated: ['subtypes']})
+          .then(card => card.toJSON().subtypes)
       }
     },
     rarity: {
-      type: rarity,
+      type: Rarity,
       description: `The rarity of the card.`,
       resolve: (card) => {
-        return Models.card.forge({id: card.id})
-                          .fetch({withRelated: ['rarity']})
-                          .then(card => card.toJSON().rarity)
+        return Models.Card
+          .forge({id: card.id})
+          .fetch({withRelated: ['rarity']})
+          .then(card => card.toJSON().rarity)
       }
     },
     set: {
-      type: set,
+      type: Set,
       description: `The set the card belongs to (set code).`,
       resolve: (card) => {
-        return Models.card.forge({id: card.id})
-                          .fetch({withRelated: ['set']})
-                          .then(card => card.toJSON().set)
+        return Models.Card
+          .forge({id: card.id})
+          .fetch({withRelated: ['set']})
+          .then(card => card.toJSON().set)
       }
     },
     text: {
@@ -172,30 +185,33 @@ export const Definition = new GraphQLObjectType({
       description: `The original text on the card at the time it was printed. This field is not available for promo cards.`
     },
     categories: {
-      type: new GraphQLList(category),
+      type: new GraphQLList(Category),
       description: `A list of categories describind this card. Examples: Acceleration, Removal`,
       resolve: (card) => {
-        return Models.card.forge({id: card.id})
-                          .fetch({withRelated: ['categories']})
-                          .then(card => card.toJSON().categories)
+        return Models.Card
+          .forge({id: card.id})
+          .fetch({withRelated: ['categories']})
+          .then(card => card.toJSON().categories)
       }
     },
     abilityTypes: {
-      type: new GraphQLList(abilityType),
+      type: new GraphQLList(AbilityType),
       description: `A list of Ability Types this card has. Examples: Activated, Triggered`,
       resolve: (card) => {
-        return Models.card.forge({id: card.id})
-                          .fetch({withRelated: ['abilityTypes']})
-                          .then(card => card.toJSON().abilityTypes)
+        return Models.Card
+          .forge({id: card.id})
+          .fetch({withRelated: ['abilityTypes']})
+          .then(card => card.toJSON().abilityTypes)
       }
     },
     keywords: {
-      type: new GraphQLList(keyword),
+      type: new GraphQLList(Keyword),
       description: `A list of keyword abilities this card has. Examples: Haste, Trample`,
       resolve: (card) => {
-        return Models.card.forge({id: card.id})
-                          .fetch({withRelated: ['keywords']})
-                          .then(card => card.toJSON().keywords)
+        return Models.Card
+          .forge({id: card.id})
+          .fetch({withRelated: ['keywords']})
+          .then(card => card.toJSON().keywords)
       }
     },
     flavor: {
@@ -223,30 +239,33 @@ export const Definition = new GraphQLObjectType({
       description: `The loyalty of the card. This is only present for planeswalkers.`
     },
     legalities: {
-      type: new GraphQLList(legality),
+      type: new GraphQLList(Legality),
       description: `The legality of the card for a given format, such as Legal, Banned or Restricted.`,
       resolve: (card) => {
-        return Models.card.forge({id: card.id})
-                          .fetch({withRelated: ['legalities']})
-                          .then(card => card.toJSON().legalities)
+        return Models.Card
+          .forge({id: card.id})
+          .fetch({withRelated: ['legalities']})
+          .then(card => card.toJSON().legalities)
       }
     },
     rulings: {
-      type: new GraphQLList(ruling),
+      type: new GraphQLList(Ruling),
       description: `The rulings for the card. An array of objects, each object having 'date’ and 'text’ keys.`,
       resolve: (card) => {
-        return Models.card.forge({id: card.id})
-                          .fetch({withRelated: ['rulings']})
-                          .then(card => card.toJSON().rulings)
+        return Models.Card
+          .forge({id: card.id})
+          .fetch({withRelated: ['rulings']})
+          .then(card => card.toJSON().rulings)
       }
     },
     artist: {
-      type: artist,
+      type: Artist,
       description: `The artist of the card. This may not match what is on the card as MTGJSON corrects many card misprints.`,
       resolve: (card) => {
-        return Models.card.forge({id: card.id})
-                          .fetch({withRelated: ['artist']})
-                          .then(card => card.toJSON().artist)
+        return Models.Card
+          .forge({id: card.id})
+          .fetch({withRelated: ['artist']})
+          .then(card => card.toJSON().artist)
       }
     },
     number: {
@@ -258,12 +277,13 @@ export const Definition = new GraphQLObjectType({
       description: `The date this card was released. This is only set for promo cards. The date may not be accurate to an exact day and month, thus only a partial date may be set (YYYY-MM-DD or YYYY-MM or YYYY). Some promo cards do not have a known release date.`
     },
     printings: {
-      type: new GraphQLList(set),
+      type: new GraphQLList(Set),
       description: `The sets that this card was printed in, expressed as an array of set codes.`,
       resolve: (card) => {
-        return Models.card.forge({id: card.id})
-                          .fetch({withRelated: ['printings']})
-                          .then(card => card.toJSON().printings)
+        return Models.Card
+          .forge({id: card.id})
+          .fetch({withRelated: ['printings']})
+          .then(card => card.toJSON().printings)
       }
     },
     timeshifted: {
@@ -295,7 +315,7 @@ export const Queries = {
       }
     },
     resolve(root, {id}) {
-      return Models.card
+      return Models.Card
         .where('id', 'IN', id)
         .fetchAll()
         .then((collection) => {
@@ -306,7 +326,7 @@ export const Queries = {
   cards: {
     type: new GraphQLList(Definition),
     resolve(root, {id}) {
-      return Models.card
+      return Models.Card
         .findAll()
         .then((collection) => {
           return collection.toJSON()

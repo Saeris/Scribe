@@ -1,26 +1,26 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
 import Models from '../models'
-import { Definition as icon }  from './icon'
+import { Definition as Icon }  from './icon'
 
 export const Definition = new GraphQLObjectType({
   name: 'Layout',
   description: 'A Layout object',
   fields: () => ({
     id: {
-      type: new GraphQLNonNull(GraphQLID),
+      type: GraphQLID,
       description: `A unique id for this layout.`
     },
     name: {
       type: GraphQLString,
       description: `The name of the layout type.`
     },
-    icons: {
-      type: new GraphQLList(icon),
-      description: `A list of icons featured on this card.`
-    },
     watermark: {
       type: GraphQLString,
       description: `Watermark that appears in this layout.`
+    },
+    icons: {
+      type: new GraphQLList(Icon),
+      description: `A list of icons featured on this card.`
     }
   })
 })
@@ -35,7 +35,7 @@ export const Queries = {
       }
     },
     resolve(root, {id}) {
-      return Models.layout
+      return Models.Layout
         .where('id', 'IN', id)
         .fetchAll()
         .then((collection) => {
@@ -46,7 +46,7 @@ export const Queries = {
   layouts: {
     type: new GraphQLList(Definition),
     resolve(root, {id}) {
-      return Models.layout
+      return Models.Layout
         .findAll()
         .then((collection) => {
           return collection.toJSON()

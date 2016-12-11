@@ -1,10 +1,9 @@
 import db from '../../config/bookshelf.config'
+import Card from './card'
+import LanguageCode from './languageCode'
 
-export default class keyword extends db.Model {
-  get tableName() {
-   return 'keyword'
-  }
-
+export default class Keyword extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
@@ -15,8 +14,14 @@ export default class keyword extends db.Model {
          .comment(`The name of the keyword.`)
          .notNullable()
 
-    table.text(`description`)
-         .comment(`The description of the keyword.`)
+    table.text(`reminderText`)
+         .comment(`A short description of the keyword ability's rules.`)
+
+    table.bigInteger(`languageCode`)
+         .comment(`The language code the reminder text of keyword is localized in.`)
+         .notNullable()
+         .unsigned()
+         .index(`keyword_code`)
 
     table.bigInteger(`cards`)
          .comment(`A list of cards that have this keyword.`)
@@ -35,6 +40,9 @@ export default class keyword extends db.Model {
          .onDelete(`CASCADE`)
          .onUpdate(`NO ACTION`)
   }
-}
 
-export const Keyword = new keyword()
+  // Bookshelf Relation Definitions
+  get tableName() { return 'keyword' }
+
+  get hasTimestamps() { return true }
+}

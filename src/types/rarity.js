@@ -2,23 +2,23 @@ import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectTyp
 import Models from '../models'
 
 export const Definition = new GraphQLObjectType({
-  name: 'Rarity',
-  description: 'A Rarity object',
-  fields: () => ({
-    id: {
-      type: new GraphQLNonNull(GraphQLID),
-      description: `A unique id for this rarity.`
-    },
-    name: {
-      type: GraphQLString,
-      description: `The name of the rarity.`
-    },
-    class: {
-      type: GraphQLString,
-      description: `A CSS class used to display this rarity.`
-    }
+    name: 'Rarity',
+    description: 'A Rarity object',
+    fields: () => ({
+      id: {
+        type: GraphQLID,
+        description: `A unique id for this rarity.`
+      },
+      name: {
+        type: GraphQLString,
+        description: `The name of the rarity.`
+      },
+      class: {
+        type: GraphQLString,
+        description: `A CSS class used to display this rarity.`
+      }
+    })
   })
-})
 
 export const Queries = {
   rarity: {
@@ -30,7 +30,7 @@ export const Queries = {
       }
     },
     resolve(root, {id}) {
-      return Models.rarity
+      return Models.Rarity
         .where('id', 'IN', id)
         .fetchAll()
         .then((collection) => {
@@ -41,7 +41,7 @@ export const Queries = {
   rarities: {
     type: new GraphQLList(Definition),
     resolve(root, {id}) {
-      return Models.rarity
+      return Models.Rarity
         .findAll()
         .then((collection) => {
           return collection.toJSON()

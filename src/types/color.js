@@ -1,13 +1,13 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
 import Models from '../models'
-import { Definition as colorIdentity } from './colorIdentity'
+import { Definition as ColorIdentity } from './colorIdentity'
 
 export const Definition = new GraphQLObjectType({
   name: 'Color',
   description: 'A Color object',
   fields: () => ({
     id: {
-      type: new GraphQLNonNull(GraphQLID),
+      type: GraphQLID,
       description: `A unique id for this color.`
     },
     symbol: {
@@ -19,7 +19,7 @@ export const Definition = new GraphQLObjectType({
       description: `A CSS class used to display a mana symbol for this color.`
     },
     indentity: {
-      type: colorIdentity,
+      type: ColorIdentity,
       description: `The color identity of this color.`
     }
   })
@@ -35,7 +35,7 @@ export const Queries = {
       }
     },
     resolve(root, {id}) {
-      return Models.color
+      return Models.Color
         .where('id', 'IN', id)
         .fetchAll()
         .then((collection) => {
@@ -46,7 +46,7 @@ export const Queries = {
   colors: {
     type: new GraphQLList(Definition),
     resolve(root, {id}) {
-      return Models.color
+      return Models.Color
         .findAll()
         .then((collection) => {
           return collection.toJSON()

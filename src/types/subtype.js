@@ -6,7 +6,7 @@ export const Definition = new GraphQLObjectType({
   description: 'A Subtype object',
   fields: () => ({
     id: {
-      type: new GraphQLNonNull(GraphQLID),
+      type: GraphQLID,
       description: `A unique id for this subtype.`
     },
     name: {
@@ -26,7 +26,7 @@ export const Queries = {
       }
     },
     resolve(root, {id}) {
-      return Models.subtype
+      return Models.Subtype
         .where('id', 'IN', id)
         .fetchAll()
         .then((collection) => {
@@ -37,7 +37,7 @@ export const Queries = {
   subtypes: {
     type: new GraphQLList(Definition),
     resolve(root, {id}) {
-      return Models.subtype
+      return Models.Subtype
         .findAll()
         .then((collection) => {
           return collection.toJSON()
@@ -58,7 +58,7 @@ export const Mutations = {
       }
     },
     resolve(root, {name}) {
-      return Models.subtype
+      return Models.Subtype
         .upsert({name: name}, {name: name})
         .then((model) => {
           return model.toJSON()

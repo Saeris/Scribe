@@ -8,6 +8,7 @@
 - [ ] Write basic project documentation (setup, getting started, etc) ie: [README](../README.md)
 - [ ] Wire-up Hapi Routes
 - [X] Troubleshoot remaining issues with SQLite Migrations / Knex schema
+- [ ] Add remaining Bookshelf Model Relations
 - [ ] Add pagination query arguments for lists
 
 ## v0.3.0

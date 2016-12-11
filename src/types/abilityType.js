@@ -1,13 +1,13 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
 import Models from '../models'
-import { Definition as card } from './card'
+import { Definition as Card } from './card'
 
 export const Definition = new GraphQLObjectType({
   name: 'AbilityType',
   description: 'An Ability Type object',
   fields: () => ({
     id: {
-      type: new GraphQLNonNull(GraphQLID),
+      type: GraphQLID,
       description: `A unique id for this ability type.`
     },
     name: {
@@ -19,7 +19,7 @@ export const Definition = new GraphQLObjectType({
       description: `Description of the ability type.`
     },
     cards: {
-      type: new GraphQLList(card),
+      type: new GraphQLList(Card),
       description: `The cards associated with this abilityType.`
     }
   })
@@ -35,7 +35,7 @@ export const Queries = {
       }
     },
     resolve(root, {id}) {
-      return Models.abilitytype
+      return Models.AbilityType
         .where('id', 'IN', id)
         .fetchAll()
         .then((collection) => {
@@ -46,7 +46,7 @@ export const Queries = {
   abilitytypes: {
     type: new GraphQLList(Definition),
     resolve(root, {id}) {
-      return Models.abilitytype
+      return Models.AbilityType
         .findAll()
         .then((collection) => {
           return collection.toJSON()

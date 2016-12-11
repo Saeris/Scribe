@@ -1,10 +1,7 @@
 import db from '../../config/bookshelf.config'
 
-export default class rarity extends db.Model {
-  get tableName() {
-   return 'rarity'
-  }
-
+export default class Rarity extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
@@ -26,6 +23,9 @@ export default class rarity extends db.Model {
   static foreignKeys(table) {
 
   }
-}
 
-export const Rarity = new rarity()
+  // Bookshelf Relation Definitions
+  get tableName() { return 'rarity' }
+
+  get hasTimestamps() { return true }
+}

@@ -6,7 +6,7 @@ export const Definition = new GraphQLObjectType({
   description: 'A Booster object',
   fields: () => ({
     id: {
-      type: new GraphQLNonNull(GraphQLID),
+      type: GraphQLID,
       description: `A unique id for this booster.`
     }
   })

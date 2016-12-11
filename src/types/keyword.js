@@ -1,12 +1,14 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
 import Models from '../models'
+import { Definition as Card } from './card'
+import { Definition as LanguageCode } from './languageCode'
 
 export const Definition = new GraphQLObjectType({
   name: 'Keyword',
-  description: 'An Keyword object',
+  description: 'A Keyword object',
   fields: () => ({
     id: {
-      type: new GraphQLNonNull(GraphQLID),
+      type: GraphQLID,
       description: `A unique id for this keyword.`
     },
     name: {
@@ -16,6 +18,20 @@ export const Definition = new GraphQLObjectType({
     reminderText: {
       type: GraphQLString,
       description: `A short description of the keyword ability's rules.`
+    },
+    languageCode: {
+      type: LanguageCode,
+      description: `The language code the reminder text of keyword is localized in.`
+    },
+    cards: {
+      type: new GraphQLList(Card),
+      description: `A list of cards featuring art from this artist.`,
+      resolve: (root, {artist}) => {
+        return Model.Keyword
+          .forge({artist: artist.id})
+          .fetch({withRelated: ['cards']})
+          .then(artist => artist.toJSON().cards)
+      }
     }
   })
 })
@@ -30,7 +46,7 @@ export const Queries = {
       }
     },
     resolve(root, {id}) {
-      return Models.keyword
+      return Models.Keyword
         .where('id', 'IN', id)
         .fetchAll()
         .then((collection) => {
@@ -41,7 +57,7 @@ export const Queries = {
   keywords: {
     type: new GraphQLList(Definition),
     resolve(root, {id}) {
-      return Models.keyword
+      return Models.Keyword
         .findAll()
         .then((collection) => {
           return collection.toJSON()

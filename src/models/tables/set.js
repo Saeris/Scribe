@@ -1,10 +1,11 @@
 import db from '../../config/bookshelf.config'
+import Icon from './icon'
+import Block from './block'
+import Booster from './booster'
+import SetType from './setType'
 
-export default class set extends db.Model {
-  get tableName() {
-   return 'set'
-  }
-
+export default class Set extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
@@ -23,19 +24,19 @@ export default class set extends db.Model {
          .comment(`The block the set belongs to.`)
          .notNullable()
          .unsigned()
-         .index(`set_block`)
+         .index(`block`)
 
     table.bigInteger(`type`)
          .comment(`The type of the set.`)
          .notNullable()
          .unsigned()
-         .index(`set_type`)
+         .index(`type`)
 
     table.bigInteger(`icon`)
          .comment(`The icon associated with the set.`)
          .notNullable()
          .unsigned()
-         .index(`set_icon`)
+         .index(`icon`)
 
     table.string(`border`)
          .comment(`The border color of the set.`)
@@ -68,6 +69,9 @@ export default class set extends db.Model {
          .onDelete(`NO ACTION`)
          .onUpdate(`NO ACTION`)
   }
-}
 
-export const Set = new set()
+  // Bookshelf Relation Definitions
+  get tableName() { return 'set' }
+
+  get hasTimestamps() { return true }
+}

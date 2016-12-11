@@ -1,12 +1,9 @@
 import db from '../../config/bookshelf.config'
-
 import Card from './card'
+import Language from './language'
 
-export default class name extends db.Model {
-  get tableName() {
-   return 'name'
-  }
-
+export default class Name extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
@@ -21,13 +18,13 @@ export default class name extends db.Model {
          .comment(`The language code of the language the name is localized in.`)
          .notNullable()
          .unsigned()
-         .index(`name_language`)
+         .index(`language`)
 
     table.bigInteger(`cards`)
          .comment(`A list of cards that have this name.`)
          .notNullable()
          .unsigned()
-         .index(`name_cards`)
+         .index(`cards`)
 
     // Timestamps
     table.timestamps()
@@ -47,9 +44,12 @@ export default class name extends db.Model {
          .onUpdate(`NO ACTION`)
   }
 
-  cardID() {
+  // Bookshelf Relation Definitions
+  get tableName() { return 'name' }
+
+  get hasTimestamps() { return true }
+
+  cards() {
     return this.belongsTo(Card, "card")
   }
 }
-
-export const Name = new name()

@@ -1,14 +1,10 @@
 import db from '../../config/bookshelf.config'
-
 import Card from './card'
-import Categories from './categories'
-import CategoryCards from './categoryCards'
+import Categories from '../lists/categories'
+import CategoryCards from '../lists/categoryCards'
 
-export default class category extends db.Model {
-  get tableName() {
-   return 'category'
-  }
-
+export default class Category extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
@@ -40,6 +36,11 @@ export default class category extends db.Model {
          .onUpdate(`NO ACTION`)
   }
 
+  // Bookshelf Relation Definitions
+  get tableName() { return 'category' }
+
+  get hasTimestamps() { return true }
+
   card() {
     return this.belongsTo(Card, 'categories')
                .through(Categories, 'category')
@@ -50,5 +51,3 @@ export default class category extends db.Model {
                .through(CategoryCards, 'category')
   }
 }
-
-export const Category = new category()

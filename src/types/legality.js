@@ -1,21 +1,21 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLBoolean, GraphQLObjectType } from 'graphql'
 import Models from '../models'
-import { Definition as format } from './format'
+import { Definition as Format } from './format'
 
 export const Definition = new GraphQLObjectType({
   name: 'Legality',
   description: 'A Legality object',
   fields: () => ({
     id: {
-      type: new GraphQLNonNull(GraphQLID),
+      type: GraphQLID,
       description: `A unique id for this name.`
     },
     cardID: {
-      type: new GraphQLNonNull(GraphQLID),
+      type: GraphQLID,
       description: `The ID of the card.`
     },
     format: {
-      type: format,
+      type: Format,
       description: `The format the card is legal in.`
     },
     legal: {
@@ -39,7 +39,7 @@ export const Queries = {
       }
     },
     resolve(root, {id}) {
-      return Models.legality
+      return Models.Legality
         .where('id', 'IN', id)
         .fetchAll()
         .then((collection) => {
@@ -50,7 +50,7 @@ export const Queries = {
   legalities: {
     type: new GraphQLList(Definition),
     resolve(root, {id}) {
-      return Models.legality
+      return Models.Legality
         .findAll()
         .then((collection) => {
           return collection.toJSON()

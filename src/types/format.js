@@ -1,13 +1,13 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
 import Models from '../models'
-import { Definition as set } from './set'
+import { Definition as Set } from './set'
 
 export const Definition = new GraphQLObjectType({
   name: 'Format',
   description: 'A Format object',
   fields: () => ({
     id: {
-      type: new GraphQLNonNull(GraphQLID),
+      type: GraphQLID,
       description: `A unique id for this format.`
     },
     name: {
@@ -15,7 +15,7 @@ export const Definition = new GraphQLObjectType({
       description: `The format name.`
     },
     sets: {
-      type: new GraphQLList(set),
+      type: new GraphQLList(Set),
       description: `A list of sets included in this format`
     }
   })
@@ -31,7 +31,7 @@ export const Queries = {
       }
     },
     resolve(root, {id}) {
-      return Models.format
+      return Models.Format
         .where('id', 'IN', id)
         .fetchAll()
         .then((collection) => {
@@ -42,7 +42,7 @@ export const Queries = {
   formats: {
     type: new GraphQLList(Definition),
     resolve(root, {id}) {
-      return Models.format
+      return Models.Format
         .findAll()
         .then((collection) => {
           return collection.toJSON()

@@ -1,10 +1,7 @@
 import db from '../../config/bookshelf.config'
 
-export default class subtype extends db.Model {
-  get tableName() {
-   return 'subtype'
-  }
-
+export default class Subtype extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
@@ -22,6 +19,9 @@ export default class subtype extends db.Model {
   static foreignKeys(table) {
 
   }
-}
 
-export const Subtype = new subtype()
+  // Bookshelf Relation Definitions
+  get tableName() { return 'subtype' }
+
+  get hasTimestamps() { return true }
+}

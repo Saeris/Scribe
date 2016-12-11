@@ -1,10 +1,7 @@
 import db from '../../config/bookshelf.config'
 
-export default class setType extends db.Model {
-  get tableName() {
-   return 'setType'
-  }
-
+export default class SetType extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
@@ -25,6 +22,9 @@ export default class setType extends db.Model {
   static foreignKeys(table) {
 
   }
-}
 
-export const SetType = new setType()
+  // Bookshelf Relation Definitions
+  get tableName() { return 'setType' }
+
+  get hasTimestamps() { return true }
+}

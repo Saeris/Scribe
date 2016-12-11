@@ -1,14 +1,10 @@
 import db from '../../config/bookshelf.config'
-
 import Card from './card'
-import AbilityTypes from './abilityTypes'
-import AbilityTypeCards from './abilityTypeCards'
+import AbilityTypes from '../lists/abilityTypes'
+import AbilityTypeCards from '../lists/abilityTypeCards'
 
-export default class abilityType extends db.Model {
-  get tableName() {
-   return 'abilitytype'
-  }
-
+export default class AbilityType extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
@@ -26,7 +22,7 @@ export default class abilityType extends db.Model {
          .comment(`The cards associated with this abilityType.`)
          .notNullable()
          .unsigned()
-         .index(`abilityType_cards`)
+         .index(`abilitytype_cards`)
 
     // Timestamps
     table.timestamps()
@@ -40,6 +36,11 @@ export default class abilityType extends db.Model {
          .onUpdate(`NO ACTION`)
   }
 
+  // Bookshelf Relation Definitions
+  get tableName() { return 'abilitytype' }
+
+  get hasTimestamps() { return true }
+
   abilityTypes() {
     return this.belongsTo(AbilityTypes)
   }
@@ -49,5 +50,3 @@ export default class abilityType extends db.Model {
                .through(AbilityTypeCards)
   }
 }
-
-export const AbilityType = new abilityType()
