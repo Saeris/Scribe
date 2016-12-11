@@ -2,7 +2,7 @@ import db from '../../config/bookshelf.config'
 import Card from '../tables/card'
 import Set from '../tables/set'
 
-export default class printings extends db.Model {
+export default class Printings extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields

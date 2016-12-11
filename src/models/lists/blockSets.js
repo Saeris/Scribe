@@ -1,6 +1,6 @@
 import db from '../../config/bookshelf.config'
 
-export default class blockSets extends db.Model {
+export default class BlockSets extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields

@@ -2,7 +2,7 @@ import db from '../../config/bookshelf.config'
 import Card from '../tables/card'
 import AbilityType from '../tables/abilityType'
 
-export default class abilityTypeCards extends db.Model {
+export default class AbilityTypeCards extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields

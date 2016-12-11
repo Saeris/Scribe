@@ -1,6 +1,6 @@
 import db from '../../config/bookshelf.config'
 
-export default class colors extends db.Model {
+export default class Colors extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields

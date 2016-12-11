@@ -18,7 +18,7 @@ export const Definition = new GraphQLObjectType({
       type: new GraphQLList(Set),
       description: `List of sets that are included in this block.`,
       resolve: (root, {artist}) => {
-        return Models.block
+        return Models.Block
           .forge({artist: artist.id})
           .fetch({withRelated: ['cards']})
           .then(artist => artist.toJSON().cards)

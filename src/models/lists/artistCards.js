@@ -2,7 +2,7 @@ import db from '../../config/bookshelf.config'
 import Card from '../tables/card'
 import Artist from '../tables/artist'
 
-export default class artistCards extends db.Model {
+export default class ArtistCards extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields

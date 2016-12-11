@@ -27,7 +27,7 @@ export const Definition = new GraphQLObjectType({
       type: new GraphQLList(Card),
       description: `A list of cards featuring art from this artist.`,
       resolve: (root, {artist}) => {
-        return Model.Keyword
+        return Models.Keyword
           .forge({artist: artist.id})
           .fetch({withRelated: ['cards']})
           .then(artist => artist.toJSON().cards)

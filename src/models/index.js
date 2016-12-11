@@ -30,6 +30,46 @@ export const Models = models()
 
 export default Models
 
+export function definitions() {
+  let definitions = []
+
+  loadModels().forEach((Model) => {
+    let Instance = new Model
+    if(Instance.Definition) {
+      definitions.push(Instance.Definition)
+      console.log(`✓ Loaded Type Definition: ${Instance.Definition.name}`)
+    }
+  })
+
+  return definitions
+}
+
+export function queries() {
+  let queries = []
+
+  loadModels().forEach((Model) => {
+    let Instance = new Model
+    if(Instance.Queries) {
+      console.log('Found Queries:')
+      console.log(Instance.Queries)
+      queries.push(Instance.Queries)
+    }
+  })
+
+  return queries
+}
+
+export function mutations() {
+  let mutations = []
+
+  loadModels().forEach((Model) => {
+    let Instance = new Model
+    if(Instance.Mutations) mutations.push(Instance.Mutations)
+  })
+
+  return mutations
+}
+
 function loadMigrations(knex, callback) {
   let migration = []
 

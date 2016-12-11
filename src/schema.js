@@ -1,7 +1,8 @@
 import { GraphQLSchema, GraphQLObjectType } from 'graphql'
-import { queries, mutations } from './types'
+import { definitions, queries, mutations } from './models'
 
 export default new GraphQLSchema({
+  types: [...definitions()],
   query: new GraphQLObjectType({
     name: 'Query',
     description: `The root query handler for Scribe's GraphQL interface.`,

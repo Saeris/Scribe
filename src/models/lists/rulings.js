@@ -1,6 +1,6 @@
 import db from '../../config/bookshelf.config'
 
-export default class rulings extends db.Model {
+export default class Rulings extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields

@@ -1,7 +1,68 @@
+import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
+import { inject } from 'aurelia-dependency-injection'
 import db from '../../config/bookshelf.config'
 import Language from './language'
 
+@inject(Language)
 export default class LanguageCode extends db.Model {
+  constructor(language) {
+    super()
+    this.Language = language
+  }
+
+  Definition = new GraphQLObjectType({
+    name: 'LanguageCode',
+    description: 'A language code object',
+    fields: () => ({
+      id: {
+        type: GraphQLID,
+        description: `A unique id for this language.`
+      },
+      code: {
+        type: GraphQLString,
+        description: `The language code.`
+      },
+      language: {
+        type: this.Language.Definition,
+        description: `The language associated with the language code.`
+      }
+    })
+  })
+
+  Queries = {
+    languageCode: {
+      type: new GraphQLList(this.Definition),
+      args: {
+        id: {
+          name: 'id',
+          type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
+        }
+      },
+      resolve: (root, {id}) => {
+        return this
+          .where('id', 'IN', id)
+          .fetchAll()
+          .then((collection) => {
+            return collection.toJSON()
+          })
+      }
+    },
+    languageCodes: {
+      type: new GraphQLList(this.Definition),
+      resolve: (root, {id}) => {
+        return this
+          .findAll()
+          .then((collection) => {
+            return collection.toJSON()
+          })
+      }
+    }
+  }
+
+  Mutations = {
+
+  }
+
   // Knex Schema Definitions
   static fields(table) {
     // Fields
