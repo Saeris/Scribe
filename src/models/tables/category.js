@@ -1,16 +1,10 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
-import { inject } from 'aurelia-dependency-injection'
 import db from '../../config/bookshelf.config'
 import Card from './card'
 import Categories from '../lists/categories'
 import CategoryCards from '../lists/categoryCards'
 
-@inject(Card)
 export default class Category extends db.Model {
-  constructor(card) {
-    super()
-    this.Card = card
-  }
 
   Definition = new GraphQLObjectType({
     name: 'Category',
@@ -29,7 +23,7 @@ export default class Category extends db.Model {
         description: `The description of the category.`
       },
       cards: {
-        type: new GraphQLList(this.Card.Definition),
+        type: new GraphQLList((new Card()).Definition),
         description: `A list of cards that have this category.`,
         resolve: (root, {artist}) => {
           return this

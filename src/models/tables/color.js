@@ -1,14 +1,8 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
-import { inject } from 'aurelia-dependency-injection'
 import db from '../../config/bookshelf.config'
 import ColorIdentity from './colorIdentity'
 
-@inject(ColorIdentity)
 export default class Color extends db.Model {
-  constructor(colorIdentity) {
-    super()
-    this.ColorIdentity = colorIdentity
-  }
 
   Definition = new GraphQLObjectType({
     name: 'Color',
@@ -27,7 +21,7 @@ export default class Color extends db.Model {
         description: `A CSS class used to display a mana symbol for this color.`
       },
       indentity: {
-        type: this.ColorIdentity,
+        type: (new ColorIdentity()).Definition,
         description: `The color identity of this color.`
       }
     })

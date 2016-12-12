@@ -1,14 +1,8 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
-import { inject } from 'aurelia-dependency-injection'
 import db from '../../config/bookshelf.config'
 import Format from './format'
 
-@inject(Format)
 export default class Legality extends db.Model {
-  constructor(format) {
-    super()
-    this.Format = format
-  }
 
   Definition = new GraphQLObjectType({
     name: 'Legality',
@@ -23,7 +17,7 @@ export default class Legality extends db.Model {
         description: `The ID of the card.`
       },
       format: {
-        type: this.Format.Definition,
+        type: (new Format()).Definition,
         description: `The format the card is legal in.`
       },
       legal: {

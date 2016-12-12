@@ -1,15 +1,9 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
-import { inject } from 'aurelia-dependency-injection'
 import db from '../../config/bookshelf.config'
 import Set from './set'
 import BlockSets from '../lists/blockSets'
 
-@inject(Set)
 export default class Block extends db.Model {
-  constructor(set) {
-    super()
-    this.Set = set
-  }
 
   Definition = new GraphQLObjectType({
     name: 'Block',
@@ -24,7 +18,7 @@ export default class Block extends db.Model {
         description: `The name of the block.`
       },
       sets: {
-        type: new GraphQLList(this.Set.Definition),
+        type: new GraphQLList((new Set()).Definition),
         description: `List of sets that are included in this block.`,
         resolve: (root, {artist}) => {
           return this

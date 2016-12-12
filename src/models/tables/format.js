@@ -1,14 +1,8 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
-import { inject } from 'aurelia-dependency-injection'
 import db from '../../config/bookshelf.config'
 import Set from './set'
 
-@inject(Set)
 export default class Format extends db.Model {
-  constructor(set) {
-    super()
-    this.Set = set
-  }
 
   Definition = new GraphQLObjectType({
     name: 'Format',
@@ -23,7 +17,7 @@ export default class Format extends db.Model {
         description: `The format name.`
       },
       sets: {
-        type: new GraphQLList(this.Set.Definition),
+        type: new GraphQLList((new Set()).Definition),
         description: `A list of sets included in this format`
       }
     })

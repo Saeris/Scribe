@@ -1,16 +1,9 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
-import { inject } from 'aurelia-dependency-injection'
 import db from '../../config/bookshelf.config'
 import Card from './card'
 import LanguageCode from './languageCode'
 
-@inject(Card, LanguageCode)
 export default class Ruling extends db.Model {
-  constructor(card, languageCode) {
-    super()
-    this.Card = card
-    this.LanguageCode = languageCode
-  }
 
   Definition = new GraphQLObjectType({
     name: 'Ruling',
@@ -29,11 +22,11 @@ export default class Ruling extends db.Model {
         description: `The date this ruling was issued.`
       },
       language: {
-        type: this.LanguageCode.Definition,
+        type: (new LanguageCode()).Definition,
         description: `The language code of this ruling.`
       },
       cards: {
-        type: new GraphQLList(this.Card.Definition),
+        type: new GraphQLList((new Card()).Definition),
         description: `List of cards that have this ruling.`,
         resolve: (root, {artist}) => {
           return this

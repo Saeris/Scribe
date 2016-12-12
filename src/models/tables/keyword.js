@@ -1,16 +1,9 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
-import { inject } from 'aurelia-dependency-injection'
 import db from '../../config/bookshelf.config'
 import Card from './card'
 import LanguageCode from './languageCode'
 
-@inject(Card, LanguageCode)
 export default class Keyword extends db.Model {
-  constructor(card, languageCode) {
-    super()
-    this.Card = card
-    this.LanguageCode = languageCode
-  }
 
   Definition = new GraphQLObjectType({
     name: 'Keyword',
@@ -29,11 +22,11 @@ export default class Keyword extends db.Model {
         description: `A short description of the keyword ability's rules.`
       },
       languageCode: {
-        type: this.LanguageCode.Definition,
+        type: (new LanguageCode()).Definition,
         description: `The language code the reminder text of keyword is localized in.`
       },
       cards: {
-        type: new GraphQLList(this.Card.Definition),
+        type: new GraphQLList((new Card()).Definition),
         description: `A list of cards featuring art from this artist.`,
         resolve: (root, {artist}) => {
           return this

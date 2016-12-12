@@ -31,17 +31,17 @@ class config {
   winston = {
     transports: [
       new (winston.transports.Loggly)({
-        token: process.env.LOGGLY_TOKEN,
-        subdomain: process.env.LOGGLY_SUBDOMAIN,
-        tags: ["Winston-NodeJS", "Scribe"],
-        json:true
+        token:            process.env.LOGGLY_TOKEN,
+        subdomain:        process.env.LOGGLY_SUBDOMAIN,
+        tags:             ["Winston-NodeJS", "Scribe"],
+        json:             true
       }),
       new (winston.transports.Console)({
-        level: this.level,
-        prettyPrint: true,
+        level:            this.level,
+        prettyPrint:      true,
         handleExceptions: true,
-        json: false,
-        colorize: true
+        json:             false,
+        colorize:         true
       })
     ]
   }
@@ -55,11 +55,11 @@ class config {
       winston: [{
         module: 'good-winston',
         args:[new winston.Logger(this.winston), {
-          error_level: 'error',
-          ops_level: 'debug',
-          request_level:'debug',
-          response_level:'info',
-          other_level: 'info'
+          error_level:    'error',
+          ops_level:      'debug',
+          request_level:  'debug',
+          response_level: 'info',
+          other_level:    'info'
         }]
       }]
     }

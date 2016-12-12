@@ -1,12 +1,7 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
-import { inject } from 'aurelia-dependency-injection'
 import db from '../../config/bookshelf.config'
 
-@inject()
 export default class Type extends db.Model {
-  constructor() {
-    super()
-  }
 
   Definition = new GraphQLObjectType({
     name: 'Type',

@@ -1,20 +1,11 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
-import { inject } from 'aurelia-dependency-injection'
 import db from '../../config/bookshelf.config'
 import Icon from './icon'
 import Block from './block'
 import Booster from './booster'
 import SetType from './setType'
 
-@inject(Block, SetType, Icon, Booster)
 export default class Set extends db.Model {
-  constructor(block, setType, icon, booster) {
-    super()
-    this.Block = block
-    this.SetType = setType
-    this.Icon = icon
-    this.Booster = booster
-  }
 
   Definition = new GraphQLObjectType({
     name: 'Set',
@@ -33,15 +24,15 @@ export default class Set extends db.Model {
         description: `The set code for this set.`
       },
       block: {
-        type: this.Block.Definition,
+        type: (new Block()).Definition,
         description: `The block the set belongs to.`
       },
       type: {
-        type: this.SetType.Definition,
+        type: (new SetType()).Definition,
         description: `The set type.`
       },
       icon: {
-        type: this.Icon.Definition,
+        type: (new Icon()).Definition,
         description: `The icon associated with the set.`
       },
       border: {
@@ -53,7 +44,7 @@ export default class Set extends db.Model {
         description: `The date this card was released. This is only set for promo cards. The date may not be accurate to an exact day and month, thus only a partial date may be set (YYYY-MM-DD or YYYY-MM or YYYY). Some promo cards do not have a known release date.`
       },
       booster: {
-        type: this.Booster.Definition,
+        type: (new Booster()).Definition,
         description: `A booster pack for this set`
       }
     })

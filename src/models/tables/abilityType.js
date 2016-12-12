@@ -1,16 +1,10 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
-import { inject } from 'aurelia-dependency-injection'
 import db from '../../config/bookshelf.config'
 import Card from './card'
 import AbilityTypes from '../lists/abilityTypes'
 import AbilityTypeCards from '../lists/abilityTypeCards'
 
-@inject(Card)
 export default class AbilityType extends db.Model {
-  constructor(card) {
-    super()
-    this.Card = card
-  }
 
   Definition = new GraphQLObjectType({
     name: 'AbilityType',
@@ -29,7 +23,7 @@ export default class AbilityType extends db.Model {
         description: `Description of the ability type.`
       },
       cards: {
-        type: new GraphQLList(this.Card.Definition),
+        type: new GraphQLList((new Card()).Definition),
         description: `The cards associated with this abilityType.`
       }
     })

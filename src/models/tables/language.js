@@ -1,14 +1,8 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
-import { inject } from 'aurelia-dependency-injection'
 import db from '../../config/bookshelf.config'
 import LanguageCode from './languageCode'
 
-@inject(LanguageCode)
 export default class Language extends db.Model {
-  constructor(languageCode) {
-    super()
-    this.LanguageCode = languageCode
-  }
 
   Definition = new GraphQLObjectType({
     name: 'Language',
@@ -23,7 +17,7 @@ export default class Language extends db.Model {
         description: `The name of the language.`
       },
       code: {
-        type: this.LanguageCode.Definition,
+        type: (new LanguageCode()).Definition,
         description: `The language code associated with this language.`
       }
     })

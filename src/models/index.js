@@ -50,8 +50,8 @@ export function queries() {
   loadModels().forEach((Model) => {
     let Instance = new Model
     if(Instance.Queries) {
-      console.log('Found Queries:')
-      console.log(Instance.Queries)
+      //console.log('Found Queries:')
+      //console.log(Instance.Queries)
       queries.push(Instance.Queries)
     }
   })

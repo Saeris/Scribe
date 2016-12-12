@@ -1,5 +1,4 @@
 import { GraphQLID, GraphQLNonNull, GraphQLInt, GraphQLString, GraphQLFloat, GraphQLBoolean, GraphQLList, GraphQLObjectType } from 'graphql'
-import { inject } from 'aurelia-dependency-injection'
 import db from '../../config/bookshelf.config'
 import Name from './name'
 import Layout from './layout'
@@ -20,26 +19,7 @@ import Ruling from './ruling'
 import Artist from './artist'
 import Printings from '../lists/printings'
 
-@inject(Name, Layout, Color, ColorIdentity, Supertype, Type, Subtype, Rarity, Set, Category, AbilityType, Keyword, Legality, Ruling, Artist)
 export default class Card extends db.Model {
-  constructor(name, layout, color, colorIdentity, supertype, type, subtype, rarity, set, category, abilityType, keyword, legality, ruling, artist) {
-    super()
-    this.Name = name
-    this.Layout = layout
-    this.Color = color
-    this.ColorIdentity = colorIdentity
-    this.Supertype = supertype
-    this.Type = type
-    this.Subtype = subtype
-    this.Rarity = rarity
-    this.Set = set
-    this.Category = category
-    this.AbilityType = abilityType
-    this.Keyword = keyword
-    this.Legality = legality
-    this.Ruling = ruling
-    this.Artist = artist
-  }
 
   Definition = new GraphQLObjectType({
     name: 'Card',
@@ -64,7 +44,7 @@ export default class Card extends db.Model {
         }
       },
       names: {
-        type: new GraphQLList(this.Name.Definition),
+        type: new GraphQLList((new Name()).Definition),
         description: `The card names. This includes a list of foreign names indexed by a language code. Example: enUS`,
         resolve: (root, {card}) => {
           return this
@@ -98,7 +78,7 @@ export default class Card extends db.Model {
         description: `If the border for this specific card is DIFFERENT than the border specified in the top level set JSON, then it will be specified here. (Example: Unglued has silver borders, except for the lands which are black bordered)`
       },
       layout: {
-        type: this.Layout.Definition,
+        type: (new Layout()).Definition,
         description: `The card layout.`,
         resolve: (card) => {
           return this
@@ -124,7 +104,7 @@ export default class Card extends db.Model {
         description: `Converted mana cost.`
       },
       colors: {
-        type: new GraphQLList(this.Color.Definition),
+        type: new GraphQLList((new Color()).Definition),
         description: `The card colors.`,
         resolve: (card) => {
           return this
@@ -134,7 +114,7 @@ export default class Card extends db.Model {
         }
       },
       colorIdentity: {
-        type: this.ColorIdentity.Definition,
+        type: (new ColorIdentity()).Definition,
         description: `The card colors by color code. [“Red”, “Blue”] becomes [“R”, “U”]`,
         resolve: (card) => {
           return this
@@ -152,7 +132,7 @@ export default class Card extends db.Model {
         description: `The original type on the card at the time it was printed. This field is not available for promo cards.`
       },
       supertypes: {
-        type: new GraphQLList(this.Supertype.Definition),
+        type: new GraphQLList((new Supertype()).Definition),
         description: `The supertypes of the card. These appear to the far left of the card type.`,
         resolve: (card) => {
           return this
@@ -162,7 +142,7 @@ export default class Card extends db.Model {
         }
       },
       types: {
-        type: new GraphQLList(this.Type.Definition),
+        type: new GraphQLList((new Type()).Definition),
         description: `The types of the card. These appear to the left of the dash in a card type.`,
         resolve: (card) => {
           return this
@@ -172,7 +152,7 @@ export default class Card extends db.Model {
         }
       },
       subtypes: {
-        type: new GraphQLList(this.Subtype.Definition),
+        type: new GraphQLList((new Subtype()).Definition),
         description: `The subtypes of the card. These appear to the right of the dash in a card type. Usually each word is its own subtype.`,
         resolve: (card) => {
           return this
@@ -182,7 +162,7 @@ export default class Card extends db.Model {
         }
       },
       rarity: {
-        type: this.Rarity.Definition,
+        type: (new Rarity()).Definition,
         description: `The rarity of the card.`,
         resolve: (card) => {
           return this
@@ -192,7 +172,7 @@ export default class Card extends db.Model {
         }
       },
       set: {
-        type: this.Set.Definition,
+        type: (new Set()).Definition,
         description: `The set the card belongs to (set code).`,
         resolve: (card) => {
           return this
@@ -210,7 +190,7 @@ export default class Card extends db.Model {
         description: `The original text on the card at the time it was printed. This field is not available for promo cards.`
       },
       categories: {
-        type: new GraphQLList(this.Category.Definition),
+        type: new GraphQLList((new Category()).Definition),
         description: `A list of categories describind this card. Examples: Acceleration, Removal`,
         resolve: (card) => {
           return this
@@ -220,7 +200,7 @@ export default class Card extends db.Model {
         }
       },
       abilityTypes: {
-        type: new GraphQLList(this.AbilityType.Definition),
+        type: new GraphQLList((new AbilityType()).Definition),
         description: `A list of Ability Types this card has. Examples: Activated, Triggered`,
         resolve: (card) => {
           return this
@@ -230,7 +210,7 @@ export default class Card extends db.Model {
         }
       },
       keywords: {
-        type: new GraphQLList(this.Keyword.Definition),
+        type: new GraphQLList((new Keyword()).Definition),
         description: `A list of keyword abilities this card has. Examples: Haste, Trample`,
         resolve: (card) => {
           return this
@@ -264,7 +244,7 @@ export default class Card extends db.Model {
         description: `The loyalty of the card. This is only present for planeswalkers.`
       },
       legalities: {
-        type: new GraphQLList(this.Legality.Definition),
+        type: new GraphQLList((new Legality()).Definition),
         description: `The legality of the card for a given format, such as Legal, Banned or Restricted.`,
         resolve: (card) => {
           return this
@@ -274,7 +254,7 @@ export default class Card extends db.Model {
         }
       },
       rulings: {
-        type: new GraphQLList(this.Ruling.Definition),
+        type: new GraphQLList((new Ruling()).Definition),
         description: `The rulings for the card. An array of objects, each object having 'date’ and 'text’ keys.`,
         resolve: (card) => {
           return this
@@ -284,7 +264,7 @@ export default class Card extends db.Model {
         }
       },
       artist: {
-        type: this.Artist.Definition,
+        type: (new Artist()).Definition,
         description: `The artist of the card. This may not match what is on the card as MTGJSON corrects many card misprints.`,
         resolve: (card) => {
           return this
@@ -302,7 +282,7 @@ export default class Card extends db.Model {
         description: `The date this card was released. This is only set for promo cards. The date may not be accurate to an exact day and month, thus only a partial date may be set (YYYY-MM-DD or YYYY-MM or YYYY). Some promo cards do not have a known release date.`
       },
       printings: {
-        type: new GraphQLList(this.Set.Definition),
+        type: new GraphQLList((new Set()).Definition),
         description: `The sets that this card was printed in, expressed as an array of set codes.`,
         resolve: (card) => {
           return this

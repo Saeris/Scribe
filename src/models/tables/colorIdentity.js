@@ -1,14 +1,8 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
-import { inject } from 'aurelia-dependency-injection'
 import db from '../../config/bookshelf.config'
 import Color from './color'
 
-@inject(Color)
 export default class ColorIdentity extends db.Model {
-  constructor(color) {
-    super()
-    this.Color = color
-  }
 
   Definition = new GraphQLObjectType({
     name: 'ColorIdentity',
@@ -27,7 +21,7 @@ export default class ColorIdentity extends db.Model {
         description: `The alias of the color identity. Examples: Bant, Jeskai`
       },
       colors: {
-        type: new GraphQLList(this.Color.Definition),
+        type: new GraphQLList((new Color()).Definition),
         description: `A list of colors included in this color identity.`
       },
       multicolored: {

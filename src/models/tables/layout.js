@@ -1,14 +1,8 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
-import { inject } from 'aurelia-dependency-injection'
 import db from '../../config/bookshelf.config'
 import Icon from './icon'
 
-@inject(Icon)
 export default class Layout extends db.Model {
-  constructor(icon) {
-    super()
-    this.Icon = icon
-  }
 
   Definition = new GraphQLObjectType({
     name: 'Layout',
@@ -27,7 +21,7 @@ export default class Layout extends db.Model {
         description: `Watermark that appears in this layout.`
       },
       icons: {
-        type: new GraphQLList(this.Icon.Definition),
+        type: new GraphQLList((new Icon()).Definition),
         description: `A list of icons featured on this card.`
       }
     })
