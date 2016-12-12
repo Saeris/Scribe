@@ -32,7 +32,7 @@ export default class Names extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'names' }
+  get tableName() { return `names` }
 
   get hasTimestamps() { return true }
 }

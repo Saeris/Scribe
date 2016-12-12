@@ -4,8 +4,8 @@ import db from '../../config/bookshelf.config'
 export default class SetType extends db.Model {
 
   Definition = new GraphQLObjectType({
-    name: 'SetType',
-    description: 'A Set Type object',
+    name: `SetType`,
+    description: `A Set Type object`,
     fields: () => ({
       id: {
         type: GraphQLID,
@@ -27,13 +27,13 @@ export default class SetType extends db.Model {
       type: new GraphQLList(this.Definition),
       args: {
         id: {
-          name: 'id',
+          name: `id`,
           type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
         }
       },
       resolve: (root, {id}) => {
         return this
-          .where('id', 'IN', id)
+          .where(`id`, `IN`, id)
           .fetchAll()
           .then((collection) => {
             return collection.toJSON()
@@ -79,7 +79,7 @@ export default class SetType extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'setType' }
+  get tableName() { return `setType` }
 
   get hasTimestamps() { return true }
 }

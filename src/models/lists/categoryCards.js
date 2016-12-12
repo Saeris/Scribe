@@ -32,7 +32,7 @@ export default class CategoryCards extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'categorycards' }
+  get tableName() { return `categorycards` }
 
   get hasTimestamps() { return true }
 }

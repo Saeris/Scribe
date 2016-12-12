@@ -1,11 +1,11 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
+import { GraphQLID, GraphQLObjectType } from 'graphql'
 import db from '../../config/bookshelf.config'
 
 export default class Booster extends db.Model {
 
   Definition = new GraphQLObjectType({
-    name: 'Booster',
-    description: 'A Booster object',
+    name: `Booster`,
+    description: `A Booster object`,
     fields: () => ({
       id: {
         type: GraphQLID,
@@ -38,7 +38,7 @@ export default class Booster extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'booster' }
+  get tableName() { return `booster` }
 
   get hasTimestamps() { return true }
 }

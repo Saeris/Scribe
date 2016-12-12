@@ -32,7 +32,7 @@ export default class Types extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'types' }
+  get tableName() { return `types` }
 
   get hasTimestamps() { return true }
 }

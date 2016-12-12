@@ -7,8 +7,8 @@ import AbilityTypeCards from '../lists/abilityTypeCards'
 export default class AbilityType extends db.Model {
 
   Definition = new GraphQLObjectType({
-    name: 'AbilityType',
-    description: 'An Ability Type object',
+    name: `AbilityType`,
+    description: `An Ability Type object`,
     fields: () => ({
       id: {
         type: GraphQLID,
@@ -34,13 +34,13 @@ export default class AbilityType extends db.Model {
       type: new GraphQLList(this.Definition),
       args: {
         id: {
-          name: 'id',
+          name: `id`,
           type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
         }
       },
       resolve: (root, {id}) => {
         return this
-          .where('id', 'IN', id)
+          .where(`id`, `IN`, id)
           .fetchAll()
           .then((collection) => {
             return collection.toJSON()
@@ -96,7 +96,7 @@ export default class AbilityType extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'abilitytype' }
+  get tableName() { return `abilitytype` }
 
   get hasTimestamps() { return true }
 

@@ -4,8 +4,8 @@ import db from '../../config/bookshelf.config'
 export default class Type extends db.Model {
 
   Definition = new GraphQLObjectType({
-    name: 'Type',
-    description: 'A Type object',
+    name: `Type`,
+    description: `A Type object`,
     fields: () => ({
       id: {
         type: GraphQLID,
@@ -23,13 +23,13 @@ export default class Type extends db.Model {
       type: new GraphQLList(this.Definition),
       args: {
         id: {
-          name: 'id',
+          name: `id`,
           type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
         }
       },
       resolve: (root, {id}) => {
         return this
-          .where('id', 'IN', id)
+          .where(`id`, `IN`, id)
           .fetchAll()
           .then((collection) => {
             return collection.toJSON()
@@ -54,7 +54,7 @@ export default class Type extends db.Model {
       description: `Creates a new Type`,
       args: {
         name: {
-          name: 'name',
+          name: `name`,
           description: `The Name of the Type. (Required)`,
           type: new GraphQLNonNull(GraphQLString)
         }
@@ -89,7 +89,7 @@ export default class Type extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'type' }
+  get tableName() { return `type` }
 
   get hasTimestamps() { return true }
 }

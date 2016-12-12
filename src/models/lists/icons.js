@@ -32,7 +32,7 @@ export default class Icons extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'icons' }
+  get tableName() { return `icons` }
 
   get hasTimestamps() { return true }
 }

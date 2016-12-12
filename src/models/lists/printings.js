@@ -34,7 +34,7 @@ export default class Printings extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'printings' }
+  get tableName() { return `printings` }
 
   get hasTimestamps() { return true }
 }

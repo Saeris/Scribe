@@ -32,7 +32,7 @@ export default class Keywords extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'keywords' }
+  get tableName() { return `keywords` }
 
   get hasTimestamps() { return true }
 }

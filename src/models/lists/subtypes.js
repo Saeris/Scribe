@@ -32,7 +32,7 @@ export default class Subtypes extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'subtypes' }
+  get tableName() { return `subtypes` }
 
   get hasTimestamps() { return true }
 }

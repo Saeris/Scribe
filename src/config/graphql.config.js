@@ -1,10 +1,9 @@
-import config from './server.config'
 import Schema from '../schema'
 
-class graphql {
+class Graphql {
   // API Endpoint Settings
   api = {
-    path: '/api',
+    path: `/api`,
     graphqlOptions: (request) => {
       let options = {
         schema:     Schema,
@@ -17,11 +16,11 @@ class graphql {
 
   // GraphiQL Editor Settings
   graphiql = {
-    path: '/graphiql',
+    path: `/graphiql`,
     graphiqlOptions: {
-      endpointURL: '/api',
+      endpointURL: `/api`
     }
   }
 }
 
-export default new graphql()
+export default new Graphql()

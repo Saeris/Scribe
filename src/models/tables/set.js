@@ -8,8 +8,8 @@ import SetType from './setType'
 export default class Set extends db.Model {
 
   Definition = new GraphQLObjectType({
-    name: 'Set',
-    description: 'A Set object',
+    name: `Set`,
+    description: `A Set object`,
     fields: () => ({
       id: {
         type: GraphQLID,
@@ -55,13 +55,13 @@ export default class Set extends db.Model {
       type: new GraphQLList(this.Definition),
       args: {
         id: {
-          name: 'id',
+          name: `id`,
           type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
         }
       },
       resolve: (root, {id}) => {
         return this
-          .where('id', 'IN', id)
+          .where(`id`, `IN`, id)
           .fetchAll()
           .then((collection) => {
             return collection.toJSON()
@@ -150,7 +150,7 @@ export default class Set extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'set' }
+  get tableName() { return `set` }
 
   get hasTimestamps() { return true }
 }

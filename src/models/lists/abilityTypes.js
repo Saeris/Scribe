@@ -34,7 +34,7 @@ export default class AbilityTypes extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'abilitytypes' }
+  get tableName() { return `abilitytypes` }
 
   get hasTimestamps() { return true }
 

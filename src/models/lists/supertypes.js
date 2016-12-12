@@ -32,7 +32,7 @@ export default class Supertypes extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'supertypes' }
+  get tableName() { return `supertypes` }
 
   get hasTimestamps() { return true }
 }

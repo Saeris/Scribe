@@ -6,8 +6,8 @@ import Language from './language'
 export default class Name extends db.Model {
 
   Definition = new GraphQLObjectType({
-    name: 'Name',
-    description: 'A Name object',
+    name: `Name`,
+    description: `A Name object`,
     fields: () => ({
       id: {
         type: GraphQLID,
@@ -27,8 +27,8 @@ export default class Name extends db.Model {
         resolve: (root, {artist}) => {
           return this
             .forge({artist: artist.id})
-            .fetch({withRelated: ['cards']})
-            .then(artist => artist.toJSON().cards)
+            .fetch({withRelated: [`cards`]})
+            .then(model => model.toJSON().cards)
         }
       }
     })
@@ -39,13 +39,13 @@ export default class Name extends db.Model {
       type: new GraphQLList(this.Definition),
       args: {
         id: {
-          name: 'id',
+          name: `id`,
           type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
         }
       },
       resolve: (root, {id}) => {
         return this
-          .where('id', 'IN', id)
+          .where(`id`, `IN`, id)
           .fetchAll()
           .then((collection) => {
             return collection.toJSON()
@@ -110,11 +110,11 @@ export default class Name extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'name' }
+  get tableName() { return `name` }
 
   get hasTimestamps() { return true }
 
   cards() {
-    return this.belongsTo(Card, "card")
+    return this.belongsTo(Card, `card`)
   }
 }

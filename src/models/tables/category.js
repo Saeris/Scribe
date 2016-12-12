@@ -7,8 +7,8 @@ import CategoryCards from '../lists/categoryCards'
 export default class Category extends db.Model {
 
   Definition = new GraphQLObjectType({
-    name: 'Category',
-    description: 'A Category object',
+    name: `Category`,
+    description: `A Category object`,
     fields: () => ({
       id: {
         type: GraphQLID,
@@ -28,8 +28,8 @@ export default class Category extends db.Model {
         resolve: (root, {artist}) => {
           return this
             .forge({artist: artist.id})
-            .fetch({withRelated: ['cards']})
-            .then(artist => artist.toJSON().cards)
+            .fetch({withRelated: [`cards`]})
+            .then(model => model.toJSON().cards)
         }
       }
     })
@@ -40,13 +40,13 @@ export default class Category extends db.Model {
       type: new GraphQLList(this.Definition),
       args: {
         id: {
-          name: 'id',
+          name: `id`,
           type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
         }
       },
       resolve: (root, {id}) => {
         return this
-          .where('id', 'IN', id)
+          .where(`id`, `IN`, id)
           .fetchAll()
           .then((collection) => {
             return collection.toJSON()
@@ -102,17 +102,17 @@ export default class Category extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'category' }
+  get tableName() { return `category` }
 
   get hasTimestamps() { return true }
 
   card() {
-    return this.belongsTo(Card, 'categories')
-               .through(Categories, 'category')
+    return this.belongsTo(Card, `categories`)
+               .through(Categories, `category`)
   }
 
   cards() {
     return this.hasMany(Card)
-               .through(CategoryCards, 'category')
+               .through(CategoryCards, `category`)
   }
 }

@@ -32,7 +32,7 @@ export default class FormatSets extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'formatsets' }
+  get tableName() { return `formatsets` }
 
   get hasTimestamps() { return true }
 }

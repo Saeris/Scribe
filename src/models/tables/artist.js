@@ -6,8 +6,8 @@ import ArtistCards from '../lists/artistCards'
 export default class Artist extends db.Model {
 
   Definition = new GraphQLObjectType({
-    name: 'Artist',
-    description: 'An Artist object',
+    name: `Artist`,
+    description: `An Artist object`,
     fields: () => ({
       id: {
         type: GraphQLID,
@@ -27,8 +27,8 @@ export default class Artist extends db.Model {
         resolve: (root, {artist}) => {
           return this
             .forge({artist: artist.id})
-            .fetch({withRelated: ['cards']})
-            .then(artist => artist.toJSON().cards)
+            .fetch({withRelated: [`cards`]})
+            .then(model => model.toJSON().cards)
         }
       }
     })
@@ -39,13 +39,13 @@ export default class Artist extends db.Model {
       type: new GraphQLList(this.Definition),
       args: {
         id: {
-          name: 'id',
+          name: `id`,
           type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
         }
       },
       resolve: (root, {id}) => {
         return this
-          .where('id', 'IN', id)
+          .where(`id`, `IN`, id)
           .fetchAll()
           .then((collection) => {
             return collection.toJSON()
@@ -106,7 +106,7 @@ export default class Artist extends db.Model {
   get hasTimestamps() { return true }
 
   card() {
-    return this.belongsTo(Card, 'artist')
+    return this.belongsTo(Card, `artist`)
   }
 
   cards() {

@@ -7,7 +7,7 @@ export function loadModels() {
 
   glob.sync(`${__dirname}/**/!(*.spec).js`).forEach( file => {
     let filename = path.basename(file)
-    if(filename !== `index.js`) {
+    if (filename !== `index.js`) {
       modelsArray.push(require(file).default)
     }
   })
@@ -16,14 +16,14 @@ export function loadModels() {
 }
 
 function models() {
-  let models = {}
+  let collection = {}
 
   loadModels().forEach((model) => {
-    models[model.name] = model
+    collection[model.name] = model
     console.log(`✓ Loaded Model Definition: ${model.name}`)
   })
 
-  return models
+  return collection
 }
 
 export const Models = models()
@@ -31,43 +31,43 @@ export const Models = models()
 export default Models
 
 export function definitions() {
-  let definitions = []
+  let collection = []
 
   loadModels().forEach((Model) => {
     let Instance = new Model
-    if(Instance.Definition) {
-      definitions.push(Instance.Definition)
+    if (Instance.Definition) {
+      collection.push(Instance.Definition)
       console.log(`✓ Loaded Type Definition: ${Instance.Definition.name}`)
     }
   })
 
-  return definitions
+  return collection
 }
 
 export function queries() {
-  let queries = []
+  let collection = []
 
   loadModels().forEach((Model) => {
     let Instance = new Model
-    if(Instance.Queries) {
+    if (Instance.Queries) {
       //console.log('Found Queries:')
       //console.log(Instance.Queries)
-      queries.push(Instance.Queries)
+      collection.push(Instance.Queries)
     }
   })
 
-  return queries
+  return collection
 }
 
 export function mutations() {
-  let mutations = []
+  let collection = []
 
   loadModels().forEach((Model) => {
     let Instance = new Model
-    if(Instance.Mutations) mutations.push(Instance.Mutations)
+    if (Instance.Mutations) collection.push(Instance.Mutations)
   })
 
-  return mutations
+  return collection
 }
 
 function loadMigrations(knex, callback) {
@@ -75,7 +75,7 @@ function loadMigrations(knex, callback) {
 
   glob.sync(`${__dirname}/**/!(*.spec).js`).forEach( file => {
     let filename = path.basename(file)
-    if(filename !== `index.js`) {
+    if (filename !== `index.js`) {
       migration.push(require(file).default)
     }
   })
@@ -91,7 +91,7 @@ function create(knex, migrations) {
     toBeCreated.push(
       knex.schema.createTableIfNotExists(migration.name, (table) => {
         migration.fields(table)
-        if(config.ENV === 'test' || config.ENV === 'development') migration.foreignKeys(table)
+        if (config.ENV === `test` || config.ENV === `development`) migration.foreignKeys(table)
       })
       .then(() => {
         console.log(`✓ Created table: ${migration.name}`)
@@ -150,24 +150,24 @@ function destroy(knex, migrations) {
 // http://knexjs.org/#Migrations-API
 
 export function up(knex, Promise) {
-  return knex.raw(`${ config.ENV === 'production' ? 'SET foreign_key_checks = 0;' : 'PRAGMA foreign_keys = ON' }`)
+  return knex.raw(`${ config.ENV === `production` ? `SET foreign_key_checks = 0;` : `PRAGMA foreign_keys = ON` }`)
     .then(() => {
       return Promise.all(loadMigrations(knex, create))
     })
     .then(() => {
-      if(config.ENV === 'production') return Promise.all(loadMigrations(knex, update))
+      if (config.ENV === `production`) return Promise.all(loadMigrations(knex, update))
     })
     .then(() => {
-      if(config.ENV === 'production') return knex.raw('SET foreign_key_checks = 1;')
+      if (config.ENV === `production`) return knex.raw(`SET foreign_key_checks = 1;`)
     })
 }
 
 export function down(knex, Promise) {
-  return knex.raw(`${ config.ENV === 'production' ? 'SET foreign_key_checks = 0;' : '' }`)
+  return knex.raw(`${ config.ENV === `production` ? `SET foreign_key_checks = 0;` : `` }`)
   .then(() => {
     return Promise.all(loadMigrations(knex, destroy))
   })
   .then(() => {
-    if(config.ENV === 'production') return knex.raw('SET foreign_key_checks = 1;')
+    if (config.ENV === `production`) return knex.raw(`SET foreign_key_checks = 1;`)
   })
 }

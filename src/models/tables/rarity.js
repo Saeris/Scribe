@@ -4,36 +4,36 @@ import db from '../../config/bookshelf.config'
 export default class Rarity extends db.Model {
 
   Definition = new GraphQLObjectType({
-      name: 'Rarity',
-      description: 'A Rarity object',
-      fields: () => ({
-        id: {
-          type: GraphQLID,
-          description: `A unique id for this rarity.`
-        },
-        name: {
-          type: GraphQLString,
-          description: `The name of the rarity.`
-        },
-        class: {
-          type: GraphQLString,
-          description: `A CSS class used to display this rarity.`
-        }
-      })
+    name: `Rarity`,
+    description: `A Rarity object`,
+    fields: () => ({
+      id: {
+        type: GraphQLID,
+        description: `A unique id for this rarity.`
+      },
+      name: {
+        type: GraphQLString,
+        description: `The name of the rarity.`
+      },
+      class: {
+        type: GraphQLString,
+        description: `A CSS class used to display this rarity.`
+      }
     })
+  })
 
   Queries = {
     rarity: {
       type: new GraphQLList(this.Definition),
       args: {
         id: {
-          name: 'id',
+          name: `id`,
           type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
         }
       },
       resolve: (root, {id}) => {
         return this
-          .where('id', 'IN', id)
+          .where(`id`, `IN`, id)
           .fetchAll()
           .then((collection) => {
             return collection.toJSON()
@@ -80,7 +80,7 @@ export default class Rarity extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'rarity' }
+  get tableName() { return `rarity` }
 
   get hasTimestamps() { return true }
 }

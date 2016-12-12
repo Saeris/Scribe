@@ -6,8 +6,8 @@ import config from './server.config'
 const db = bookshelf(knex(config.db))
 
 db.plugin(modelbase.pluggable)
-db.plugin('registry') // https://github.com/tgriesser/bookshelf/wiki/Plugin:-Model-Registry
-db.plugin('visibility') // https://github.com/tgriesser/bookshelf/wiki/Plugin:-Visibility
+db.plugin(`registry`) // https://github.com/tgriesser/bookshelf/wiki/Plugin:-Model-Registry
+db.plugin(`visibility`) // https://github.com/tgriesser/bookshelf/wiki/Plugin:-Visibility
 
 console.log(`✓ Bookshelf configured using: ${config.db.client}`)
 

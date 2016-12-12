@@ -5,8 +5,8 @@ import LanguageCode from './languageCode'
 export default class Language extends db.Model {
 
   Definition = new GraphQLObjectType({
-    name: 'Language',
-    description: 'A language object',
+    name: `Language`,
+    description: `A language object`,
     fields: () => ({
       id: {
         type: GraphQLID,
@@ -28,13 +28,13 @@ export default class Language extends db.Model {
       type: new GraphQLList(this.Definition),
       args: {
         id: {
-          name: 'id',
+          name: `id`,
           type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
         }
       },
       resolve: (root, {id}) => {
         return this
-          .where('id', 'IN', id)
+          .where(`id`, `IN`, id)
           .fetchAll()
           .then((collection) => {
             return collection.toJSON()
@@ -87,7 +87,7 @@ export default class Language extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'language' }
+  get tableName() { return `language` }
 
   get hasTimestamps() { return true }
 }

@@ -1,12 +1,12 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
+import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLObjectType } from 'graphql'
 import db from '../../config/bookshelf.config'
 import Format from './format'
 
 export default class Legality extends db.Model {
 
   Definition = new GraphQLObjectType({
-    name: 'Legality',
-    description: 'A Legality object',
+    name: `Legality`,
+    description: `A Legality object`,
     fields: () => ({
       id: {
         type: GraphQLID,
@@ -36,13 +36,13 @@ export default class Legality extends db.Model {
       type: new GraphQLList(this.Definition),
       args: {
         id: {
-          name: 'id',
+          name: `id`,
           type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
         }
       },
       resolve: (root, {id}) => {
         return this
-          .where('id', 'IN', id)
+          .where(`id`, `IN`, id)
           .fetchAll()
           .then((collection) => {
             return collection.toJSON()
@@ -112,7 +112,7 @@ export default class Legality extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'legality' }
+  get tableName() { return `legality` }
 
   get hasTimestamps() { return true }
 }

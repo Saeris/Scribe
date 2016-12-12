@@ -3,7 +3,7 @@ import jwt from 'hapi-auth-jwt2' // https://github.com/dwyl/hapi-auth-jwt2
 import boomDecorators from 'hapi-boom-decorators' // https://github.com/brainsiq/hapi-boom-decorators
 import { graphqlHapi, graphiqlHapi } from 'graphql-server-hapi' // http://dev.apollodata.com/tools/graphql-server
 import good from 'good' // https://github.com/hapijs/good
-import goodWinston from 'good-winston' // https://github.com/lancespeelmon/good-winston
+import 'good-winston' // https://github.com/lancespeelmon/good-winston
 import config from './config/server.config' // HTTP Server Settings
 import graphql from './config/graphql.config' // GraphQL Settings
 import routes from './routes' // REST API Endpoints
@@ -33,7 +33,7 @@ server.register({
 // Setup Logging and Start the Server
 server.register({
   register: good,
-  options: config.good,
+  options: config.good
 }, (err) => {
   if (err) {
     return console.error(err)

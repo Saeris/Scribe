@@ -32,7 +32,7 @@ export default class Rulings extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'rulings' }
+  get tableName() { return `rulings` }
 
   get hasTimestamps() { return true }
 }

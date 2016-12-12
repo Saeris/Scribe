@@ -32,7 +32,7 @@ export default class Sides extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'sides' }
+  get tableName() { return `sides` }
 
   get hasTimestamps() { return true }
 }

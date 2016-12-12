@@ -32,7 +32,7 @@ export default class BlockSets extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'blocksets' }
+  get tableName() { return `blocksets` }
 
   get hasTimestamps() { return true }
 }

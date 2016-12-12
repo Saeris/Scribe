@@ -1,4 +1,4 @@
-import { GraphQLID, GraphQLNonNull, GraphQLInt, GraphQLString, GraphQLFloat, GraphQLBoolean, GraphQLList, GraphQLObjectType } from 'graphql'
+import { GraphQLID, GraphQLNonNull, GraphQLInt, GraphQLString, GraphQLBoolean, GraphQLList, GraphQLObjectType } from 'graphql'
 import db from '../../config/bookshelf.config'
 import Name from './name'
 import Layout from './layout'
@@ -22,8 +22,8 @@ import Printings from '../lists/printings'
 export default class Card extends db.Model {
 
   Definition = new GraphQLObjectType({
-    name: 'Card',
-    description: 'A Card object',
+    name: `Card`,
+    description: `A Card object`,
     fields: () => ({
       id: {
         type: GraphQLID,
@@ -31,7 +31,7 @@ export default class Card extends db.Model {
         resolve: (root, {card}) => {
           return this
             .forge({id: card.id})
-            .then(card => card.toJSON().id)
+            .then(model => model.toJSON().id)
         }
       },
       multiverseid: {
@@ -40,7 +40,7 @@ export default class Card extends db.Model {
         resolve: (root, {card}) => {
           return this
             .forge({id: card.id})
-            .then(card => card.toJSON().multiverseid)
+            .then(model => model.toJSON().multiverseid)
         }
       },
       names: {
@@ -49,8 +49,8 @@ export default class Card extends db.Model {
         resolve: (root, {card}) => {
           return this
             .forge({id: card.id})
-            .fetch({withRelated: ['names']})
-            .then(card => card.toJSON().names)
+            .fetch({withRelated: [`names`]})
+            .then(model => model.toJSON().names)
         }
       },
       sides: {
@@ -59,8 +59,8 @@ export default class Card extends db.Model {
         resolve: (root, {card}) => {
           return this
             .forge({id: card.id})
-            .fetch({withRelated: ['sides']})
-            .then(card => card.toJSON().sides)
+            .fetch({withRelated: [`sides`]})
+            .then(model => model.toJSON().sides)
         }
       },
       variations: {
@@ -69,8 +69,8 @@ export default class Card extends db.Model {
         resolve: (card) => {
           return this
             .forge({id: card.id})
-            .fetch({withRelated: ['variations']})
-            .then(card => card.toJSON().variations)
+            .fetch({withRelated: [`variations`]})
+            .then(model => model.toJSON().variations)
         }
       },
       border: {
@@ -83,8 +83,8 @@ export default class Card extends db.Model {
         resolve: (card) => {
           return this
             .forge({id: card.id})
-            .fetch({withRelated: ['layout']})
-            .then(card => card.toJSON().layout)
+            .fetch({withRelated: [`layout`]})
+            .then(model => model.toJSON().layout)
         }
       },
       imageUrl: {
@@ -109,8 +109,8 @@ export default class Card extends db.Model {
         resolve: (card) => {
           return this
             .forge({id: card.id})
-            .fetch({withRelated: ['colors']})
-            .then(card => card.toJSON().colors)
+            .fetch({withRelated: [`colors`]})
+            .then(model => model.toJSON().colors)
         }
       },
       colorIdentity: {
@@ -119,8 +119,8 @@ export default class Card extends db.Model {
         resolve: (card) => {
           return this
             .forge({id: card.id})
-            .fetch({withRelated: ['colorIdentity']})
-            .then(card => card.toJSON().colorIdentity)
+            .fetch({withRelated: [`colorIdentity`]})
+            .then(model => model.toJSON().colorIdentity)
         }
       },
       typeLine: {
@@ -137,8 +137,8 @@ export default class Card extends db.Model {
         resolve: (card) => {
           return this
             .forge({id: card.id})
-            .fetch({withRelated: ['supertypes']})
-            .then(card => card.toJSON().supertypes)
+            .fetch({withRelated: [`supertypes`]})
+            .then(model => model.toJSON().supertypes)
         }
       },
       types: {
@@ -147,8 +147,8 @@ export default class Card extends db.Model {
         resolve: (card) => {
           return this
             .forge({id: card.id})
-            .fetch({withRelated: ['types']})
-            .then(card => card.toJSON().types)
+            .fetch({withRelated: [`types`]})
+            .then(model => model.toJSON().types)
         }
       },
       subtypes: {
@@ -157,8 +157,8 @@ export default class Card extends db.Model {
         resolve: (card) => {
           return this
             .forge({id: card.id})
-            .fetch({withRelated: ['subtypes']})
-            .then(card => card.toJSON().subtypes)
+            .fetch({withRelated: [`subtypes`]})
+            .then(model => model.toJSON().subtypes)
         }
       },
       rarity: {
@@ -167,8 +167,8 @@ export default class Card extends db.Model {
         resolve: (card) => {
           return this
             .forge({id: card.id})
-            .fetch({withRelated: ['rarity']})
-            .then(card => card.toJSON().rarity)
+            .fetch({withRelated: [`rarity`]})
+            .then(model => model.toJSON().rarity)
         }
       },
       set: {
@@ -177,8 +177,8 @@ export default class Card extends db.Model {
         resolve: (card) => {
           return this
             .forge({id: card.id})
-            .fetch({withRelated: ['set']})
-            .then(card => card.toJSON().set)
+            .fetch({withRelated: [`set`]})
+            .then(model => model.toJSON().set)
         }
       },
       text: {
@@ -195,8 +195,8 @@ export default class Card extends db.Model {
         resolve: (card) => {
           return this
             .forge({id: card.id})
-            .fetch({withRelated: ['categories']})
-            .then(card => card.toJSON().categories)
+            .fetch({withRelated: [`categories`]})
+            .then(model => model.toJSON().categories)
         }
       },
       abilityTypes: {
@@ -205,8 +205,8 @@ export default class Card extends db.Model {
         resolve: (card) => {
           return this
             .forge({id: card.id})
-            .fetch({withRelated: ['abilityTypes']})
-            .then(card => card.toJSON().abilityTypes)
+            .fetch({withRelated: [`abilityTypes`]})
+            .then(model => model.toJSON().abilityTypes)
         }
       },
       keywords: {
@@ -215,8 +215,8 @@ export default class Card extends db.Model {
         resolve: (card) => {
           return this
             .forge({id: card.id})
-            .fetch({withRelated: ['keywords']})
-            .then(card => card.toJSON().keywords)
+            .fetch({withRelated: [`keywords`]})
+            .then(model => model.toJSON().keywords)
         }
       },
       flavor: {
@@ -249,8 +249,8 @@ export default class Card extends db.Model {
         resolve: (card) => {
           return this
             .forge({id: card.id})
-            .fetch({withRelated: ['legalities']})
-            .then(card => card.toJSON().legalities)
+            .fetch({withRelated: [`legalities`]})
+            .then(model => model.toJSON().legalities)
         }
       },
       rulings: {
@@ -259,8 +259,8 @@ export default class Card extends db.Model {
         resolve: (card) => {
           return this
             .forge({id: card.id})
-            .fetch({withRelated: ['rulings']})
-            .then(card => card.toJSON().rulings)
+            .fetch({withRelated: [`rulings`]})
+            .then(model => model.toJSON().rulings)
         }
       },
       artist: {
@@ -269,8 +269,8 @@ export default class Card extends db.Model {
         resolve: (card) => {
           return this
             .forge({id: card.id})
-            .fetch({withRelated: ['artist']})
-            .then(card => card.toJSON().artist)
+            .fetch({withRelated: [`artist`]})
+            .then(model => model.toJSON().artist)
         }
       },
       number: {
@@ -287,8 +287,8 @@ export default class Card extends db.Model {
         resolve: (card) => {
           return this
             .forge({id: card.id})
-            .fetch({withRelated: ['printings']})
-            .then(card => card.toJSON().printings)
+            .fetch({withRelated: [`printings`]})
+            .then(model => model.toJSON().printings)
         }
       },
       timeshifted: {
@@ -315,13 +315,13 @@ export default class Card extends db.Model {
       type: new GraphQLList(this.Definition),
       args: {
         id: {
-          name: 'id',
+          name: `id`,
           type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
         }
       },
       resolve: (root, {id}) => {
         return this
-          .where('id', 'IN', id)
+          .where(`id`, `IN`, id)
           .fetchAll()
           .then((collection) => {
             return collection.toJSON()
@@ -623,63 +623,66 @@ export default class Card extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'card' }
+  get tableName() { return `card` }
 
   get hasTimestamps() { return true }
 
   names() {
-    return this.hasMany(Name, "names")
+    return this.hasMany(Name, `names`)
   }
 
   sides() {
-    return this.hasMany(Card, "sides")
+    return this.hasMany(Card, `sides`)
+               .through(Sides, `card`)
   }
 
   variations() {
-    return this.hasMany(Card, "variations")
+    return this.hasMany(Card, `variations`)
+               .through(Variations, `card`)
   }
 
   colors() {
-    return this.hasMany(Color, "colors")
+    return this.hasMany(Color, `colors`)
   }
 
   supertypes() {
-    return this.hasMany(Supertype, "supertypes")
+    return this.hasMany(Supertype, `supertypes`)
   }
 
   types() {
-    return this.hasMany(Type, "types")
+    return this.hasMany(Type, `types`)
   }
 
   subtypes() {
-    return this.hasMany(Subtype, "subtypes")
+    return this.hasMany(Subtype, `subtypes`)
   }
 
   categories() {
-    return this.hasMany(Category, "categories")
+    return this.hasMany(Category, `categories`)
   }
 
   abilityTypes() {
-    return this.hasMany(AbilityType, "abilityTypes")
+    return this.hasMany(AbilityType, `abilityTypes`)
   }
 
   keywords() {
-    return this.hasMany(Keyword, "keywords")
+    return this.hasMany(Keyword, `keywords`)
   }
 
   legalities() {
-    return this.hasMany(Legality, "legalities")
+    return this.hasMany(Legality, `legalities`)
   }
 
   rulings() {
-    return this.hasMany(Ruling, "rulings")
+    return this.hasMany(Ruling, `rulings`)
   }
 
   artist() {
-    return this.hasone(Artist, "artist")
+    return this.hasone(Artist, `artist`)
   }
 
   printings() {
-    return this.hasMany(Card, "printings")
+    return this.hasMany(Card, `printings`)
+               .through(Printings, `card`)
   }
 }

@@ -6,8 +6,8 @@ import LanguageCode from './languageCode'
 export default class Ruling extends db.Model {
 
   Definition = new GraphQLObjectType({
-    name: 'Ruling',
-    description: 'An Ruling object',
+    name: `Ruling`,
+    description: `An Ruling object`,
     fields: () => ({
       id: {
         type: GraphQLID,
@@ -31,8 +31,8 @@ export default class Ruling extends db.Model {
         resolve: (root, {artist}) => {
           return this
             .forge({artist: artist.id})
-            .fetch({withRelated: ['cards']})
-            .then(artist => artist.toJSON().cards)
+            .fetch({withRelated: [`cards`]})
+            .then(model => model.toJSON().cards)
         }
       }
     })
@@ -43,13 +43,13 @@ export default class Ruling extends db.Model {
       type: new GraphQLList(this.Definition),
       args: {
         id: {
-          name: 'id',
+          name: `id`,
           type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
         }
       },
       resolve: (root, {id}) => {
         return this
-          .where('id', 'IN', id)
+          .where(`id`, `IN`, id)
           .fetchAll()
           .then((collection) => {
             return collection.toJSON()
@@ -119,7 +119,7 @@ export default class Ruling extends db.Model {
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'ruling' }
+  get tableName() { return `ruling` }
 
   get hasTimestamps() { return true }
 }

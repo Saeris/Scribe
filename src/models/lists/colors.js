@@ -24,15 +24,15 @@ export default class Colors extends db.Model {
   }
 
   static foreignKeys(table) {
-      table.foreign(`color`)
-           .references(`id`)
-           .inTable(`color`)
-           .onDelete(`NO ACTION`)
-           .onUpdate(`NO ACTION`)
+    table.foreign(`color`)
+         .references(`id`)
+         .inTable(`color`)
+         .onDelete(`NO ACTION`)
+         .onUpdate(`NO ACTION`)
   }
 
   // Bookshelf Relation Definitions
-  get tableName() { return 'colors' }
+  get tableName() { return `colors` }
 
   get hasTimestamps() { return true }
 }
