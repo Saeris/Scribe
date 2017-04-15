@@ -1,10 +1,20 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
+import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
 import Models from '../models'
-import { Definition as Icon }  from './icon'
+import * as Icon  from './icon'
+
+export const Input = new GraphQLInputObjectType({
+  name: `LayoutInput`,
+  description: `Required fields for a new Layout object`,
+  fields: () => ({
+    name:      { type: new GraphQLNonNull(GraphQLString) },
+    watermark: { type: GraphQLString },
+    icons:     { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) }
+  })
+})
 
 export const Definition = new GraphQLObjectType({
-  name: 'Layout',
-  description: 'A Layout object',
+  name: `Layout`,
+  description: `A Layout object`,
   fields: () => ({
     id: {
       type: GraphQLID,
@@ -19,42 +29,60 @@ export const Definition = new GraphQLObjectType({
       description: `Watermark that appears in this layout.`
     },
     icons: {
-      type: new GraphQLList(Icon),
-      description: `A list of icons featured on this card.`
+      type: new GraphQLList(Icon.Definition),
+      description: `A list of icons featured on this card.`,
+      resolve: (root, { id }) => Models.Layout
+        .forge({ id })
+        .fetch({ withRelated: [`icons`] })
+        .then(model => model.toJSON().icons)
     }
   })
 })
 
 export const Queries = {
-  layout: {
+  getLayout: {
     type: new GraphQLList(Definition),
+    description: `Returns a Layout with the given ID.`,
     args: {
-      id: {
-        name: 'id',
-        type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
-      }
+      id: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) }
     },
-    resolve(root, {id}) {
-      return Models.Layout
-        .where('id', 'IN', id)
-        .fetchAll()
-        .then((collection) => {
-          return collection.toJSON()
-        })
-    }
+    resolve: (root, { id }) => Models.Layout
+      .where(`id`, `IN`, id)
+      .fetchAll()
+      .then(collection => collection.toJSON())
   },
-  layouts: {
+  listLayouts: {
     type: new GraphQLList(Definition),
-    resolve(root, {id}) {
-      return Models.Layout
-        .findAll()
-        .then((collection) => {
-          return collection.toJSON()
-        })
-    }
+    description: `Lists all Layouts.`,
+    resolve: (root, { id }) => Models.Layout
+      .findAll()
+      .then(collection => collection.toJSON())
   }
 }
 
 export const Mutations = {
-
+  createLayout: {
+    type: Definition,
+    description: `Creates a new Layout`,
+    args: { input: { type: Input } },
+    resolve: (root, { input }) => Models.Layout
+      .findOrCreate(input)
+      .then(model => model.toJSON())
+  },
+  updateLayout: {
+    type: Definition,
+    description: `Updates an existing Layout, creates it if it does not already exist`,
+    args: { input: { type: Input } },
+    resolve: (root, { input }) => Models.Layout
+      .upsert(input, input)
+      .then(model => model.toJSON())
+  },
+  deleteLayout: {
+    type: Definition,
+    description: `Deletes a Layout by id`,
+    args: { id: { type: GraphQLID } },
+    resolve: (root, { id }) => Models.Layout
+      .destroy({ id })
+      .then(model => model.toJSON())
+  }
 }

@@ -1,9 +1,17 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
+import { GraphQLID, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
 import Models from '../models'
 
+export const Input = new GraphQLInputObjectType({
+  name: `BoosterInput`,
+  description: `Required fields for a new Booster object`,
+  fields: () => ({
+    id: { type: GraphQLID }
+  })
+})
+
 export const Definition = new GraphQLObjectType({
-  name: 'Booster',
-  description: 'A Booster object',
+  name: `Booster`,
+  description: `A Booster object`,
   fields: () => ({
     id: {
       type: GraphQLID,

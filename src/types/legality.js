@@ -1,22 +1,42 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLBoolean, GraphQLObjectType } from 'graphql'
+import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLBoolean, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
 import Models from '../models'
-import { Definition as Format } from './format'
+import * as Card from './format'
+import * as Format from './format'
+
+export const Input = new GraphQLInputObjectType({
+  name: `LegalityInput`,
+  description: `Required fields for a new Legality object`,
+  fields: () => ({
+    cards:      { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) },
+    format:     { type: new GraphQLNonNull(GraphQLID) },
+    legal:      { type: new GraphQLNonNull(GraphQLBoolean) },
+    restricted: { type: new GraphQLNonNull(GraphQLBoolean) }
+  })
+})
 
 export const Definition = new GraphQLObjectType({
-  name: 'Legality',
-  description: 'A Legality object',
+  name: `Legality`,
+  description: `A Legality object`,
   fields: () => ({
     id: {
       type: GraphQLID,
       description: `A unique id for this name.`
     },
-    cardID: {
-      type: GraphQLID,
-      description: `The ID of the card.`
+    cards: {
+      type: new GraphQLList(Card.Definition),
+      description: `The ID of the card.`,
+      resolve: (root, { id }) => Models.Legality
+        .forge({ id })
+        .fetch({ withRelated: [`cards`] })
+        .then(model => model.toJSON().cards)
     },
     format: {
-      type: Format,
-      description: `The format the card is legal in.`
+      type: Format.Definition,
+      description: `The format the card is legal in.`,
+      resolve: (root, { id }) => Models.Legality
+        .forge({ id })
+        .fetch({ withRelated: [`format`] })
+        .then(model => model.toJSON().format)
     },
     legal: {
       type: GraphQLBoolean,
@@ -30,35 +50,49 @@ export const Definition = new GraphQLObjectType({
 })
 
 export const Queries = {
-  legality: {
+  getLegality: {
     type: new GraphQLList(Definition),
+    description: `Returns a Legality with the given ID.`,
     args: {
-      id: {
-        name: 'id',
-        type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
-      }
+      id: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) }
     },
-    resolve(root, {id}) {
-      return Models.Legality
-        .where('id', 'IN', id)
-        .fetchAll()
-        .then((collection) => {
-          return collection.toJSON()
-        })
-    }
+    resolve: (root, { id }) => Models.Legality
+      .where(`id`, `IN`, id)
+      .fetchAll()
+      .then(collection => collection.toJSON())
   },
-  legalities: {
+  listLegalities: {
     type: new GraphQLList(Definition),
-    resolve(root, {id}) {
-      return Models.Legality
-        .findAll()
-        .then((collection) => {
-          return collection.toJSON()
-        })
-    }
+    description: `Lists all Legalities.`,
+    resolve: (root, { id }) => Models.Legality
+      .findAll()
+      .then(collection => collection.toJSON())
   }
 }
 
 export const Mutations = {
-
+  createLegality: {
+    type: Definition,
+    description: `Creates a new Legality`,
+    args: { input: { type: Input } },
+    resolve: (root, { input }) => Models.Legality
+      .findOrCreate(input)
+      .then(model => model.toJSON())
+  },
+  updateLegality: {
+    type: Definition,
+    description: `Updates an existing Legality, creates it if it does not already exist`,
+    args: { input: { type: Input } },
+    resolve: (root, { input }) => Models.Legality
+      .upsert(input, input)
+      .then(model => model.toJSON())
+  },
+  deleteLegality: {
+    type: Definition,
+    description: `Deletes a Legality by id`,
+    args: { id: { type: GraphQLID } },
+    resolve: (root, { id }) => Models.Legality
+      .destroy({ id })
+      .then(model => model.toJSON())
+  }
 }

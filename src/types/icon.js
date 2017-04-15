@@ -1,9 +1,19 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
+import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
 import Models from '../models'
 
+export const Input = new GraphQLInputObjectType({
+  name: `IconInput`,
+  description: `Required fields for a new Icon object`,
+  fields: () => ({
+    name:  { type: new GraphQLNonNull(GraphQLString) },
+    image: { type: new GraphQLNonNull(GraphQLString) },
+    class: { type: new GraphQLNonNull(GraphQLString) }
+  })
+})
+
 export const Definition = new GraphQLObjectType({
-  name: 'Icon',
-  description: 'An Icon object',
+  name: `Icon`,
+  description: `An Icon object`,
   fields: () => ({
     id: {
       type: GraphQLID,
@@ -25,35 +35,49 @@ export const Definition = new GraphQLObjectType({
 })
 
 export const Queries = {
-  icon: {
+  getIcon: {
     type: new GraphQLList(Definition),
+    description: `Returns an Icon with the given ID.`,
     args: {
-      id: {
-        name: 'id',
-        type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
-      }
+      id: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) }
     },
-    resolve(root, {id}) {
-      return Models.Icon
-        .where('id', 'IN', id)
-        .fetchAll()
-        .then((collection) => {
-          return collection.toJSON()
-        })
-    }
+    resolve: (root, { id }) => Models.Icon
+      .where(`id`, `IN`, id)
+      .fetchAll()
+      .then(collection => collection.toJSON())
   },
-  icons: {
+  listIcons: {
     type: new GraphQLList(Definition),
-    resolve(root, {id}) {
-      return Models.Icon
-        .findAll()
-        .then((collection) => {
-          return collection.toJSON()
-        })
-    }
+    description: `Lists all Icons.`,
+    resolve: (root, { id }) => Models.Icon
+      .findAll()
+      .then(collection => collection.toJSON())
   }
 }
 
 export const Mutations = {
-
+  createIcon: {
+    type: Definition,
+    description: `Creates a new Icon`,
+    args: { input: { type: Input } },
+    resolve: (root, { input }) => Models.Icon
+      .findOrCreate(input)
+      .then(model => model.toJSON())
+  },
+  updateIcon: {
+    type: Definition,
+    description: `Updates an existing Icon, creates it if it does not already exist`,
+    args: { input: { type: Input } },
+    resolve: (root, { input }) => Models.Icon
+      .upsert(input, input)
+      .then(model => model.toJSON())
+  },
+  deleteIcon: {
+    type: Definition,
+    description: `Deletes a Icon by id`,
+    args: { id: { type: GraphQLID } },
+    resolve: (root, { id }) => Models.Icon
+      .destroy({ id })
+      .then(model => model.toJSON())
+  }
 }

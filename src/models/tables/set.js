@@ -1,4 +1,3 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
 import db from '../../config/bookshelf.config'
 import Icon from './icon'
 import Block from './block'
@@ -6,84 +5,6 @@ import Booster from './booster'
 import SetType from './setType'
 
 export default class Set extends db.Model {
-
-  Definition = new GraphQLObjectType({
-    name: `Set`,
-    description: `A Set object`,
-    fields: () => ({
-      id: {
-        type: GraphQLID,
-        description: `A unique id for this set.`
-      },
-      name: {
-        type: GraphQLString,
-        description: `The set name.`
-      },
-      code: {
-        type: GraphQLString,
-        description: `The set code for this set.`
-      },
-      block: {
-        type: (new Block()).Definition,
-        description: `The block the set belongs to.`
-      },
-      type: {
-        type: (new SetType()).Definition,
-        description: `The set type.`
-      },
-      icon: {
-        type: (new Icon()).Definition,
-        description: `The icon associated with the set.`
-      },
-      border: {
-        type: GraphQLString,
-        description: `The card border color for this set.`
-      },
-      releaseDate: {
-        type: GraphQLString,
-        description: `The date this card was released. This is only set for promo cards. The date may not be accurate to an exact day and month, thus only a partial date may be set (YYYY-MM-DD or YYYY-MM or YYYY). Some promo cards do not have a known release date.`
-      },
-      booster: {
-        type: (new Booster()).Definition,
-        description: `A booster pack for this set`
-      }
-    })
-  })
-
-  Queries = {
-    set: {
-      type: new GraphQLList(this.Definition),
-      args: {
-        id: {
-          name: `id`,
-          type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
-        }
-      },
-      resolve: (root, {id}) => {
-        return this
-          .where(`id`, `IN`, id)
-          .fetchAll()
-          .then((collection) => {
-            return collection.toJSON()
-          })
-      }
-    },
-    sets: {
-      type: new GraphQLList(this.Definition),
-      resolve: (root, {id}) => {
-        return this
-          .findAll()
-          .then((collection) => {
-            return collection.toJSON()
-          })
-      }
-    }
-  }
-
-  Mutations = {
-
-  }
-
   // Knex Schema Definitions
   static fields(table) {
     // Fields

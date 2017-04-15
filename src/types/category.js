@@ -1,10 +1,20 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
+import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
 import Models from '../models'
-import { Definition as Card } from './card'
+import * as Card from './card'
+
+export const Input = new GraphQLInputObjectType({
+  name: `CategoryInput`,
+  description: `Required fields for a new Category object`,
+  fields: () => ({
+    name:        { type: new GraphQLNonNull(GraphQLString) },
+    description: { type: new GraphQLNonNull(GraphQLString) },
+    cards:       { type: new GraphQLList(GraphQLID) }
+  })
+})
 
 export const Definition = new GraphQLObjectType({
-  name: 'Category',
-  description: 'A Category object',
+  name: `Category`,
+  description: `A Category object`,
   fields: () => ({
     id: {
       type: GraphQLID,
@@ -19,48 +29,60 @@ export const Definition = new GraphQLObjectType({
       description: `The description of the category.`
     },
     cards: {
-      type: new GraphQLList(Card),
+      type: new GraphQLList(Card.Definition),
       description: `A list of cards that have this category.`,
-      resolve: (root, {artist}) => {
-        return Models.Category
-          .forge({artist: artist.id})
-          .fetch({withRelated: ['cards']})
-          .then(artist => artist.toJSON().cards)
-      }
+      resolve: (root, { id }) => Models.Category
+        .forge({ id })
+        .fetch({ withRelated: [`cards`] })
+        .then(model => model.toJSON().cards)
     }
   })
 })
 
 export const Queries = {
-  category: {
+  getCategory: {
     type: new GraphQLList(Definition),
+    description: `Returns a Category with the given ID.`,
     args: {
-      id: {
-        name: 'id',
-        type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
-      }
+      id: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) }
     },
-    resolve(root, {id}) {
-      return Models.Category
-        .where('id', 'IN', id)
-        .fetchAll()
-        .then((collection) => {
-          return collection.toJSON()
-        })
-    }
+    resolve: (root, { id }) => Models.Category
+      .where(`id`, `IN`, id)
+      .fetchAll()
+      .then(collection => collection.toJSON())
   },
-  categories: {
+  listCategories: {
     type: new GraphQLList(Definition),
-    resolve(root, {id}) {
-      return Models.Category
-        .findAll()
-        .then((collection) => {
-          return collection.toJSON()
-        })
-    }
+    description: `Lists all Categories.`,
+    resolve: (root, { id }) => Models.Category
+      .findAll()
+      .then(collection => collection.toJSON())
   }
 }
 
 export const Mutations = {
-
+  createCategory: {
+    type: Definition,
+    description: `Creates a new Category`,
+    args: { input: { type: Input } },
+    resolve: (root, { input }) => Models.Category
+      .findOrCreate(input)
+      .then(model => model.toJSON())
+  },
+  updateCategory: {
+    type: Definition,
+    description: `Updates an existing Category, creates it if it does not already exist`,
+    args: { input: { type: Input } },
+    resolve: (root, { input }) => Models.Category
+      .upsert(input, input)
+      .then(model => model.toJSON())
+  },
+  deleteCategory: {
+    type: Definition,
+    description: `Deletes a Category by id`,
+    args: { id: { type: GraphQLID } },
+    resolve: (root, { id }) => Models.Category
+      .destroy({ id })
+      .then(model => model.toJSON())
+  }
 }

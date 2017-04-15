@@ -1,27 +1,6 @@
-import { GraphQLID, GraphQLObjectType } from 'graphql'
 import db from '../../config/bookshelf.config'
 
 export default class Booster extends db.Model {
-
-  Definition = new GraphQLObjectType({
-    name: `Booster`,
-    description: `A Booster object`,
-    fields: () => ({
-      id: {
-        type: GraphQLID,
-        description: `A unique id for this booster.`
-      }
-    })
-  })
-
-  Queries = {
-
-  }
-
-  Mutations = {
-
-  }
-
   // Knex Schema Definitions
   static fields(table) {
     // Fields

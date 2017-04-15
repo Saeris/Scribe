@@ -1,70 +1,7 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLObjectType } from 'graphql'
 import db from '../../config/bookshelf.config'
 import Format from './format'
 
 export default class Legality extends db.Model {
-
-  Definition = new GraphQLObjectType({
-    name: `Legality`,
-    description: `A Legality object`,
-    fields: () => ({
-      id: {
-        type: GraphQLID,
-        description: `A unique id for this name.`
-      },
-      cardID: {
-        type: GraphQLID,
-        description: `The ID of the card.`
-      },
-      format: {
-        type: (new Format()).Definition,
-        description: `The format the card is legal in.`
-      },
-      legal: {
-        type: GraphQLBoolean,
-        description: `Set to True if the card is Legal to play in the given format.`
-      },
-      restricted: {
-        type: GraphQLBoolean,
-        description: `Set to True if the card is restricted in the given format.`
-      }
-    })
-  })
-
-  Queries = {
-    legality: {
-      type: new GraphQLList(this.Definition),
-      args: {
-        id: {
-          name: `id`,
-          type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
-        }
-      },
-      resolve: (root, {id}) => {
-        return this
-          .where(`id`, `IN`, id)
-          .fetchAll()
-          .then((collection) => {
-            return collection.toJSON()
-          })
-      }
-    },
-    legalities: {
-      type: new GraphQLList(this.Definition),
-      resolve: (root, {id}) => {
-        return this
-          .findAll()
-          .then((collection) => {
-            return collection.toJSON()
-          })
-      }
-    }
-  }
-
-  Mutations = {
-
-  }
-
   // Knex Schema Definitions
   static fields(table) {
     // Indexes

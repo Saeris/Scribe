@@ -1,12 +1,12 @@
 import hapi from 'hapi' // http://hapijs.com/api
-import jwt from 'hapi-auth-jwt2' // https://github.com/dwyl/hapi-auth-jwt2
+// jwt from 'hapi-auth-jwt2' // https://github.com/dwyl/hapi-auth-jwt2
 import boomDecorators from 'hapi-boom-decorators' // https://github.com/brainsiq/hapi-boom-decorators
 import { graphqlHapi, graphiqlHapi } from 'graphql-server-hapi' // http://dev.apollodata.com/tools/graphql-server
 import good from 'good' // https://github.com/hapijs/good
 import 'good-winston' // https://github.com/lancespeelmon/good-winston
 import config from './config/server.config' // HTTP Server Settings
 import graphql from './config/graphql.config' // GraphQL Settings
-import routes from './routes' // REST API Endpoints
+//import routes from './routes' // REST API Endpoints
 
 const server = new hapi.Server()
 

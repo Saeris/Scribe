@@ -1,10 +1,19 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType } from 'graphql'
+import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
 import Models from '../models'
-import { Definition as Set } from './set'
+import * as Set from './set'
+
+export const Input = new GraphQLInputObjectType({
+  name: `FormatInput`,
+  description: `Required fields for a new Format object`,
+  fields: () => ({
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    sets: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) }
+  })
+})
 
 export const Definition = new GraphQLObjectType({
-  name: 'Format',
-  description: 'A Format object',
+  name: `Format`,
+  description: `A Format object`,
   fields: () => ({
     id: {
       type: GraphQLID,
@@ -15,42 +24,60 @@ export const Definition = new GraphQLObjectType({
       description: `The format name.`
     },
     sets: {
-      type: new GraphQLList(Set),
-      description: `A list of sets included in this format`
+      type: new GraphQLList(Set.Definition),
+      description: `A list of sets included in this format`,
+      resolve: (root, { id }) => Models.Format
+        .forge({ id })
+        .fetch({ withRelated: [`sets`] })
+        .then(model => model.toJSON().sets)
     }
   })
 })
 
 export const Queries = {
-  format: {
+  getFormat: {
     type: new GraphQLList(Definition),
+    description: `Returns a Format with the given ID.`,
     args: {
-      id: {
-        name: 'id',
-        type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID)))
-      }
+      id: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) }
     },
-    resolve(root, {id}) {
-      return Models.Format
-        .where('id', 'IN', id)
-        .fetchAll()
-        .then((collection) => {
-          return collection.toJSON()
-        })
-    }
+    resolve: (root, { id }) => Models.Format
+      .where(`id`, `IN`, id)
+      .fetchAll()
+      .then(collection => collection.toJSON())
   },
-  formats: {
+  listFormats: {
     type: new GraphQLList(Definition),
-    resolve(root, {id}) {
-      return Models.Format
-        .findAll()
-        .then((collection) => {
-          return collection.toJSON()
-        })
-    }
+    description: `Lists all Formats.`,
+    resolve: (root, { id }) => Models.Format
+      .findAll()
+      .then(collection => collection.toJSON())
   }
 }
 
 export const Mutations = {
-
+  createFormat: {
+    type: Definition,
+    description: `Creates a new Format`,
+    args: { input: { type: Input } },
+    resolve: (root, { input }) => Models.Format
+      .findOrCreate(input)
+      .then(model => model.toJSON())
+  },
+  updateFormat: {
+    type: Definition,
+    description: `Updates an existing Format, creates it if it does not already exist`,
+    args: { input: { type: Input } },
+    resolve: (root, { input }) => Models.Format
+      .upsert(input, input)
+      .then(model => model.toJSON())
+  },
+  deleteFormat: {
+    type: Definition,
+    description: `Deletes a Format by id`,
+    args: { id: { type: GraphQLID } },
+    resolve: (root, { id }) => Models.Format
+      .destroy({ id })
+      .then(model => model.toJSON())
+  }
 }
