@@ -38,9 +38,7 @@ export const Queries = {
   getBlock: {
     type: new GraphQLList(Definition),
     description: `Returns a Block with the given ID.`,
-    args: {
-      id: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) }
-    },
+    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
     resolve: (root, { id }) => Models.Block
       .where(`id`, `IN`, id)
       .fetchAll()

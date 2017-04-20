@@ -29,9 +29,7 @@ export const Queries = {
   getSupertype: {
     type: new GraphQLList(Definition),
     description: `Returns a Supertype with the given ID.`,
-    args: {
-      id: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) }
-    },
+    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
     resolve: (root, { id }) => Models.Supertype
       .where(`id`, `IN`, id)
       .fetchAll()

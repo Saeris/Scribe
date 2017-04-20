@@ -28,9 +28,7 @@ export const Queries = {
   getSubtype: {
     type: new GraphQLList(Definition),
     description: `Returns a Subtype with the given ID.`,
-    args: {
-      id: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) }
-    },
+    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
     resolve: (root, { id }) => Models.Subtype
       .where(`id`, `IN`, id)
       .fetchAll()

@@ -43,9 +43,7 @@ export const Queries = {
   getCategory: {
     type: new GraphQLList(Definition),
     description: `Returns a Category with the given ID.`,
-    args: {
-      id: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) }
-    },
+    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
     resolve: (root, { id }) => Models.Category
       .where(`id`, `IN`, id)
       .fetchAll()

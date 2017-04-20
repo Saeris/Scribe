@@ -43,9 +43,7 @@ export const Queries = {
   getArtist: {
     type: new GraphQLList(Definition),
     description: `Returns an Artist with the given ID.`,
-    args: {
-      id: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) }
-    },
+    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
     resolve: (root, { id }) => Models.Artist
       .where(`id`, `IN`, id)
       .fetchAll()

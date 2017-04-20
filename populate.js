@@ -1,7 +1,13 @@
 import fetch from 'node-fetch'
+import Lokka from 'lokka'
+import Transport from 'lokka-transport-http'
 import values from 'lodash/values'
 
 const BaseUrl = `https://api.magicthegathering.io/v1`
+
+const client = new Lokka({
+  transport: new Transport(`http://localhost:1337/api`)
+})
 
 async function getCards(config = {}) {
   let parameters = {
@@ -70,7 +76,18 @@ class Set {
     return null
   }
 
-  getSetType(type) {
+  getSetType(name) {
+    const mutation = `($input: SetTypeInput) {
+      createSetType(input: $input) {
+        id
+        name
+      }
+    }`
+
+    client.mutate(mutation, { input: { name } }).then(resp => {
+      console.log(resp)
+    })
+
     return null
   }
 

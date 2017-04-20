@@ -38,9 +38,7 @@ export const Queries = {
   getLanguageCode: {
     type: new GraphQLList(Definition),
     description: `Returns a Language Code with the given ID.`,
-    args: {
-      id: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) }
-    },
+    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
     resolve: (root, { id }) => Models.LanguageCode
       .where(`id`, `IN`, id)
       .fetchAll()

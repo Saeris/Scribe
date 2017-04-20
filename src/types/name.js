@@ -48,9 +48,7 @@ export const Queries = {
   getName: {
     type: new GraphQLList(Definition),
     description: `Returns a Name with the given ID.`,
-    args: {
-      id: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) }
-    },
+    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
     resolve: (root, { id }) => Models.Name
       .where(`id`, `IN`, id)
       .fetchAll()

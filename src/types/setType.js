@@ -6,7 +6,7 @@ export const Input = new GraphQLInputObjectType({
   description: `Required fields for a new Set Type object`,
   fields: () => ({
     name: { type: new GraphQLNonNull(GraphQLString) },
-    description:  { type: new GraphQLNonNull(GraphQLString) }
+    description:  { type: GraphQLString }
   })
 })
 
@@ -33,9 +33,7 @@ export const Queries = {
   getSetType: {
     type: new GraphQLList(Definition),
     description: `Returns a Set Type with the given ID.`,
-    args: {
-      id: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) }
-    },
+    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
     resolve: (root, { id }) => Models.SetType
       .where(`id`, `IN`, id)
       .fetchAll()

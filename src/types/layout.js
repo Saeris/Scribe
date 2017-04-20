@@ -43,9 +43,7 @@ export const Queries = {
   getLayout: {
     type: new GraphQLList(Definition),
     description: `Returns a Layout with the given ID.`,
-    args: {
-      id: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) }
-    },
+    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
     resolve: (root, { id }) => Models.Layout
       .where(`id`, `IN`, id)
       .fetchAll()

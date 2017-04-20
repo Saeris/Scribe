@@ -316,9 +316,7 @@ export const Queries = {
   getCard: {
     type: new GraphQLList(Definition),
     description: `Returns a Card with the given ID.`,
-    args: {
-      id: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) }
-    },
+    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
     resolve: (root, { id }) => Models.Card
       .where(`id`, `IN`, id)
       .fetchAll()

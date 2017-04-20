@@ -53,9 +53,7 @@ export const Queries = {
   getKeyword: {
     type: new GraphQLList(Definition),
     description: `Returns a Keyword with the given ID.`,
-    args: {
-      id: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) }
-    },
+    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
     resolve: (root, { id }) => Models.Keyword
       .where(`id`, `IN`, id)
       .fetchAll()

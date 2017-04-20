@@ -29,9 +29,7 @@ export const Queries = {
   getType: {
     type: new GraphQLList(Definition),
     description: `Returns a Type with the given ID.`,
-    args: {
-      id: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) }
-    },
+    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
     resolve: (root, { id }) => Models.Type
       .where(`id`, `IN`, id)
       .fetchAll()

@@ -53,9 +53,7 @@ export const Queries = {
   getLegality: {
     type: new GraphQLList(Definition),
     description: `Returns a Legality with the given ID.`,
-    args: {
-      id: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) }
-    },
+    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
     resolve: (root, { id }) => Models.Legality
       .where(`id`, `IN`, id)
       .fetchAll()
