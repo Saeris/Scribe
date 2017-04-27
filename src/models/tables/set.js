@@ -1,6 +1,8 @@
+import moment from 'moment'
 import db from '../../config/bookshelf.config'
 import Icon from './icon'
 import Block from './block'
+import BlockSets from '../lists/blockSets'
 import Booster from './booster'
 import SetType from './setType'
 
@@ -22,7 +24,6 @@ export default class Set extends db.Model {
 
     table.bigInteger(`block`)
          .comment(`The block the set belongs to.`)
-         .notNullable()
          .unsigned()
          .index(`block`)
 
@@ -42,9 +43,14 @@ export default class Set extends db.Model {
          .comment(`The border color of the set.`)
          .notNullable()
 
-    table.date(`releasedate`)
+    table.date(`releaseDate`)
          .comment(`The date on which the set was released.`)
          .notNullable()
+
+    table.bigInteger(`booster`)
+         .comment(`Booster pack generation rules for this set.`)
+         .unsigned()
+         .index(`booster`)
 
     // Timestamps
     table.timestamps()
@@ -68,10 +74,30 @@ export default class Set extends db.Model {
          .inTable(`icon`)
          .onDelete(`NO ACTION`)
          .onUpdate(`NO ACTION`)
+
+    table.foreign(`booster`)
+         .references(`id`)
+         .inTable(`booster`)
+         .onDelete(`NO ACTION`)
+         .onUpdate(`NO ACTION`)
   }
 
   // Bookshelf Relation Definitions
   get tableName() { return `set` }
 
   get hasTimestamps() { return true }
+
+  block = () => this.belongsTo(Block, `block`).through(BlockSets, `id`, `set`, `block`)
+
+  type = () => this.hasOne(SetType, `id`, `type`)
+
+  icon = () => this.hasOne(Icon, `id`, `icon`)
+
+  booster = () => this.hasOne(Booster, `id`, `booster`)
+
+  toJSON() {
+    let attrs = db.Model.prototype.toJSON.apply(this, arguments)
+    attrs.releaseDate = moment(this.get(`releaseDate`)).format(`YYYY-MM-DD`)
+    return attrs
+  }
 }

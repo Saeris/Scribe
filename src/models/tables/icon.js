@@ -14,11 +14,9 @@ export default class Icon extends db.Model {
 
     table.text(`image`)
          .comment(`A URL pointing to an image of the icon.`)
-         .notNullable()
 
     table.string(`class`)
          .comment(`CSS class name used to display the icon.`)
-         .notNullable()
 
     // Timestamps
     table.timestamps()

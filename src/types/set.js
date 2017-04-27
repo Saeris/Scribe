@@ -1,4 +1,5 @@
 import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import { GraphQLDate } from 'graphql-iso-date'
 import Models from '../models'
 import * as Block from './block'
 import * as SetType from './setType'
@@ -15,7 +16,7 @@ export const Input = new GraphQLInputObjectType({
     type:        { type: new GraphQLNonNull(GraphQLID)},
     icon:        { type: new GraphQLNonNull(GraphQLID) },
     border:      { type: new GraphQLNonNull(GraphQLString) },
-    releaseDate: { type: new GraphQLNonNull(GraphQLString) },
+    releaseDate: { type: new GraphQLNonNull(GraphQLDate) },
     booster:     { type: GraphQLID }
   })
 })
@@ -39,25 +40,22 @@ export const Definition = new GraphQLObjectType({
     block: {
       type: Block.Definition,
       description: `The block the set belongs to.`,
-      resolve: (root, { id }) => Models.Set
-        .forge({ id })
-        .fetch({ withRelated: [`block`] })
+      resolve: (type) => Models.Set
+        .findById(type.id, { withRelated: [`block`] })
         .then(model => model.toJSON().block)
     },
     type: {
       type: SetType.Definition,
       description: `The set type.`,
-      resolve: (root, { id }) => Models.Set
-        .forge({ id })
-        .fetch({ withRelated: [`type`] })
+      resolve: (type) => Models.Set
+        .findById(type.id, { withRelated: [`type`] })
         .then(model => model.toJSON().type)
     },
     icon: {
       type: Icon.Definition,
       description: `The icon associated with the set.`,
-      resolve: (root, { id }) => Models.Set
-        .forge({ id })
-        .fetch({ withRelated: [`icon`] })
+      resolve: (type) => Models.Set
+        .findById(type.id, { withRelated: [`icon`] })
         .then(model => model.toJSON().icon)
     },
     border: {
@@ -65,15 +63,14 @@ export const Definition = new GraphQLObjectType({
       description: `The card border color for this set.`
     },
     releaseDate: {
-      type: GraphQLString,
+      type: GraphQLDate,
       description: `The date this card was released. This is only set for promo cards. The date may not be accurate to an exact day and month, thus only a partial date may be set (YYYY-MM-DD or YYYY-MM or YYYY). Some promo cards do not have a known release date.`
     },
     booster: {
       type: Booster.Definition,
       description: `A booster pack for this set`,
-      resolve: (root, { id }) => Models.Set
-        .forge({ id })
-        .fetch({ withRelated: [`booster`] })
+      resolve: (type) => Models.Set
+        .findById(type.id, { withRelated: [`booster`] })
         .then(model => model.toJSON().booster)
     }
   })

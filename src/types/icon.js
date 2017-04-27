@@ -6,8 +6,8 @@ export const Input = new GraphQLInputObjectType({
   description: `Required fields for a new Icon object`,
   fields: () => ({
     name:  { type: new GraphQLNonNull(GraphQLString) },
-    image: { type: new GraphQLNonNull(GraphQLString) },
-    class: { type: new GraphQLNonNull(GraphQLString) }
+    image: { type: GraphQLString },
+    class: { type: GraphQLString }
   })
 })
 

@@ -5,7 +5,6 @@ export const Input = new GraphQLInputObjectType({
   name: `SupertypeInput`,
   description: `Required fields for a new Supertype object`,
   fields: () => ({
-    id:   { type: GraphQLID },
     name: { type: new GraphQLNonNull(GraphQLString) }
   })
 })

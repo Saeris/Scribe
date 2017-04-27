@@ -16,7 +16,6 @@ export default class Block extends db.Model {
 
     table.bigInteger(`sets`)
          .comment(`List of sets that are included in this block.`)
-         .notNullable()
          .unsigned()
          .index(`block_sets`)
 
@@ -37,12 +36,5 @@ export default class Block extends db.Model {
 
   get hasTimestamps() { return true }
 
-  set() {
-    return this.belongsTo(Set, `block`)
-  }
-
-  sets() {
-    return this.hasMany(Set)
-               .through(BlockSets)
-  }
+  sets = () => this.hasMany(Set, `sets`).through(BlockSets, `id`, `block`, `set`)
 }
