@@ -8,13 +8,13 @@ export default class KeywordCards extends db.Model {
          .comment(`The keyword associated with this card.`)
          .notNullable()
          .unsigned()
-         .index(`keyword`)
+         .index(`keywordcards_keyword`)
 
     table.bigInteger(`card`)
          .comment(`The card associated with this keyword.`)
          .notNullable()
          .unsigned()
-         .index(`card`)
+         .index(`keywordcards_card`)
 
     // Timestamps
     table.timestamps()

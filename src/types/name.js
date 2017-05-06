@@ -1,4 +1,5 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import order from './utilities/order'
 import Models from '../models'
 import * as Card from './card'
 import * as Language from './language'
@@ -7,10 +8,29 @@ export const Input = new GraphQLInputObjectType({
   name: `NameInput`,
   description: `Required fields for a new Name object`,
   fields: () => ({
-    name:     { type: new GraphQLNonNull(GraphQLString) },
-    language: { type: new GraphQLNonNull(GraphQLID) },
-    cards:    { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) }
+    name:         { type: new GraphQLNonNull(GraphQLString) },
+    language:     { type: new GraphQLNonNull(GraphQLID) },
+    cards:        { type: new GraphQLList(GraphQLID) }
   })
+})
+
+const Filter = new GraphQLInputObjectType({
+  name: `NameFilter`,
+  description: `Queryable fields for Name.`,
+  fields: () => ({
+    name:         { type: new GraphQLList(GraphQLString) },
+    language:     { type: new GraphQLList(GraphQLID) },
+    cards:        { type: new GraphQLList(GraphQLID) }
+  })
+})
+
+const Fields = new GraphQLEnumType({
+  name: `NameFields`,
+  description: `Field names for Name.`,
+  values: {
+    name:         { value: `name` },
+    language:     { value: `language` }
+  }
 })
 
 export const Definition = new GraphQLObjectType({
@@ -28,37 +48,46 @@ export const Definition = new GraphQLObjectType({
     language: {
       type: Language.Definition,
       description: `The language name.`,
-      resolve: (root, { id }) => Models.Name
-        .forge({ id })
-        .fetch({ withRelated: [`language`] })
+      resolve: (type) => Models.Name
+        .findById(type.id, { withRelated: [`language`] })
         .then(model => model.toJSON().language)
     },
     cards: {
       type: new GraphQLList(Card.Definition),
       description: `A list of cards featuring art from this artist.`,
-      resolve: (root, { id }) => Models.Name
-        .forge({ id })
-        .fetch({ withRelated: [`cards`] })
+      resolve: (type) => Models.Name
+        .findById(type.id, { withRelated: [`cards`] })
         .then(model => model.toJSON().cards)
     }
   })
 })
 
 export const Queries = {
-  getName: {
+  name: {
     type: new GraphQLList(Definition),
-    description: `Returns a Name with the given ID.`,
-    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
-    resolve: (root, { id }) => Models.Name
-      .where(`id`, `IN`, id)
+    description: `Returns a Name.`,
+    args: {
+      id: { type: new GraphQLList(GraphQLID) },
+      filter: {
+        type: Filter
+      },
+      limit: { type: GraphQLInt },
+      offset: { type: GraphQLInt },
+      orderBy: { type: order(`name`, Fields) }
+    },
+    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.Name
+      .query(qb => {
+        if (!!id) qb.whereIn(`id`, id)
+        if (!!filter) {
+          for (let field in filter) {
+            qb.whereIn(field, filter[field])
+          }
+        }
+        if (!!limit) qb.limit(limit)
+        if (!!offset) qb.offset(offset)
+        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
+      })
       .fetchAll()
-      .then(collection => collection.toJSON())
-  },
-  listNames: {
-    type: new GraphQLList(Definition),
-    description: `Lists all Names.`,
-    resolve: (root, { id }) => Models.Name
-      .findAll()
       .then(collection => collection.toJSON())
   }
 }

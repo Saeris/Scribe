@@ -1,7 +1,6 @@
 import db from '../../config/bookshelf.config'
-import Card from './card'
-import AbilityTypes from '../lists/abilityTypes'
-import AbilityTypeCards from '../lists/abilityTypeCards'
+import { Card } from './'
+import { AbilityTypes, AbilityTypeCards } from '../lists'
 
 export default class AbilityType extends db.Model {
   // Knex Schema Definitions
@@ -41,12 +40,7 @@ export default class AbilityType extends db.Model {
 
   get hasTimestamps() { return true }
 
-  abilityTypes() {
-    return this.belongsTo(AbilityTypes)
-  }
+  abilityTypes = () => this.belongsTo(AbilityTypes)
 
-  cards() {
-    return this.hasMany(Card, `card`)
-               .through(AbilityTypeCards)
-  }
+  cards = () => this.hasMany(Card, `card`).through(AbilityTypeCards)
 }

@@ -8,13 +8,13 @@ export default class BlockSets extends db.Model {
          .comment(`The block associated with this set.`)
          .notNullable()
          .unsigned()
-         .index(`block`)
+         .index(`blocksets_block`)
 
     table.bigInteger(`set`)
          .comment(`The set associated with this block.`)
          .notNullable()
          .unsigned()
-         .index(`set`)
+         .index(`blocksets_set`)
 
     // Timestamps
     table.timestamps()

@@ -8,13 +8,13 @@ export default class Subtypes extends db.Model {
          .comment(`The card associated with this subtype.`)
          .notNullable()
          .unsigned()
-         .index(`card`)
+         .index(`subtypes_card`)
 
     table.bigInteger(`subtype`)
          .comment(`The subtype associated with this card.`)
          .notNullable()
          .unsigned()
-         .index(`subtype`)
+         .index(`subtypes_subtype`)
 
     // Timestamps
     table.timestamps()

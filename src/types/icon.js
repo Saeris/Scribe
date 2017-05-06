@@ -1,14 +1,34 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import order from './utilities/order'
 import Models from '../models'
+import * as Image from './image'
 
 export const Input = new GraphQLInputObjectType({
   name: `IconInput`,
   description: `Required fields for a new Icon object`,
   fields: () => ({
     name:  { type: new GraphQLNonNull(GraphQLString) },
-    image: { type: GraphQLString },
+    image: { type: GraphQLID },
     class: { type: GraphQLString }
   })
+})
+
+const Filter = new GraphQLInputObjectType({
+  name: `IconFilter`,
+  description: `Queryable fields for Icon.`,
+  fields: () => ({
+    name:  { type: new GraphQLList(GraphQLString) },
+    image: { type: new GraphQLList(GraphQLID) }
+  })
+})
+
+const Fields = new GraphQLEnumType({
+  name: `IconFields`,
+  description: `Field names for Icon.`,
+  values: {
+    name:  { value: `name` },
+    image: { value: `image` }
+  }
 })
 
 export const Definition = new GraphQLObjectType({
@@ -24,8 +44,11 @@ export const Definition = new GraphQLObjectType({
       description: `The name of the icon.`
     },
     image: {
-      type: GraphQLString,
-      description: `A url to an image for this icon.`
+      type: Image.Definition,
+      description: `The language image.`,
+      resolve: (type) => Models.Icon
+        .findById(type.id, { withRelated: [`image`] })
+        .then(model => model.toJSON().image)
     },
     class: {
       type: GraphQLString,
@@ -35,20 +58,31 @@ export const Definition = new GraphQLObjectType({
 })
 
 export const Queries = {
-  getIcon: {
+  icon: {
     type: new GraphQLList(Definition),
-    description: `Returns an Icon with the given ID.`,
-    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
-    resolve: (root, { id }) => Models.Icon
-      .where(`id`, `IN`, id)
+    description: `Returns an Icon.`,
+    args: {
+      id: { type: new GraphQLList(GraphQLID) },
+      filter: {
+        type: Filter
+      },
+      limit: { type: GraphQLInt },
+      offset: { type: GraphQLInt },
+      orderBy: { type: order(`icon`, Fields) }
+    },
+    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.Icon
+      .query(qb => {
+        if (!!id) qb.whereIn(`id`, id)
+        if (!!filter) {
+          for (let field in filter) {
+            qb.whereIn(field, filter[field])
+          }
+        }
+        if (!!limit) qb.limit(limit)
+        if (!!offset) qb.offset(offset)
+        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
+      })
       .fetchAll()
-      .then(collection => collection.toJSON())
-  },
-  listIcons: {
-    type: new GraphQLList(Definition),
-    description: `Lists all Icons.`,
-    resolve: (root, { id }) => Models.Icon
-      .findAll()
       .then(collection => collection.toJSON())
   }
 }

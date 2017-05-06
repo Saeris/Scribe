@@ -20,7 +20,7 @@ function models() {
 
   loadModels().forEach((model) => {
     collection[model.name] = model
-    console.log(`✓ Loaded Model Definition: ${model.name}`)
+    console.log(`Loaded Model Definition: ${model.name}`)
   })
 
   return collection
@@ -37,7 +37,7 @@ export function definitions() {
     let Instance = new Model
     if (Instance.Definition) {
       collection.push(Instance.Definition)
-      console.log(`✓ Loaded Type Definition: ${Instance.Definition.name}`)
+      console.log(`Loaded Type Definition: ${Instance.Definition.name}`)
     }
   })
 
@@ -94,7 +94,7 @@ function create(knex, migrations) {
         if (config.ENV === `test` || config.ENV === `development`) migration.foreignKeys(table)
       })
       .then(() => {
-        console.log(`✓ Created table: ${migration.name}`)
+        console.log(`Created table: ${migration.name}`)
       })
       .catch((err) => {
         console.log(`Failed to create table: ${migration.name}`)
@@ -115,7 +115,7 @@ function update(knex, migrations) {
         migration.foreignKeys(table)
       })
       .then(() => {
-        console.log(`✓ Set Foreign Keys on table: ${migration.name}`)
+        console.log(`Set Foreign Keys on table: ${migration.name}`)
       })
       .catch((err) => {
         console.log(`Failed to alter table: ${migration.name}`)
@@ -135,7 +135,7 @@ function destroy(knex, migrations) {
     toBeDestroyed.push(
       knex.schema.dropTableIfExists(migration.name)
       .then(() => {
-        console.log(`✓ Destroyed table: ${migration.name}`)
+        console.log(`Destroyed table: ${migration.name}`)
       })
       .catch((err) => {
         console.log(`Failed to destroy table: ${migration.name}`)

@@ -8,13 +8,13 @@ export default class Sides extends db.Model {
          .comment(`The card associated with this side.`)
          .notNullable()
          .unsigned()
-         .index(`card`)
+         .index(`sides_card`)
 
     table.bigInteger(`side`)
          .comment(`The side associated with this card.`)
          .notNullable()
          .unsigned()
-         .index(`side`)
+         .index(`sides_side`)
 
     // Timestamps
     table.timestamps()

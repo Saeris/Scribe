@@ -1,5 +1,5 @@
 import db from '../../config/bookshelf.config'
-import Language from './language'
+import { Language } from './'
 
 export default class LanguageCode extends db.Model {
   // Knex Schema Definitions
@@ -35,4 +35,6 @@ export default class LanguageCode extends db.Model {
   get tableName() { return `languagecode` }
 
   get hasTimestamps() { return true }
+
+  language = () => this.belongsTo(Language, `language`)
 }

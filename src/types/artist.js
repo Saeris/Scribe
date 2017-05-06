@@ -1,4 +1,5 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import order from './utilities/order'
 import Models from '../models'
 import * as Card from './card'
 
@@ -10,6 +11,23 @@ export const Input = new GraphQLInputObjectType({
     website: { type: GraphQLString },
     cards:   { type: new GraphQLList(GraphQLID) }
   })
+})
+
+const Filter = new GraphQLInputObjectType({
+  name: `ArtistFilter`,
+  description: `Queryable fields for Artist.`,
+  fields: () => ({
+    name:  { type: new GraphQLList(GraphQLString) },
+    cards: { type: new GraphQLList(GraphQLID) }
+  })
+})
+
+const Fields = new GraphQLEnumType({
+  name: `ArtistFields`,
+  description: `Field names for Artist.`,
+  values: {
+    name: { value: `name` }
+  }
 })
 
 export const Definition = new GraphQLObjectType({
@@ -40,20 +58,31 @@ export const Definition = new GraphQLObjectType({
 })
 
 export const Queries = {
-  getArtist: {
+  artist: {
     type: new GraphQLList(Definition),
-    description: `Returns an Artist with the given ID.`,
-    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
-    resolve: (root, { id }) => Models.Artist
-      .where(`id`, `IN`, id)
+    description: `Returns a Artist.`,
+    args: {
+      id: { type: new GraphQLList(GraphQLID) },
+      filter: {
+        type: Filter
+      },
+      limit: { type: GraphQLInt },
+      offset: { type: GraphQLInt },
+      orderBy: { type: order(`artist`, Fields) }
+    },
+    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.Artist
+      .query(qb => {
+        if (!!id) qb.whereIn(`id`, id)
+        if (!!filter) {
+          for (let field in filter) {
+            qb.whereIn(field, filter[field])
+          }
+        }
+        if (!!limit) qb.limit(limit)
+        if (!!offset) qb.offset(offset)
+        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
+      })
       .fetchAll()
-      .then(collection => collection.toJSON())
-  },
-  listArtists: {
-    type: new GraphQLList(Definition),
-    description: `Lists all Artists.`,
-    resolve: (root, { id }) => Models.Artist
-      .findAll()
       .then(collection => collection.toJSON())
   }
 }

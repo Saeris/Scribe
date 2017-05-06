@@ -1,5 +1,5 @@
 import db from '../../config/bookshelf.config'
-import Set from './set'
+import { Set } from './'
 
 export default class Format extends db.Model {
   // Knex Schema Definitions
@@ -35,4 +35,6 @@ export default class Format extends db.Model {
   get tableName() { return `format` }
 
   get hasTimestamps() { return true }
+
+  sets = () => this.hasMany(Set, `sets`)
 }

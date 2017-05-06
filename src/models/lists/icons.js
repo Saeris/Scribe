@@ -8,13 +8,13 @@ export default class Icons extends db.Model {
          .comment(`The layout associated with this icon.`)
          .notNullable()
          .unsigned()
-         .index(`layout`)
+         .index(`icons_layout`)
 
     table.bigInteger(`icon`)
          .comment(`The icon associated with this layout.`)
          .notNullable()
          .unsigned()
-         .index(`icon`)
+         .index(`icons_icon`)
 
     // Timestamps
     table.timestamps()

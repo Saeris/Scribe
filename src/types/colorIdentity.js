@@ -1,4 +1,5 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLBoolean, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import { GraphQLID, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import order from './utilities/order'
 import Models from '../models'
 import * as Color from './color'
 
@@ -8,10 +9,32 @@ export const Input = new GraphQLInputObjectType({
   fields: () => ({
     name:         { type: new GraphQLNonNull(GraphQLString) },
     alias:        { type: GraphQLString },
-    colors:       { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) },
-    multicolored: { type: new GraphQLList(GraphQLBoolean) },
-    devoid:       { type: new GraphQLList(GraphQLBoolean) }
+    colors:       { type: new GraphQLList(GraphQLID) },
+    multicolored: { type: GraphQLBoolean },
+    devoid:       { type: GraphQLBoolean }
   })
+})
+
+const Filter = new GraphQLInputObjectType({
+  name: `ColorIdentityFilter`,
+  description: `Queryable fields for ColorIdentity.`,
+  fields: () => ({
+    name:         { type: new GraphQLList(GraphQLString) },
+    alias:        { type: new GraphQLList(GraphQLString) },
+    multicolored: { type: GraphQLBoolean },
+    devoid:       { type: GraphQLBoolean }
+  })
+})
+
+const Fields = new GraphQLEnumType({
+  name: `ColorIdentityFields`,
+  description: `Field names for ColorIdentity.`,
+  values: {
+    name:         { value: `name` },
+    alias:        { value: `alias` },
+    multicolored: { value: `multicolored` },
+    devoid:       { value: `devoid` }
+  }
 })
 
 export const Definition = new GraphQLObjectType({
@@ -33,9 +56,8 @@ export const Definition = new GraphQLObjectType({
     colors: {
       type: new GraphQLList(Color.Definition),
       description: `A list of colors included in this color identity.`,
-      resolve: (root, { id }) => Models.ColorIdentity
-        .forge({ id })
-        .fetch({ withRelated: [`colors`] })
+      resolve: (type) => Models.ColorIdentity
+        .findById(type.id, { withRelated: [`colors`] })
         .then(model => model.toJSON().colors)
     },
     multicolored: {
@@ -50,20 +72,31 @@ export const Definition = new GraphQLObjectType({
 })
 
 export const Queries = {
-  getColorIdentity: {
+  colorIdentity: {
     type: new GraphQLList(Definition),
-    description: `Returns a Color Identity with the given ID.`,
-    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
-    resolve: (root, { id }) => Models.Coloridentity
-      .where(`id`, `IN`, id)
+    description: `Returns a ColorIdentity.`,
+    args: {
+      id: { type: new GraphQLList(GraphQLID) },
+      filter: {
+        type: Filter
+      },
+      limit: { type: GraphQLInt },
+      offset: { type: GraphQLInt },
+      orderBy: { type: order(`colorIdentity`, Fields) }
+    },
+    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.ColorIdentity
+      .query(qb => {
+        if (!!id) qb.whereIn(`id`, id)
+        if (!!filter) {
+          for (let field in filter) {
+            qb.whereIn(field, filter[field])
+          }
+        }
+        if (!!limit) qb.limit(limit)
+        if (!!offset) qb.offset(offset)
+        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
+      })
       .fetchAll()
-      .then(collection => collection.toJSON())
-  },
-  listColorIdentities: {
-    type: new GraphQLList(Definition),
-    description: `Lists all Color Identities.`,
-    resolve: (root, { id }) => Models.Coloridentity
-      .findAll()
       .then(collection => collection.toJSON())
   }
 }
@@ -73,17 +106,35 @@ export const Mutations = {
     type: Definition,
     description: `Creates a new ColorIdentity`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => Models.ColorIdentity
-      .findOrCreate(input)
-      .then(model => model.toJSON())
+    resolve: (root, { input }) => {
+      let { colors, ...fields } = input
+      return Models.ColorIdentity
+        .findOrCreate(fields)
+        .then(model => {
+          let identity = model.toJSON()
+
+          if (!!colors) for (let color of colors) Models.Colors.findOrCreate({ coloridentity: identity.id, color })
+
+          return identity
+        })
+    }
   },
   updateColorIdentity: {
     type: Definition,
     description: `Updates an existing ColorIdentity, creates it if it does not already exist`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => Models.ColorIdentity
-      .upsert(input, input)
-      .then(model => model.toJSON())
+    resolve: (root, { input }) => {
+      let { colors, ...fields } = input
+      return Models.ColorIdentity
+        .upsert(fields, fields)
+        .then(model => {
+          let identity = model.toJSON()
+
+          if (!!colors) for (let color of colors) Models.Colors.findOrCreate({ coloridentity: identity.id, color })
+
+          return identity
+        })
+    }
   },
   deleteColorIdentity: {
     type: Definition,

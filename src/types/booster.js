@@ -1,4 +1,5 @@
-import { GraphQLID, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import { GraphQLID, GraphQLInt, GraphQLEnumType, GraphQLList, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import order from './utilities/order'
 import Models from '../models'
 
 export const Input = new GraphQLInputObjectType({
@@ -21,22 +22,7 @@ export const Definition = new GraphQLObjectType({
 })
 
 export const Queries = {
-  getBooster: {
-    type: new GraphQLList(Definition),
-    description: `Returns a Booster with the given ID.`,
-    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
-    resolve: (root, { id }) => Models.Booster
-      .where(`id`, `IN`, id)
-      .fetchAll()
-      .then(collection => collection.toJSON())
-  },
-  listBoosters: {
-    type: new GraphQLList(Definition),
-    description: `Lists all Boosters.`,
-    resolve: (root, { id }) => Models.Booster
-      .findAll()
-      .then(collection => collection.toJSON())
-  }
+
 }
 
 export const Mutations = {

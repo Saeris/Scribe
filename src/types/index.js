@@ -4,7 +4,7 @@ import glob from 'glob' // https://github.com/isaacs/node-glob
 export function loadTypes() {
   let types = []
 
-  glob.sync(`${__dirname}/**/!(*.spec).js`).forEach( file => {
+  glob.sync(`${__dirname}/!(*.spec).js`).forEach( file => {
     let filename = path.basename(file)
     if (filename !== `index.js`) {
       types.push(require(file))
@@ -19,7 +19,7 @@ export function definitions() {
 
   loadTypes().forEach((type) => {
     collection[type.Definition.name] = type.Definition
-    console.log(`✓ Loaded Type Definition: ${type.Definition.name}`)
+    console.log(`Loaded Type Definition: ${type.Definition.name}`)
   })
 
   return collection

@@ -8,13 +8,13 @@ export default class NameCards extends db.Model {
          .comment(`The name associated with this card.`)
          .notNullable()
          .unsigned()
-         .index(`name`)
+         .index(`namecards_name`)
 
     table.bigInteger(`card`)
          .comment(`The card associated with this name.`)
          .notNullable()
          .unsigned()
-         .index(`card`)
+         .index(`namecards_card`)
 
     // Timestamps
     table.timestamps()

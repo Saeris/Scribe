@@ -8,13 +8,13 @@ export default class CategoryCards extends db.Model {
          .comment(`The category associated with this card.`)
          .notNullable()
          .unsigned()
-         .index(`category`)
+         .index(`categorycards_category`)
 
     table.bigInteger(`card`)
          .comment(`The card associated with this category.`)
          .notNullable()
          .unsigned()
-         .index(`card`)
+         .index(`categorycards_card`)
 
     // Timestamps
     table.timestamps()

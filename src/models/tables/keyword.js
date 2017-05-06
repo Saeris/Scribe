@@ -1,6 +1,5 @@
 import db from '../../config/bookshelf.config'
-import Card from './card'
-import LanguageCode from './languageCode'
+import { Card, LanguageCode } from './'
 
 export default class Keyword extends db.Model {
   // Knex Schema Definitions
@@ -45,4 +44,8 @@ export default class Keyword extends db.Model {
   get tableName() { return `keyword` }
 
   get hasTimestamps() { return true }
+
+  languageCode = () => this.hasOne(LanguageCode, `languageCode`)
+
+  cards = () => this.belongsToMany(Card, `cards`)
 }

@@ -1,6 +1,5 @@
 import db from '../../config/bookshelf.config'
-import Card from './card'
-import Language from './language'
+import { Card, Language } from './'
 
 export default class Name extends db.Model {
   // Knex Schema Definitions
@@ -18,13 +17,12 @@ export default class Name extends db.Model {
          .comment(`The language code of the language the name is localized in.`)
          .notNullable()
          .unsigned()
-         .index(`language`)
+         .index(`name_language`)
 
     table.bigInteger(`cards`)
          .comment(`A list of cards that have this name.`)
-         .notNullable()
          .unsigned()
-         .index(`cards`)
+         .index(`name_cards`)
 
     // Timestamps
     table.timestamps()
@@ -49,7 +47,7 @@ export default class Name extends db.Model {
 
   get hasTimestamps() { return true }
 
-  cards() {
-    return this.belongsTo(Card, `card`)
-  }
+  cards = () => this.belongsTo(Card, `id`, `card`)
+
+  language = () => this.hasOne(Language, `id`, `language`)
 }

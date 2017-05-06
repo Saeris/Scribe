@@ -1,10 +1,7 @@
 import moment from 'moment'
 import db from '../../config/bookshelf.config'
-import Icon from './icon'
-import Block from './block'
-import BlockSets from '../lists/blockSets'
-import Booster from './booster'
-import SetType from './setType'
+import { Icon, Block, Booster, SetType } from './'
+import { BlockSets } from '../lists'
 
 export default class Set extends db.Model {
   // Knex Schema Definitions
@@ -25,19 +22,19 @@ export default class Set extends db.Model {
     table.bigInteger(`block`)
          .comment(`The block the set belongs to.`)
          .unsigned()
-         .index(`block`)
+         .index(`set_block`)
 
     table.bigInteger(`type`)
          .comment(`The type of the set.`)
          .notNullable()
          .unsigned()
-         .index(`type`)
+         .index(`set_type`)
 
     table.bigInteger(`icon`)
          .comment(`The icon associated with the set.`)
          .notNullable()
          .unsigned()
-         .index(`icon`)
+         .index(`set_icon`)
 
     table.string(`border`)
          .comment(`The border color of the set.`)
@@ -50,7 +47,7 @@ export default class Set extends db.Model {
     table.bigInteger(`booster`)
          .comment(`Booster pack generation rules for this set.`)
          .unsigned()
-         .index(`booster`)
+         .index(`set_booster`)
 
     // Timestamps
     table.timestamps()
@@ -87,7 +84,7 @@ export default class Set extends db.Model {
 
   get hasTimestamps() { return true }
 
-  block = () => this.belongsTo(Block, `block`).through(BlockSets, `id`, `set`, `block`)
+  block = () => this.belongsTo(Block, `block`).through(BlockSets, `id`, `block`, `set`)
 
   type = () => this.hasOne(SetType, `id`, `type`)
 

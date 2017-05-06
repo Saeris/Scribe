@@ -1,6 +1,5 @@
 import db from '../../config/bookshelf.config'
-import Card from './card'
-import LanguageCode from './languageCode'
+import { Card, LanguageCode } from './'
 
 export default class Ruling extends db.Model {
   // Knex Schema Definitions
@@ -23,13 +22,13 @@ export default class Ruling extends db.Model {
          .comment(`The language code of this ruling.`)
          .notNullable()
          .unsigned()
-         .index(`language`)
+         .index(`ruling_language`)
 
     table.bigInteger(`cards`)
          .comment(`List of cards that have this ruling.`)
          .notNullable()
          .unsigned()
-         .index(`cards`)
+         .index(`ruling_cards`)
 
     // Timestamps
     table.timestamps()
@@ -53,4 +52,8 @@ export default class Ruling extends db.Model {
   get tableName() { return `ruling` }
 
   get hasTimestamps() { return true }
+
+  language = () => this.hasOne(LanguageCode, `language`)
+
+  cards = () => this.belongsToMany(Card, `cards`)
 }

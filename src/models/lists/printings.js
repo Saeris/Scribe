@@ -8,13 +8,13 @@ export default class Printings extends db.Model {
          .comment(`The card associated with this printing.`)
          .notNullable()
          .unsigned()
-         .index(`card`)
+         .index(`printings_card`)
 
     table.bigInteger(`set`)
          .comment(`The set associated with this printing.`)
          .notNullable()
          .unsigned()
-         .index(`set`)
+         .index(`printings_set`)
 
     // Timestamps
     table.timestamps()

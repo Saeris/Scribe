@@ -8,13 +8,13 @@ export default class Rulings extends db.Model {
          .comment(`The card associated with this ruling.`)
          .notNullable()
          .unsigned()
-         .index(`card`)
+         .index(`rulings_card`)
 
     table.bigInteger(`ruling`)
          .comment(`The ruling associated with this card.`)
          .notNullable()
          .unsigned()
-         .index(`ruling`)
+         .index(`rulings_ruling`)
 
     // Timestamps
     table.timestamps()

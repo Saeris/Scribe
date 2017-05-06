@@ -1,4 +1,5 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import order from './utilities/order'
 import Models from '../models'
 
 export const Input = new GraphQLInputObjectType({
@@ -8,6 +9,22 @@ export const Input = new GraphQLInputObjectType({
     name: { type: new GraphQLNonNull(GraphQLString) },
     description:  { type: GraphQLString }
   })
+})
+
+const Filter = new GraphQLInputObjectType({
+  name: `SetTypeFilter`,
+  description: `Queryable fields for SetType.`,
+  fields: () => ({
+    name: { type: new GraphQLList(GraphQLString) }
+  })
+})
+
+const Fields = new GraphQLEnumType({
+  name: `SetTypeFields`,
+  description: `Field names for SetType.`,
+  values: {
+    name: { value: `name` }
+  }
 })
 
 export const Definition = new GraphQLObjectType({
@@ -30,20 +47,31 @@ export const Definition = new GraphQLObjectType({
 })
 
 export const Queries = {
-  getSetType: {
+  setType: {
     type: new GraphQLList(Definition),
-    description: `Returns a Set Type with the given ID.`,
-    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
-    resolve: (root, { id }) => Models.SetType
-      .where(`id`, `IN`, id)
+    description: `Returns a Set Type.`,
+    args: {
+      id: { type: new GraphQLList(GraphQLID) },
+      filter: {
+        type: Filter
+      },
+      limit: { type: GraphQLInt },
+      offset: { type: GraphQLInt },
+      orderBy: { type: order(`setType`, Fields) }
+    },
+    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.SetType
+      .query(qb => {
+        if (!!id) qb.whereIn(`id`, id)
+        if (!!filter) {
+          for (let field in filter) {
+            qb.whereIn(field, filter[field])
+          }
+        }
+        if (!!limit) qb.limit(limit)
+        if (!!offset) qb.offset(offset)
+        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
+      })
       .fetchAll()
-      .then(collection => collection.toJSON())
-  },
-  listSetTypes: {
-    type: new GraphQLList(Definition),
-    description: `Lists all Set Types.`,
-    resolve: (root, { id }) => Models.SetType
-      .findAll()
       .then(collection => collection.toJSON())
   }
 }

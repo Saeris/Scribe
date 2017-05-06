@@ -1,6 +1,4 @@
 import db from '../../config/bookshelf.config'
-import Card from '../tables/card'
-import AbilityType from '../tables/abilityType'
 
 export default class AbilityTypes extends db.Model {
   // Knex Schema Definitions
@@ -10,13 +8,13 @@ export default class AbilityTypes extends db.Model {
          .comment(`The card associated with this abilityType.`)
          .notNullable()
          .unsigned()
-         .index(`card`)
+         .index(`abilitytypes_card`)
 
     table.bigInteger(`abilitytype`)
          .comment(`The abilityType associated with this card.`)
          .notNullable()
          .unsigned()
-         .index(`abilitytype`)
+         .index(`abilitytypes_abilitytype`)
 
     // Timestamps
     table.timestamps()
@@ -37,12 +35,4 @@ export default class AbilityTypes extends db.Model {
   get tableName() { return `abilitytypes` }
 
   get hasTimestamps() { return true }
-
-  abilityType() {
-    return this.belongsTo(AbilityType)
-  }
-
-  card() {
-    return this.hasMany(Card)
-  }
 }

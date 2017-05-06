@@ -1,6 +1,6 @@
 import db from '../../config/bookshelf.config'
-import Set from './set'
-import BlockSets from '../lists/blockSets'
+import { Set } from './'
+import { BlockSets } from '../lists'
 
 export default class Block extends db.Model {
   // Knex Schema Definitions
@@ -14,17 +14,12 @@ export default class Block extends db.Model {
          .comment(`The name of the block.`)
          .notNullable()
 
-    table.bigInteger(`sets`)
-         .comment(`List of sets that are included in this block.`)
-         .unsigned()
-         .index(`block_sets`)
-
     // Timestamps
     table.timestamps()
   }
 
   static foreignKeys(table) {
-    table.foreign(`sets`)
+    table.foreign(`id`)
          .references(`block`)
          .inTable(`blockSets`)
          .onDelete(`CASCADE`)
@@ -36,5 +31,5 @@ export default class Block extends db.Model {
 
   get hasTimestamps() { return true }
 
-  sets = () => this.hasMany(Set, `sets`).through(BlockSets, `id`, `block`, `set`)
+  sets = () => this.hasMany(Set, `id`).through(BlockSets, `id`, `block`, `set`)
 }

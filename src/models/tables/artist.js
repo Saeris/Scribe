@@ -1,6 +1,6 @@
 import db from '../../config/bookshelf.config'
-import Card from './card'
-import ArtistCards from '../lists/artistCards'
+import { Card } from './'
+import { ArtistCards } from '../lists'
 
 export default class Artist extends db.Model {
   // Knex Schema Definitions
@@ -19,7 +19,6 @@ export default class Artist extends db.Model {
 
     table.bigInteger(`cards`)
          .comment(`The cards associated with this artist.`)
-         .notNullable()
          .unsigned()
          .index(`artist_cards`)
 
@@ -40,12 +39,5 @@ export default class Artist extends db.Model {
 
   get hasTimestamps() { return true }
 
-  card() {
-    return this.belongsTo(Card, `artist`)
-  }
-
-  cards() {
-    return this.hasMany(Card, `card`)
-               .through(ArtistCards)
-  }
+  cards = () => this.hasMany(Card, `cards`).through(ArtistCards)
 }

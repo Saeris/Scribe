@@ -1,4 +1,5 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLBoolean, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import { GraphQLID, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import order from './utilities/order'
 import Models from '../models'
 import * as Card from './format'
 import * as Format from './format'
@@ -12,6 +13,27 @@ export const Input = new GraphQLInputObjectType({
     legal:      { type: new GraphQLNonNull(GraphQLBoolean) },
     restricted: { type: new GraphQLNonNull(GraphQLBoolean) }
   })
+})
+
+const Filter = new GraphQLInputObjectType({
+  name: `LegalityFilter`,
+  description: `Queryable fields for Legality.`,
+  fields: () => ({
+    cards:      { type: new GraphQLList(GraphQLID) },
+    format:     { type: new GraphQLList(GraphQLID) },
+    legal:      { type: GraphQLBoolean },
+    restricted: { type: GraphQLBoolean }
+  })
+})
+
+const Fields = new GraphQLEnumType({
+  name: `LegalityFields`,
+  description: `Field names for Legality.`,
+  values: {
+    format:     { value: `format` },
+    legal:      { value: `legal` },
+    restricted: { value: `restricted` }
+  }
 })
 
 export const Definition = new GraphQLObjectType({
@@ -50,20 +72,31 @@ export const Definition = new GraphQLObjectType({
 })
 
 export const Queries = {
-  getLegality: {
+  legality: {
     type: new GraphQLList(Definition),
-    description: `Returns a Legality with the given ID.`,
-    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
-    resolve: (root, { id }) => Models.Legality
-      .where(`id`, `IN`, id)
+    description: `Returns a Legality.`,
+    args: {
+      id: { type: new GraphQLList(GraphQLID) },
+      filter: {
+        type: Filter
+      },
+      limit: { type: GraphQLInt },
+      offset: { type: GraphQLInt },
+      orderBy: { type: order(`legality`, Fields) }
+    },
+    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.Legality
+      .query(qb => {
+        if (!!id) qb.whereIn(`id`, id)
+        if (!!filter) {
+          for (let field in filter) {
+            qb.whereIn(field, filter[field])
+          }
+        }
+        if (!!limit) qb.limit(limit)
+        if (!!offset) qb.offset(offset)
+        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
+      })
       .fetchAll()
-      .then(collection => collection.toJSON())
-  },
-  listLegalities: {
-    type: new GraphQLList(Definition),
-    description: `Lists all Legalities.`,
-    resolve: (root, { id }) => Models.Legality
-      .findAll()
       .then(collection => collection.toJSON())
   }
 }

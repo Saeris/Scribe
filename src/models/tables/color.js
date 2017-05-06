@@ -1,5 +1,6 @@
 import db from '../../config/bookshelf.config'
-import ColorIdentity from './colorIdentity'
+import { Icon, ColorIdentity } from './'
+import { Colors } from '../lists'
 
 export default class Color extends db.Model {
   // Knex Schema Definitions
@@ -12,16 +13,15 @@ export default class Color extends db.Model {
     table.string(`symbol`)
          .comment(`The color symbol code for this color.`)
          .notNullable()
+         .notNullable()
 
     table.bigInteger(`icon`)
          .comment(`The icon associated with the color.`)
-         .notNullable()
          .unsigned()
          .index(`color_icon`)
 
     table.bigInteger(`identity`)
          .comment(`The color identity associated with the color.`)
-         .notNullable()
          .unsigned()
          .index(`color_identity`)
 
@@ -47,4 +47,10 @@ export default class Color extends db.Model {
   get tableName() { return `color` }
 
   get hasTimestamps() { return true }
+
+  icon = () => this.hasOne(Icon, `id`, `icon`)
+
+  identity = () => this.hasOne(ColorIdentity, `id`, `identity`)
+
+  identities = () => this.belongsToMany(ColorIdentity, `id`).through(Colors, `id`, `coloridentity`, `color`)
 }

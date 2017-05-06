@@ -8,13 +8,13 @@ export default class Legalities extends db.Model {
          .comment(`The card associated with this legality.`)
          .notNullable()
          .unsigned()
-         .index(`card`)
+         .index(`legalities_card`)
 
     table.bigInteger(`legality`)
          .comment(`The legality associated with this card.`)
          .notNullable()
          .unsigned()
-         .index(`legality`)
+         .index(`legalities_legality`)
 
     // Timestamps
     table.timestamps()

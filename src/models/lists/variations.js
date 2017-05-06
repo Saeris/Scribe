@@ -8,13 +8,13 @@ export default class Variations extends db.Model {
          .comment(`The card associated with this variation.`)
          .notNullable()
          .unsigned()
-         .index(`card`)
+         .index(`variations_card`)
 
     table.bigInteger(`variation`)
          .comment(`The variation associated with this card.`)
          .notNullable()
          .unsigned()
-         .index(`variation`)
+         .index(`variations_variation`)
 
     // Timestamps
     table.timestamps()

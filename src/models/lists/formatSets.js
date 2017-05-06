@@ -8,13 +8,13 @@ export default class FormatSets extends db.Model {
          .comment(`The format associated with this set.`)
          .notNullable()
          .unsigned()
-         .index(`format`)
+         .index(`formatsets_format`)
 
     table.bigInteger(`set`)
          .comment(`The set associated with this format.`)
          .notNullable()
          .unsigned()
-         .index(`set`)
+         .index(`formatsets_set`)
 
     // Timestamps
     table.timestamps()

@@ -1,4 +1,5 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import order from './utilities/order'
 import Models from '../models'
 import * as Language from './language'
 
@@ -9,6 +10,24 @@ export const Input = new GraphQLInputObjectType({
     code:     { type: new GraphQLNonNull(GraphQLString) },
     language: { type: new GraphQLNonNull(GraphQLID) }
   })
+})
+
+const Filter = new GraphQLInputObjectType({
+  name: `LanguageCodeFilter`,
+  description: `Queryable fields for LanguageCode.`,
+  fields: () => ({
+    code:     { type: new GraphQLList(GraphQLString) },
+    language: { type: new GraphQLList(GraphQLID) }
+  })
+})
+
+const Fields = new GraphQLEnumType({
+  name: `LanguageCodeFields`,
+  description: `Field names for LanguageCode.`,
+  values: {
+    code: { value: `code` },
+    language : { value: `language` }
+  }
 })
 
 export const Definition = new GraphQLObjectType({
@@ -26,29 +45,39 @@ export const Definition = new GraphQLObjectType({
     language: {
       type: Language.Definition,
       description: `The language associated with the language code.`,
-      resolve: (root, { id }) => Models.LanguageCode
-        .forge({ id })
-        .fetch({ withRelated: [`language`] })
+      resolve: (type) => Models.LanguageCode
+        .findById(type.id, { withRelated: [`language`] })
         .then(model => model.toJSON().language)
     }
   })
 })
 
 export const Queries = {
-  getLanguageCode: {
+  languageCode: {
     type: new GraphQLList(Definition),
-    description: `Returns a Language Code with the given ID.`,
-    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
-    resolve: (root, { id }) => Models.LanguageCode
-      .where(`id`, `IN`, id)
+    description: `Returns a LanguageCode.`,
+    args: {
+      id: { type: new GraphQLList(GraphQLID) },
+      filter: {
+        type: Filter
+      },
+      limit: { type: GraphQLInt },
+      offset: { type: GraphQLInt },
+      orderBy: { type: order(`languageCode`, Fields) }
+    },
+    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.LanguageCode
+      .query(qb => {
+        if (!!id) qb.whereIn(`id`, id)
+        if (!!filter) {
+          for (let field in filter) {
+            qb.whereIn(field, filter[field])
+          }
+        }
+        if (!!limit) qb.limit(limit)
+        if (!!offset) qb.offset(offset)
+        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
+      })
       .fetchAll()
-      .then(collection => collection.toJSON())
-  },
-  listLanguageCodes: {
-    type: new GraphQLList(Definition),
-    description: `Lists all Language Codes.`,
-    resolve: (root, { id }) => Models.LanguageCode
-      .findAll()
       .then(collection => collection.toJSON())
   }
 }

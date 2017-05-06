@@ -8,13 +8,13 @@ export default class Colors extends db.Model {
          .comment(`The colorIdentity associated with the color.`)
          .notNullable()
          .unsigned()
-         .index(`coloridentity`)
+         .index(`colors_coloridentity`)
 
     table.bigInteger(`color`)
          .comment(`The color associated with the colorIdentity.`)
          .notNullable()
          .unsigned()
-         .index(`color`)
+         .index(`colors_color`)
 
     // Timestamps
     table.timestamps()

@@ -8,13 +8,13 @@ export default class Types extends db.Model {
          .comment(`The card associated with this type.`)
          .notNullable()
          .unsigned()
-         .index(`card`)
+         .index(`types_card`)
 
     table.bigInteger(`type`)
          .comment(`The type associated with this card.`)
          .notNullable()
          .unsigned()
-         .index(`type`)
+         .index(`types_type`)
 
     // Timestamps
     table.timestamps()

@@ -1,4 +1,5 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import order from './utilities/order'
 import Models from '../models'
 import * as Icon  from './icon'
 
@@ -8,8 +9,25 @@ export const Input = new GraphQLInputObjectType({
   fields: () => ({
     name:      { type: new GraphQLNonNull(GraphQLString) },
     watermark: { type: GraphQLString },
-    icons:     { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) }
+    icons:     { type: new GraphQLList(GraphQLID) }
   })
+})
+
+const Filter = new GraphQLInputObjectType({
+  name: `LayoutFilter`,
+  description: `Queryable fields for Layout.`,
+  fields: () => ({
+    name:  { type: new GraphQLList(GraphQLString) },
+    icons: { type: new GraphQLList(GraphQLID) }
+  })
+})
+
+const Fields = new GraphQLEnumType({
+  name: `LayoutFields`,
+  description: `Field names for Layout.`,
+  values: {
+    name: { value: `name` }
+  }
 })
 
 export const Definition = new GraphQLObjectType({
@@ -40,20 +58,31 @@ export const Definition = new GraphQLObjectType({
 })
 
 export const Queries = {
-  getLayout: {
+  layout: {
     type: new GraphQLList(Definition),
-    description: `Returns a Layout with the given ID.`,
-    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
-    resolve: (root, { id }) => Models.Layout
-      .where(`id`, `IN`, id)
+    description: `Returns a Layout.`,
+    args: {
+      id: { type: new GraphQLList(GraphQLID) },
+      filter: {
+        type: Filter
+      },
+      limit: { type: GraphQLInt },
+      offset: { type: GraphQLInt },
+      orderBy: { type: order(`layout`, Fields) }
+    },
+    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.Layout
+      .query(qb => {
+        if (!!id) qb.whereIn(`id`, id)
+        if (!!filter) {
+          for (let field in filter) {
+            qb.whereIn(field, filter[field])
+          }
+        }
+        if (!!limit) qb.limit(limit)
+        if (!!offset) qb.offset(offset)
+        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
+      })
       .fetchAll()
-      .then(collection => collection.toJSON())
-  },
-  listLayouts: {
-    type: new GraphQLList(Definition),
-    description: `Lists all Layouts.`,
-    resolve: (root, { id }) => Models.Layout
-      .findAll()
       .then(collection => collection.toJSON())
   }
 }

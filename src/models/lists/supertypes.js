@@ -8,13 +8,13 @@ export default class Supertypes extends db.Model {
          .comment(`The card associated with this supertype.`)
          .notNullable()
          .unsigned()
-         .index(`card`)
+         .index(`supertypes_card`)
 
     table.bigInteger(`supertype`)
          .comment(`The supertype associated with this card.`)
          .notNullable()
          .unsigned()
-         .index(`supertype`)
+         .index(`supertypes_supertype`)
 
     // Timestamps
     table.timestamps()

@@ -1,4 +1,5 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import order from './utilities/order'
 import Models from '../models'
 import * as Set from './set'
 
@@ -9,6 +10,23 @@ export const Input = new GraphQLInputObjectType({
     name: { type: new GraphQLNonNull(GraphQLString) },
     sets: { type: new GraphQLList(GraphQLID) }
   })
+})
+
+const Filter = new GraphQLInputObjectType({
+  name: `BlockFilter`,
+  description: `Queryable fields for Block.`,
+  fields: () => ({
+    name: { type: new GraphQLList(GraphQLString) },
+    sets: { type: new GraphQLList(GraphQLID) }
+  })
+})
+
+const Fields = new GraphQLEnumType({
+  name: `BlockFields`,
+  description: `Field names for Block.`,
+  values: {
+    name: { value: `name` }
+  }
 })
 
 export const Definition = new GraphQLObjectType({
@@ -26,29 +44,39 @@ export const Definition = new GraphQLObjectType({
     sets: {
       type: new GraphQLList(Set.Definition),
       description: `List of sets that are included in this block.`,
-      resolve: (root, { id }) => Models.Block
-        .forge({ id })
-        .fetch({ withRelated: [`sets`] })
+      resolve: (type) => Models.Block
+        .findById(type.id, { withRelated: [`sets`] })
         .then(model => model.toJSON().sets)
     }
   })
 })
 
 export const Queries = {
-  getBlock: {
+  block: {
     type: new GraphQLList(Definition),
-    description: `Returns a Block with the given ID.`,
-    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
-    resolve: (root, { id }) => Models.Block
-      .where(`id`, `IN`, id)
+    description: `Returns a Block.`,
+    args: {
+      id: { type: new GraphQLList(GraphQLID) },
+      filter: {
+        type: Filter
+      },
+      limit: { type: GraphQLInt },
+      offset: { type: GraphQLInt },
+      orderBy: { type: order(`block`, Fields) }
+    },
+    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.Block
+      .query(qb => {
+        if (!!id) qb.whereIn(`id`, id)
+        if (!!filter) {
+          for (let field in filter) {
+            qb.whereIn(field, filter[field])
+          }
+        }
+        if (!!limit) qb.limit(limit)
+        if (!!offset) qb.offset(offset)
+        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
+      })
       .fetchAll()
-      .then(collection => collection.toJSON())
-  },
-  listBlocks: {
-    type: new GraphQLList(Definition),
-    description: `Lists all Blocks.`,
-    resolve: (root, { id }) => Models.Block
-      .findAll()
       .then(collection => collection.toJSON())
   }
 }

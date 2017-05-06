@@ -1,4 +1,5 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import order from './utilities/order'
 import Models from '../models'
 
 export const Input = new GraphQLInputObjectType({
@@ -8,6 +9,22 @@ export const Input = new GraphQLInputObjectType({
     name:  { type: new GraphQLNonNull(GraphQLString) },
     class: { type: new GraphQLNonNull(GraphQLString) }
   })
+})
+
+const Filter = new GraphQLInputObjectType({
+  name: `RarityFilter`,
+  description: `Queryable fields for Rarity.`,
+  fields: () => ({
+    name: { type: new GraphQLList(GraphQLString) }
+  })
+})
+
+const Fields = new GraphQLEnumType({
+  name: `RarityFields`,
+  description: `Field names for Rarity.`,
+  values: {
+    name: { value: `name` }
+  }
 })
 
 export const Definition = new GraphQLObjectType({
@@ -30,20 +47,31 @@ export const Definition = new GraphQLObjectType({
 })
 
 export const Queries = {
-  getRarity: {
+  rarity: {
     type: new GraphQLList(Definition),
-    description: `Returns a Rarity with the given ID.`,
-    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
-    resolve: (root, { id }) => Models.Rarity
-      .where(`id`, `IN`, id)
+    description: `Returns a Rarity.`,
+    args: {
+      id: { type: new GraphQLList(GraphQLID) },
+      filter: {
+        type: Filter
+      },
+      limit: { type: GraphQLInt },
+      offset: { type: GraphQLInt },
+      orderBy: { type: order(`rarity`, Fields) }
+    },
+    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.Rarity
+      .query(qb => {
+        if (!!id) qb.whereIn(`id`, id)
+        if (!!filter) {
+          for (let field in filter) {
+            qb.whereIn(field, filter[field])
+          }
+        }
+        if (!!limit) qb.limit(limit)
+        if (!!offset) qb.offset(offset)
+        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
+      })
       .fetchAll()
-      .then(collection => collection.toJSON())
-  },
-  listRarities: {
-    type: new GraphQLList(Definition),
-    description: `Lists all Rarities.`,
-    resolve: (root, { id }) => Models.Rarity
-      .findAll()
       .then(collection => collection.toJSON())
   }
 }

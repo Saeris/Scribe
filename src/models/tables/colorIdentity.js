@@ -1,5 +1,6 @@
 import db from '../../config/bookshelf.config'
-import Color from './color'
+import { Color } from './'
+import { Colors } from '../lists'
 
 export default class ColorIdentity extends db.Model {
   // Knex Schema Definitions
@@ -16,12 +17,6 @@ export default class ColorIdentity extends db.Model {
     table.string(`alias`)
          .comment(`The alias of the color identity. Examples: Bant, Jeskai`)
 
-    table.bigInteger(`colors`)
-         .comment(`List of colors included in this color identity.`)
-         .notNullable()
-         .unsigned()
-         .index(`colorIdentity_colors`)
-
     table.boolean(`multicolored`)
          .comment(`True if the color identity has more than one color.`)
          .notNullable()
@@ -35,7 +30,7 @@ export default class ColorIdentity extends db.Model {
   }
 
   static foreignKeys(table) {
-    table.foreign(`colors`)
+    table.foreign(`id`)
          .references(`coloridentity`)
          .inTable(`colors`)
          .onDelete(`CASCADE`)
@@ -46,4 +41,6 @@ export default class ColorIdentity extends db.Model {
   get tableName() { return `colorIdentity` }
 
   get hasTimestamps() { return true }
+
+  colors = () => this.hasMany(Color, `id`).through(Colors, `id`, `coloridentity`, `color`)
 }

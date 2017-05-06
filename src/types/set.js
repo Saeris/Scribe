@@ -1,5 +1,6 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
 import { GraphQLDate } from 'graphql-iso-date'
+import order from './utilities/order'
 import Models from '../models'
 import * as Block from './block'
 import * as SetType from './setType'
@@ -19,6 +20,32 @@ export const Input = new GraphQLInputObjectType({
     releaseDate: { type: new GraphQLNonNull(GraphQLDate) },
     booster:     { type: GraphQLID }
   })
+})
+
+const Filter = new GraphQLInputObjectType({
+  name: `SetFilter`,
+  description: `Queryable fields for Set.`,
+  fields: () => ({
+    name:        { type: new GraphQLList(GraphQLString) },
+    code:        { type: new GraphQLList(GraphQLString) },
+    block:       { type: new GraphQLList(GraphQLID) },
+    type:        { type: new GraphQLList(GraphQLID) },
+    border:      { type: new GraphQLList(GraphQLString) },
+    releaseDate: { type: new GraphQLList(GraphQLDate) }
+  })
+})
+
+const Fields = new GraphQLEnumType({
+  name: `SetFields`,
+  description: `Field names for Set.`,
+  values: {
+    name:        { value: `name` },
+    code:        { value: `code` },
+    block:       { value: `block` },
+    type:        { value: `type` },
+    border:      { value: `border` },
+    releaseDate: { value: `releaseDate` }
+  }
 })
 
 export const Definition = new GraphQLObjectType({
@@ -77,20 +104,31 @@ export const Definition = new GraphQLObjectType({
 })
 
 export const Queries = {
-  getSet: {
+  set: {
     type: new GraphQLList(Definition),
-    description: `Returns a Set with the given ID.`,
-    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
-    resolve: (root, { id }) => Models.Set
-      .where(`id`, `IN`, id)
+    description: `Returns a Set.`,
+    args: {
+      id: { type: new GraphQLList(GraphQLID) },
+      filter: {
+        type: Filter
+      },
+      limit: { type: GraphQLInt },
+      offset: { type: GraphQLInt },
+      orderBy: { type: order(`set`, Fields) }
+    },
+    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.Set
+      .query(qb => {
+        if (!!id) qb.whereIn(`id`, id)
+        if (!!filter) {
+          for (let field in filter) {
+            qb.whereIn(field, filter[field])
+          }
+        }
+        if (!!limit) qb.limit(limit)
+        if (!!offset) qb.offset(offset)
+        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
+      })
       .fetchAll()
-      .then(collection => collection.toJSON())
-  },
-  listSets: {
-    type: new GraphQLList(Definition),
-    description: `Lists all Sets.`,
-    resolve: (root, { id }) => Models.Set
-      .findAll()
       .then(collection => collection.toJSON())
   }
 }
@@ -102,7 +140,13 @@ export const Mutations = {
     args: { input: { type: Input } },
     resolve: (root, { input }) => Models.Set
       .findOrCreate(input)
-      .then(model => model.toJSON())
+      .then(model => {
+        let set = model.toJSON()
+
+        if (!!set.block) Models.BlockSets.findOrCreate({ block: set.block, set: set.id })
+
+        return set
+      })
   },
   updateSet: {
     type: Definition,
@@ -110,7 +154,13 @@ export const Mutations = {
     args: { input: { type: Input } },
     resolve: (root, { input }) => Models.Set
       .upsert(input, input)
-      .then(model => model.toJSON())
+      .then(model => {
+        let set = model.toJSON()
+
+        if (!!set.block) Models.BlockSets.findOrCreate({ block: set.block, set: set.id })
+
+        return set
+      })
   },
   deleteSet: {
     type: Definition,

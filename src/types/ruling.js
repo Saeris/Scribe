@@ -1,4 +1,6 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import { GraphQLDate } from 'graphql-iso-date'
+import order from './utilities/order'
 import Models from '../models'
 import * as Card from './card'
 import * as LanguageCode from './languageCode'
@@ -8,10 +10,30 @@ export const Input = new GraphQLInputObjectType({
   description: `Required fields for a new Ruling object`,
   fields: () => ({
     text:     { type: new GraphQLNonNull(GraphQLString) },
-    date:     { type: new GraphQLNonNull(GraphQLString) },
+    date:     { type: new GraphQLNonNull(GraphQLDate) },
     language: { type: new GraphQLNonNull(GraphQLID) },
     cards:    { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) }
   })
+})
+
+const Filter = new GraphQLInputObjectType({
+  name: `RulingFilter`,
+  description: `Queryable fields for Ruling.`,
+  fields: () => ({
+    text:     { type: GraphQLString },
+    date:     { type: new GraphQLList(GraphQLDate) },
+    language: { type: new GraphQLList(GraphQLID) },
+    cards:    { type: new GraphQLList(GraphQLID) }
+  })
+})
+
+const Fields = new GraphQLEnumType({
+  name: `RulingFields`,
+  description: `Field names for Ruling.`,
+  values: {
+    date:     { value: `date` },
+    language: { value: `language` }
+  }
 })
 
 export const Definition = new GraphQLObjectType({
@@ -27,7 +49,7 @@ export const Definition = new GraphQLObjectType({
       description: `The text of the ruling.`
     },
     date: {
-      type: GraphQLString,
+      type: GraphQLDate,
       description: `The date this ruling was issued.`
     },
     language: {
@@ -50,20 +72,31 @@ export const Definition = new GraphQLObjectType({
 })
 
 export const Queries = {
-  getRuling: {
+  ruling: {
     type: new GraphQLList(Definition),
-    description: `Returns a Ruling with the given ID.`,
-    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
-    resolve: (root, { id }) => Models.Ruling
-      .where(`id`, `IN`, id)
+    description: `Returns a Ruling.`,
+    args: {
+      id: { type: new GraphQLList(GraphQLID) },
+      filter: {
+        type: Filter
+      },
+      limit: { type: GraphQLInt },
+      offset: { type: GraphQLInt },
+      orderBy: { type: order(`ruling`, Fields) }
+    },
+    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.Ruling
+      .query(qb => {
+        if (!!id) qb.whereIn(`id`, id)
+        if (!!filter) {
+          for (let field in filter) {
+            qb.whereIn(field, filter[field])
+          }
+        }
+        if (!!limit) qb.limit(limit)
+        if (!!offset) qb.offset(offset)
+        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
+      })
       .fetchAll()
-      .then(collection => collection.toJSON())
-  },
-  listRulings: {
-    type: new GraphQLList(Definition),
-    description: `Lists all Rulings.`,
-    resolve: (root, { id }) => Models.Ruling
-      .findAll()
       .then(collection => collection.toJSON())
   }
 }

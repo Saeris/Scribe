@@ -1,4 +1,5 @@
-import { GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import order from './utilities/order'
 import Models from '../models'
 import * as Card from './card'
 
@@ -7,9 +8,26 @@ export const Input = new GraphQLInputObjectType({
   description: `Required fields for a new Ability Type object`,
   fields: () => ({
     name:        { type: new GraphQLNonNull(GraphQLString) },
-    description: { type: new GraphQLNonNull(GraphQLString) },
+    description: { type: GraphQLString },
     cards:       { type: new GraphQLList(GraphQLID) }
   })
+})
+
+const Filter = new GraphQLInputObjectType({
+  name: `AbilityTypeFilter`,
+  description: `Queryable fields for AbilityType.`,
+  fields: () => ({
+    name:  { type: new GraphQLList(GraphQLString) },
+    cards: { type: new GraphQLList(GraphQLID) }
+  })
+})
+
+const Fields = new GraphQLEnumType({
+  name: `AbilityTypeFields`,
+  description: `Field names for AbilityType.`,
+  values: {
+    name: { value: `name` }
+  }
 })
 
 export const Definition = new GraphQLObjectType({
@@ -40,20 +58,31 @@ export const Definition = new GraphQLObjectType({
 })
 
 export const Queries = {
-  getAbilityType: {
+  abilityType: {
     type: new GraphQLList(Definition),
-    description: `Returns an Ability Type with the given ID.`,
-    args: { id: { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) } },
-    resolve: (root, { id }) => Models.AbilityType
-      .where(`id`, `IN`, id)
+    description: `Returns a AbilityType.`,
+    args: {
+      id: { type: new GraphQLList(GraphQLID) },
+      filter: {
+        type: Filter
+      },
+      limit: { type: GraphQLInt },
+      offset: { type: GraphQLInt },
+      orderBy: { type: order(`abilityType`, Fields) }
+    },
+    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.AbilityType
+      .query(qb => {
+        if (!!id) qb.whereIn(`id`, id)
+        if (!!filter) {
+          for (let field in filter) {
+            qb.whereIn(field, filter[field])
+          }
+        }
+        if (!!limit) qb.limit(limit)
+        if (!!offset) qb.offset(offset)
+        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
+      })
       .fetchAll()
-      .then(collection => collection.toJSON())
-  },
-  listAbilityTypes: {
-    type: new GraphQLList(Definition),
-    description: `Lists all Ability Types.`,
-    resolve: (root, { id }) => Models.AbilityType
-      .findAll()
       .then(collection => collection.toJSON())
   }
 }

@@ -1,7 +1,6 @@
 import db from '../../config/bookshelf.config'
-import Card from './card'
-import Categories from '../lists/categories'
-import CategoryCards from '../lists/categoryCards'
+import { Card } from './'
+import { CategoryCards } from '../lists'
 
 export default class Category extends db.Model {
   // Knex Schema Definitions
@@ -41,13 +40,5 @@ export default class Category extends db.Model {
 
   get hasTimestamps() { return true }
 
-  card() {
-    return this.belongsTo(Card, `categories`)
-               .through(Categories, `category`)
-  }
-
-  cards() {
-    return this.hasMany(Card)
-               .through(CategoryCards, `category`)
-  }
+  cards = () => this.hasMany(Card).through(CategoryCards, `category`)
 }

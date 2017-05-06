@@ -11,3 +11,4 @@ npm-debug.log*
 /release
 /test/coverage
 /src/scribe.sqlite
+/src/images

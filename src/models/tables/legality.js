@@ -1,5 +1,5 @@
 import db from '../../config/bookshelf.config'
-import Format from './format'
+import { Format, Card } from './'
 
 export default class Legality extends db.Model {
   // Knex Schema Definitions
@@ -14,7 +14,7 @@ export default class Legality extends db.Model {
          .comment(`The format associated with this legality.`)
          .notNullable()
          .unsigned()
-         .index(`format`)
+         .index(`legality_format`)
 
     table.boolean(`legal`)
          .comment(`True if the card is legal in the associated format.`)
@@ -28,7 +28,7 @@ export default class Legality extends db.Model {
          .comment(`List of cards that have this legality ruling.`)
          .notNullable()
          .unsigned()
-         .index(`cards`)
+         .index(`legality_cards`)
 
     // Timestamps
     table.timestamps()
@@ -52,4 +52,8 @@ export default class Legality extends db.Model {
   get tableName() { return `legality` }
 
   get hasTimestamps() { return true }
+
+  format = () => this.hasOne(Format, `format`)
+
+  cards = () => this.belongsToMany(Card, `cards`)
 }
