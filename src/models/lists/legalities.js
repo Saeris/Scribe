@@ -23,14 +23,6 @@ export default class Legalities extends db.Model {
     table.primary([`card`, `legality`])
   }
 
-  static foreignKeys(table) {
-    table.foreign(`legality`)
-         .references(`id`)
-         .inTable(`legality`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-  }
-
   // Bookshelf Relation Definitions
   get tableName() { return `legalities` }
 

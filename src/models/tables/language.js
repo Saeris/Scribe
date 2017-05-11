@@ -7,6 +7,7 @@ export default class Language extends db.Model {
     // Fields
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     table.string(`name`)
@@ -21,14 +22,6 @@ export default class Language extends db.Model {
 
     // Timestamps
     table.timestamps()
-  }
-
-  static foreignKeys(table) {
-    table.foreign(`code`)
-         .references(`id`)
-         .inTable(`languagecode`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
   }
 
   // Bookshelf Relation Definitions

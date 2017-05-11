@@ -8,6 +8,7 @@ export default class AbilityType extends db.Model {
     // Fields
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     table.string(`name`)
@@ -25,14 +26,6 @@ export default class AbilityType extends db.Model {
 
     // Timestamps
     table.timestamps()
-  }
-
-  static foreignKeys(table) {
-    table.foreign(`cards`)
-         .references(`abilitytype`)
-         .inTable(`abilitytypecards`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
   }
 
   // Bookshelf Relation Definitions

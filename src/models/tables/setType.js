@@ -6,6 +6,7 @@ export default class SetType extends db.Model {
     // Fields
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     table.string(`name`)
@@ -17,10 +18,6 @@ export default class SetType extends db.Model {
 
     // Timestamps
     table.timestamps()
-  }
-
-  static foreignKeys(table) {
-
   }
 
   // Bookshelf Relation Definitions

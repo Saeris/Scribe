@@ -23,14 +23,6 @@ export default class AbilityTypes extends db.Model {
     table.primary([`card`, `abilitytype`])
   }
 
-  static foreignKeys(table) {
-    table.foreign(`abilitytype`)
-         .references(`id`)
-         .inTable(`abilitytype`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-  }
-
   // Bookshelf Relation Definitions
   get tableName() { return `abilitytypes` }
 

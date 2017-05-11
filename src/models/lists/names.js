@@ -23,14 +23,6 @@ export default class Names extends db.Model {
     table.primary([`card`, `name`])
   }
 
-  static foreignKeys(table) {
-    table.foreign(`name`)
-         .references(`id`)
-         .inTable(`name`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-  }
-
   // Bookshelf Relation Definitions
   get tableName() { return `names` }
 

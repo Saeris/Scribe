@@ -23,14 +23,6 @@ export default class Supertypes extends db.Model {
     table.primary([`card`, `supertype`])
   }
 
-  static foreignKeys(table) {
-    table.foreign(`supertype`)
-         .references(`id`)
-         .inTable(`supertype`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-  }
-
   // Bookshelf Relation Definitions
   get tableName() { return `supertypes` }
 

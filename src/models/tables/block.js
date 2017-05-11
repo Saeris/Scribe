@@ -8,6 +8,7 @@ export default class Block extends db.Model {
     // Fields
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     table.string(`name`)
@@ -16,14 +17,6 @@ export default class Block extends db.Model {
 
     // Timestamps
     table.timestamps()
-  }
-
-  static foreignKeys(table) {
-    table.foreign(`id`)
-         .references(`block`)
-         .inTable(`blockSets`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
   }
 
   // Bookshelf Relation Definitions

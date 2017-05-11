@@ -9,6 +9,7 @@ export default class Set extends db.Model {
     // Fields
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     table.string(`name`)
@@ -51,32 +52,6 @@ export default class Set extends db.Model {
 
     // Timestamps
     table.timestamps()
-  }
-
-  static foreignKeys(table) {
-    table.foreign(`block`)
-         .references(`id`)
-         .inTable(`block`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`type`)
-         .references(`id`)
-         .inTable(`settype`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`icon`)
-         .references(`id`)
-         .inTable(`icon`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`booster`)
-         .references(`id`)
-         .inTable(`booster`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
   }
 
   // Bookshelf Relation Definitions

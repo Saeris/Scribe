@@ -9,6 +9,7 @@ class Config {
 
   // HTTP Server Settings
   http    = {
+    host: `127.0.0.1`,
     port: process.env.HTTP || 1337,
     routes: {
       cors: true
@@ -17,6 +18,7 @@ class Config {
 
   // HTTPS Server Settings
   https   = {
+    host: `127.0.0.1`,
     port: process.env.HTTPS || 8080,
     routes: {
       cors: true
@@ -85,9 +87,6 @@ class Config {
     migrations: {
       directory: `./src/models`,
       tableName: `migrations`
-    },
-    seeds: {
-      directory: `./src/seeds`
     }
   }
 }

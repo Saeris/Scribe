@@ -23,14 +23,6 @@ export default class CardColors extends db.Model {
     table.primary([`card`, `color`])
   }
 
-  static foreignKeys(table) {
-    table.foreign(`color`)
-         .references(`id`)
-         .inTable(`color`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-  }
-
   // Bookshelf Relation Definitions
   get tableName() { return `cardColors` }
 

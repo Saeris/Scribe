@@ -100,7 +100,7 @@ class Set {
     this.type         = data.type
     this.icon         = data.icon
     this.border       = data.border
-    this.releaseDate  = data.releaseDate
+    this.releaseDate  = moment(data.releaseDate).format(`YYYY-MM-DD`)
     this.booster      = null
   }
 }

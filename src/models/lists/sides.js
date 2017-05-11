@@ -23,14 +23,6 @@ export default class Sides extends db.Model {
     table.primary([`card`, `side`])
   }
 
-  static foreignKeys(table) {
-    table.foreign(`side`)
-         .references(`id`)
-         .inTable(`card`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-  }
-
   // Bookshelf Relation Definitions
   get tableName() { return `sides` }
 

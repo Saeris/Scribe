@@ -23,14 +23,6 @@ export default class Icons extends db.Model {
     table.primary([`layout`, `icon`])
   }
 
-  static foreignKeys(table) {
-    table.foreign(`icon`)
-         .references(`id`)
-         .inTable(`icon`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-  }
-
   // Bookshelf Relation Definitions
   get tableName() { return `icons` }
 

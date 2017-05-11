@@ -23,14 +23,6 @@ export default class Rulings extends db.Model {
     table.primary([`card`, `ruling`])
   }
 
-  static foreignKeys(table) {
-    table.foreign(`ruling`)
-         .references(`id`)
-         .inTable(`ruling`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-  }
-
   // Bookshelf Relation Definitions
   get tableName() { return `rulings` }
 

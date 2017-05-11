@@ -8,6 +8,7 @@ export default class Color extends db.Model {
     // Fields
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     table.string(`symbol`)
@@ -18,29 +19,21 @@ export default class Color extends db.Model {
     table.bigInteger(`icon`)
          .comment(`The icon associated with the color.`)
          .unsigned()
-         .index(`color_icon`)
-
-    table.bigInteger(`identity`)
-         .comment(`The color identity associated with the color.`)
-         .unsigned()
-         .index(`color_identity`)
-
-    // Timestamps
-    table.timestamps()
-  }
-
-  static foreignKeys(table) {
-    table.foreign(`icon`)
          .references(`id`)
          .inTable(`icon`)
          .onDelete(`NO ACTION`)
          .onUpdate(`NO ACTION`)
 
-    table.foreign(`identity`)
+    table.bigInteger(`identity`)
+         .comment(`The color identity associated with the color.`)
+         .unsigned()
          .references(`id`)
          .inTable(`coloridentity`)
          .onDelete(`NO ACTION`)
          .onUpdate(`NO ACTION`)
+
+    // Timestamps
+    table.timestamps()
   }
 
   // Bookshelf Relation Definitions

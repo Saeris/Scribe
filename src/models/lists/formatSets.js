@@ -23,14 +23,6 @@ export default class FormatSets extends db.Model {
     table.primary([`format`, `set`])
   }
 
-  static foreignKeys(table) {
-    table.foreign(`set`)
-         .references(`id`)
-         .inTable(`set`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-  }
-
   // Bookshelf Relation Definitions
   get tableName() { return `formatsets` }
 

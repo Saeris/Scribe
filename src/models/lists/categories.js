@@ -23,14 +23,6 @@ export default class Categories extends db.Model {
     table.primary([`card`, `category`])
   }
 
-  static foreignKeys(table) {
-    table.foreign(`category`)
-         .references(`id`)
-         .inTable(`category`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-  }
-
   // Bookshelf Relation Definitions
   get tableName() { return `categories` }
 

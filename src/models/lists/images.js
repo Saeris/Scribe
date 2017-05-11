@@ -16,19 +16,17 @@ export default class Images extends db.Model {
          .unsigned()
          .index(`images_image`)
 
+    table.bigInteger(`artist`)
+         .comment(`The artist associated with this image.`)
+         .notNullable()
+         .unsigned()
+         .index(`images_artist`)
+
     // Timestamps
     table.timestamps()
 
     // Keys
-    table.primary([`card`, `image`])
-  }
-
-  static foreignKeys(table) {
-    table.foreign(`image`)
-         .references(`id`)
-         .inTable(`image`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
+    table.primary([`card`, `image`, `artist`])
   }
 
   // Bookshelf Relation Definitions

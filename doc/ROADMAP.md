@@ -4,16 +4,16 @@
 
 ## v0.2.0
 
-- [ ] Refactor Types/Models to condense data schema into one place per table.
+- [ ] ~~Refactor Types/Models to condense data schema into one place per table.~~
 - [ ] Write basic project documentation (setup, getting started, etc) ie: [README](../README.md)
 - [ ] Wire-up Hapi Routes
 - [X] Troubleshoot remaining issues with SQLite Migrations / Knex schema
 - [ ] Add remaining Bookshelf Model Relations
-- [ ] Add pagination query arguments for lists
+- [X] Add pagination query arguments for lists
 
 ## v0.3.0
 
-- [ ] Add remaining mutations to enable populating the database via the API
+- [X] Add remaining mutations to enable populating the database via the API
 - [ ] Add private tables / type definitions
   - [ ] Tables: Account, Collection, Binders, Decks, OwnedCards, misc
   - [ ] Type definitions/queries/mutations for above

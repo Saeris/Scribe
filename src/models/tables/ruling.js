@@ -7,6 +7,7 @@ export default class Ruling extends db.Model {
     // Indexes
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     // Fields
@@ -32,20 +33,6 @@ export default class Ruling extends db.Model {
 
     // Timestamps
     table.timestamps()
-  }
-
-  static foreignKeys(table) {
-    table.foreign(`language`)
-         .references(`id`)
-         .inTable(`languagecode`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`cards`)
-         .references(`ruling`)
-         .inTable(`rulingcards`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
   }
 
   // Bookshelf Relation Definitions

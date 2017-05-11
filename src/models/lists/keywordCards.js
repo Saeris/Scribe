@@ -23,14 +23,6 @@ export default class KeywordCards extends db.Model {
     table.primary([`keyword`, `card`])
   }
 
-  static foreignKeys(table) {
-    table.foreign(`card`)
-         .references(`id`)
-         .inTable(`card`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-  }
-
   // Bookshelf Relation Definitions
   get tableName() { return `keywordcards` }
 

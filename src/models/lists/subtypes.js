@@ -23,14 +23,6 @@ export default class Subtypes extends db.Model {
     table.primary([`card`, `subtype`])
   }
 
-  static foreignKeys(table) {
-    table.foreign(`subtype`)
-         .references(`id`)
-         .inTable(`subtype`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-  }
-
   // Bookshelf Relation Definitions
   get tableName() { return `subtypes` }
 

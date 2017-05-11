@@ -7,6 +7,7 @@ export default class Keyword extends db.Model {
     // Fields
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     table.string(`name`)
@@ -14,7 +15,7 @@ export default class Keyword extends db.Model {
          .notNullable()
 
     table.text(`reminderText`)
-         .comment(`A short description of the keyword ability's rules.`)
+         .comment(`A short description of the keyword rules.`)
 
     table.bigInteger(`languageCode`)
          .comment(`The language code the reminder text of keyword is localized in.`)
@@ -30,14 +31,6 @@ export default class Keyword extends db.Model {
 
     // Timestamps
     table.timestamps()
-  }
-
-  static foreignKeys(table) {
-    table.foreign(`cards`)
-         .references(`keyword`)
-         .inTable(`keywordcards`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
   }
 
   // Bookshelf Relation Definitions

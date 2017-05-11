@@ -7,6 +7,7 @@ export default class Name extends db.Model {
     // Fields
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     table.string(`name`)
@@ -26,20 +27,6 @@ export default class Name extends db.Model {
 
     // Timestamps
     table.timestamps()
-  }
-
-  static foreignKeys(table) {
-    table.foreign(`language`)
-         .references(`id`)
-         .inTable(`languagecode`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`cards`)
-         .references(`name`)
-         .inTable(`namecards`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
   }
 
   // Bookshelf Relation Definitions

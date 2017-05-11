@@ -9,11 +9,11 @@ const duration = ms => moment.utc(ms).format(`HH:mm:ss.SSS`)
 const getColor = async input => await client
   .query({
     query: gql`query getColor($input: [String]) {
-      color(filter: { symbol: $input }) {
+      color(filter: {symbol: $input}) {
         id
       }
     }`,
-    varaibles: { input }
+    variables: { input }
   })
   .then(res => res.data.color.map(color => color.id))
   .catch(err => console.log(`Failed to get Color.`, input,  err))
@@ -168,11 +168,11 @@ export async function insertColors() {
     ]
 
     for (let { name, alias, colorList, multicolored, devoid } of colorIdentities) {
-      console.info(`${prefix}Adding color identity ${chalk.green(alias)} to database...`)
+      console.info(`${prefix}Adding color identity ${chalk.green(alias)}`)
       await updateColorIdentity({ name, alias, colors: colorList, multicolored, devoid })
     }
     for (let { symbol, className, identity } of colors) {
-      console.info(`${prefix}Adding color ${chalk.green(symbol)} to database...`)
+      console.info(`${prefix}Adding color ${chalk.green(symbol)}`)
       const icon = await updateColorIcon({ name: symbol, class: className })
       await updateColor({ symbol, icon, identity })
     }

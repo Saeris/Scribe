@@ -23,14 +23,6 @@ export default class Printings extends db.Model {
     table.primary([`card`, `set`])
   }
 
-  static foreignKeys(table) {
-    table.foreign(`set`)
-         .references(`id`)
-         .inTable(`set`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-  }
-
   // Bookshelf Relation Definitions
   get tableName() { return `printings` }
 

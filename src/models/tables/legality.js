@@ -7,6 +7,7 @@ export default class Legality extends db.Model {
     // Indexes
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     // Fields
@@ -32,20 +33,6 @@ export default class Legality extends db.Model {
 
     // Timestamps
     table.timestamps()
-  }
-
-  static foreignKeys(table) {
-    table.foreign(`format`)
-         .references(`id`)
-         .inTable(`format`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`cards`)
-         .references(`legality`)
-         .inTable(`legalitycards`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
   }
 
   // Bookshelf Relation Definitions

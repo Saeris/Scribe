@@ -23,14 +23,6 @@ export default class Variations extends db.Model {
     table.primary([`card`, `variation`])
   }
 
-  static foreignKeys(table) {
-    table.foreign(`variation`)
-         .references(`id`)
-         .inTable(`card`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-  }
-
   // Bookshelf Relation Definitions
   get tableName() { return `variations` }
 

@@ -14,31 +14,31 @@ const BaseUrl = `https://api.magicthegathering.io/v1`
 
 const duration = ms => moment.utc(ms).format(`HH:mm:ss.SSS`)
 
-const updateCard = async (fields) => await client
+const updateCard = async input => await client
   .mutate({
     mutation: gql`mutation updateCard($input: CardInput) {
       updateCard(input: $input) {
         id
       }
     }`,
-    variables: { input: { ...fields } }
+    variables: { input }
   })
   .then(res => res.data.updateCard.id)
-  .catch(err => console.log(`Failed to update Card.`, err))
+  .catch(err => console.log(`Failed to update Card.`, input, err))
 
-const updateName = async (name, language) => await client
+const updateName = async input => await client
   .mutate({
     mutation: gql`mutation updateName($input: NameInput) {
       updateName(input: $input) {
         id
       }
     }`,
-    variables: { input: { name, language } }
+    variables: { input: input }
   })
   .then(res => res.data.updateName.id)
-  .catch(err => console.log(`Failed to update Name.`, err))
+  .catch(err => console.log(`Failed to update Name.`, input, err))
 
-const fetchImage = async (url, set, num, language) => {
+const fetchImage = (url, set, num, language) => {
   const dir = `./src/images/sets/${set}`
   const image = `${dir}/${set}_${num}_${language}.jpg`
 
@@ -50,53 +50,53 @@ const fetchImage = async (url, set, num, language) => {
   return image
 }
 
-const updateImage = async (url, multiverseid, language) => await client
+const updateImage = async input => await client
   .mutate({
     mutation: gql`mutation updateImage($input: ImageInput) {
       updateImage(input: $input) {
         id
       }
     }`,
-    variables: { input: { url, multiverseid, language } }
+    variables: { input }
   })
   .then(res => res.data.updateImage.id)
-  .catch(err => console.log(`Failed to update Image.`, err))
+  .catch(err => console.log(`Failed to update Image.`, input, err))
 
-const updateArtist = async name => await client
+const updateArtist = async input => await client
   .mutate({
     mutation: gql`mutation updateArtist($input: ArtistInput) {
       updateArtist(input: $input) {
         id
       }
     }`,
-    variables: { input: { name } }
+    variables: { input }
   })
   .then(res => res.data.updateArtist.id)
-  .catch(err => console.log(`Failed to update Artist.`, err))
+  .catch(err => console.log(`Failed to update Artist.`, input, err))
 
-const updateLayout = async name => await client
+const updateLayout = async input => await client
   .mutate({
     mutation: gql`mutation updateLayout($input: LayoutInput) {
       updateLayout(input: $input) {
         id
       }
     }`,
-    variables: { input: { name } }
+    variables: { input }
   })
   .then(res => res.data.updateLayout.id)
-  .catch(err => console.log(`Failed to update Layout.`, err))
+  .catch(err => console.log(`Failed to update Layout.`, input, err))
 
-const updateRarity = async name => await client
+const updateRarity = async input => await client
   .mutate({
     mutation: gql`mutation updateRarity($input: RarityInput) {
       updateRarity(input: $input) {
         id
       }
     }`,
-    variables: { input: { name: name, class: `ss-${name.toLowerCase()}` } }
+    variables: { input }
   })
   .then(res => res.data.updateRarity.id)
-  .catch(err => console.log(`Failed to update Rarity.`, err))
+  .catch(err => console.log(`Failed to update Rarity.`, input, err))
 
 export { updateCard, updateName, updateImage, updateArtist, updateLayout, updateRarity }
 
@@ -144,16 +144,16 @@ export async function insertCards(cards, set) {
       let srcImages = []
 
       if (!!card.multiverseid) {
-        names.push(await updateName(card.name, 1))
+        names.push(await updateName({ name: card.name, language: 1 }))
         srcImages.push({ url: card.imageUrl, multiverseid: card.multiverseid, code: `en-US`, codeID: 1 })
       }
       if (!!card.foreignNames) {
         for (let name of card.foreignNames) {
           if (!!name.multiverseid) {
-            let languageCode = await getLanguageCode(name.language)
+            let languageCode = await getLanguageCode([name.language])
             console.log(`Adding name: ${name.name}, language: ${name.language}, code: ${languageCode.id}`)
-            names.push(await updateName(name.name, languageCode.id))
-            srcImages.push({ url: card.imageUrl, multiverseid: card.multiverseid, code: languageCode.code, codeID: languageCode.id })
+            names.push(await updateName({ name: name.name, language: languageCode.id }))
+            srcImages.push({ url: name.imageUrl, multiverseid: name.multiverseid, code: languageCode.code, codeID: languageCode.id })
           }
         }
       }
@@ -161,37 +161,41 @@ export async function insertCards(cards, set) {
 
       let images = []
       for (let image of srcImages) {
-        images.push(await updateImage(await fetchImage(image.url, set.code, card.number, image.code), image.multiverseid, image.codeID))
+        images.push(await updateImage({
+          url: fetchImage(image.url, set.code, card.number, image.code),
+          multiverseid: image.multiverseid,
+          language: image.codeID
+        }))
       }
       card.images = await images
 
-      card.layout = await updateLayout(card.layout)
+      card.layout = await updateLayout({ name:card.layout })
 
       let colors = []
-      if (!!card.colorIdentity) colors = card.colorIdentity.map(color => `"{${color}}"`)
+      if (!!card.colorIdentity) colors = card.colorIdentity.map(color => `{${color}}`)
 
       let colorIdentity = ``
       if (!!card.colorIdentity && !!card.colors) {
-        for (let identity of card.colors) colorIdentity = `${colorIdentity}/${identity}`.substring(1)
+        for (let identity of card.colors) colorIdentity = `${colorIdentity}/${identity}`
       }
 
       card.colors = await getColor(colors)
-      card.colorIdentity = await getColorIdentity(colorIdentity)
+      card.colorIdentity = (colorIdentity !== ``) ? await getColorIdentity([colorIdentity.substring(1)]) : 6
 
       let supertypes = []
-      if (!!card.supertypes) supertypes = card.supertypes.map(supertype => `"${supertype}"`)
+      if (!!card.supertypes) supertypes = card.supertypes.map(supertype => `${supertype}`)
       card.supertypes = await getSupertype(supertypes)
 
       let types = []
-      if (!!card.types) types = card.types.map(type => `"${type}"`)
+      if (!!card.types) types = card.types.map(type => `${type}`)
       card.types = await getType(types)
 
       let subtypes = []
-      if (!!card.subtypes) subtypes = card.subtypes.map(subtype => `"${subtype}"`)
+      if (!!card.subtypes) subtypes = card.subtypes.map(subtype => `${subtype}`)
       card.subtypes = await getSubtype(subtypes)
 
-      card.rarity = await updateRarity(card.rarity)
-      card.artist = await updateArtist(card.artist)
+      card.rarity = await updateRarity({ name: card.rarity, class: `ss-${card.rarity.toLowerCase()}` })
+      card.artist = await updateArtist({ name: card.artist })
 
       results.push(await updateCard(new Card(card)))
     }
@@ -239,7 +243,7 @@ class Card {
     this.rulings         = !!data.rulings ? data.rulings : null
     this.artist          = data.artist
     this.number          = data.number
-    this.releaseDate     = data.releaseDate
+    this.releaseDate     = moment(data.releaseDate).format(`YYYY-MM-DD`)
     this.printings       = !!data.printings ? data.printings : null
     this.timeshifted     = !!data.timeshifted ? data.timeshifted : false
     this.starter         = !!data.starter ? data.starter : false

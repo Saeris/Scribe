@@ -23,14 +23,6 @@ export default class BlockSets extends db.Model {
     table.primary([`block`, `set`])
   }
 
-  static foreignKeys(table) {
-    table.foreign(`set`)
-         .references(`id`)
-         .inTable(`set`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-  }
-
   // Bookshelf Relation Definitions
   get tableName() { return `blocksets` }
 

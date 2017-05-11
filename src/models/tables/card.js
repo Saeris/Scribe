@@ -107,122 +107,6 @@ export default class Card extends db.Model {
     table.timestamps()
   }
 
-  static foreignKeys(table) {
-    table.foreign(`id`)
-         .references(`card`)
-         .inTable(`names`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`id`)
-         .references(`id`)
-         .inTable(`image`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`id`)
-         .references(`card`)
-         .inTable(`sides`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`id`)
-         .references(`card`)
-         .inTable(`variations`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`layout`)
-         .references(`id`)
-         .inTable(`layout`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`id`)
-         .references(`card`)
-         .inTable(`cardColors`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`colorIdentity`)
-         .references(`id`)
-         .inTable(`coloridentity`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`id`)
-         .references(`card`)
-         .inTable(`supertypes`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`id`)
-         .references(`card`)
-         .inTable(`types`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`id`)
-         .references(`card`)
-         .inTable(`subtypes`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`rarity`)
-         .references(`id`)
-         .inTable(`rarity`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`set`)
-         .references(`id`)
-         .inTable(`set`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`id`)
-         .references(`card`)
-         .inTable(`categories`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`id`)
-         .references(`card`)
-         .inTable(`abilitytypes`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`id`)
-         .references(`card`)
-         .inTable(`keywords`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`id`)
-         .references(`card`)
-         .inTable(`legalities`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`id`)
-         .references(`card`)
-         .inTable(`rulings`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`artist`)
-         .references(`id`)
-         .inTable(`artist`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-
-    table.foreign(`id`)
-         .references(`card`)
-         .inTable(`printings`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-  }
-
   // Bookshelf Relation Definitions
   get tableName() { return `card` }
 
@@ -258,11 +142,11 @@ export default class Card extends db.Model {
 
   rulings = () => this.hasMany(Ruling, `id`).through(Rulings, `id`, `card`, `ruling`)
 
-  set = () => this.hasOne(Set, `id`, `set`)
+  set = () => this.belongsTo(Set, `set`, `id`)
 
   printings = () => this.hasMany(Set, `id`).through(Printings, `id`, `card`, `set`)
 
   rarity = () => this.hasOne(Rarity, `id`, `rarity`)
 
-  artist = () => this.hasOne(Artist, `id`, `artist`)
+  artist = () => this.hasMany(Artist, `id`, `artist`).through(Images, `id`, `card`, `artist`)
 }

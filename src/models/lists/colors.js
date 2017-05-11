@@ -8,27 +8,17 @@ export default class Colors extends db.Model {
          .comment(`The colorIdentity associated with the color.`)
          .notNullable()
          .unsigned()
-         .index(`colors_coloridentity`)
 
     table.bigInteger(`color`)
          .comment(`The color associated with the colorIdentity.`)
          .notNullable()
          .unsigned()
-         .index(`colors_color`)
 
     // Timestamps
     table.timestamps()
 
     // Keys
     table.primary([`coloridentity`, `color`])
-  }
-
-  static foreignKeys(table) {
-    table.foreign(`color`)
-         .references(`id`)
-         .inTable(`color`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
   }
 
   // Bookshelf Relation Definitions

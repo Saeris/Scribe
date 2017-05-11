@@ -6,14 +6,11 @@ export default class Booster extends db.Model {
     // Fields
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     // Timestamps
     table.timestamps()
-  }
-
-  static foreignKeys(table) {
-
   }
 
   // Bookshelf Relation Definitions
