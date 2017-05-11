@@ -1,14 +1,13 @@
 import db from '../../config/bookshelf.config'
+import { Card, LanguageCode } from './'
 
-export default class ruling extends db.Model {
-  get tableName() {
-   return 'ruling'
-  }
-
+export default class Ruling extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Indexes
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     // Fields
@@ -36,19 +35,12 @@ export default class ruling extends db.Model {
     table.timestamps()
   }
 
-  static foreignKeys(table) {
-    table.foreign(`language`)
-         .references(`id`)
-         .inTable(`languagecode`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
+  // Bookshelf Relation Definitions
+  get tableName() { return `ruling` }
 
-    table.foreign(`cards`)
-         .references(`ruling`)
-         .inTable(`rulingcards`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-  }
+  get hasTimestamps() { return true }
+
+  language = () => this.hasOne(LanguageCode, `language`)
+
+  cards = () => this.belongsToMany(Card, `cards`)
 }
-
-export const Ruling = new ruling()

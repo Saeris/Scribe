@@ -1,14 +1,12 @@
 import db from '../../config/bookshelf.config'
 
-export default class type extends db.Model {
-  get tableName() {
-   return 'type'
-  }
-
+export default class Type extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     table.string(`name`)
@@ -19,9 +17,8 @@ export default class type extends db.Model {
     table.timestamps()
   }
 
-  static foreignKeys(table) {
+  // Bookshelf Relation Definitions
+  get tableName() { return `type` }
 
-  }
+  get hasTimestamps() { return true }
 }
-
-export const Type = new type()

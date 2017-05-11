@@ -1,22 +1,27 @@
 import db from '../../config/bookshelf.config'
+import { Card, LanguageCode } from './'
 
-export default class keyword extends db.Model {
-  get tableName() {
-   return 'keyword'
-  }
-
+export default class Keyword extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     table.string(`name`)
          .comment(`The name of the keyword.`)
          .notNullable()
 
-    table.text(`description`)
-         .comment(`The description of the keyword.`)
+    table.text(`reminderText`)
+         .comment(`A short description of the keyword rules.`)
+
+    table.bigInteger(`languageCode`)
+         .comment(`The language code the reminder text of keyword is localized in.`)
+         .notNullable()
+         .unsigned()
+         .index(`keyword_code`)
 
     table.bigInteger(`cards`)
          .comment(`A list of cards that have this keyword.`)
@@ -28,13 +33,12 @@ export default class keyword extends db.Model {
     table.timestamps()
   }
 
-  static foreignKeys(table) {
-    table.foreign(`cards`)
-         .references(`keyword`)
-         .inTable(`keywordcards`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-  }
-}
+  // Bookshelf Relation Definitions
+  get tableName() { return `keyword` }
 
-export const Keyword = new keyword()
+  get hasTimestamps() { return true }
+
+  languageCode = () => this.hasOne(LanguageCode, `languageCode`)
+
+  cards = () => this.belongsToMany(Card, `cards`)
+}

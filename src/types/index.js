@@ -4,9 +4,9 @@ import glob from 'glob' // https://github.com/isaacs/node-glob
 export function loadTypes() {
   let types = []
 
-  glob.sync(`${__dirname}/**/!(*.spec).js`).forEach( file => {
+  glob.sync(`${__dirname}/!(*.spec).js`).forEach( file => {
     let filename = path.basename(file)
-    if(filename !== `index.js`) {
+    if (filename !== `index.js`) {
       types.push(require(file))
     }
   })
@@ -15,34 +15,34 @@ export function loadTypes() {
 }
 
 export function definitions() {
-  let definitions = {}
+  let collection = {}
 
   loadTypes().forEach((type) => {
-    definitions[type.Definition.name] = type.Definition
-    console.log(`✓ Loaded Type Definition: ${type.Definition.name}`)
+    collection[type.Definition.name] = type.Definition
+    console.log(`Loaded Type Definition: ${type.Definition.name}`)
   })
 
-  return definitions
+  return collection
 }
 
 export function queries() {
-  let queries = []
+  let collection = []
 
   loadTypes().forEach((type) => {
-    queries.push(type.Queries)
+    collection.push(type.Queries)
   })
 
-  return queries
+  return collection
 }
 
 export function mutations() {
-  let mutations = []
+  let collection = []
 
   loadTypes().forEach((type) => {
-    mutations.push(type.Mutations)
+    collection.push(type.Mutations)
   })
 
-  return mutations
+  return collection
 }
 
 export const Definitions = definitions()

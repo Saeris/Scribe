@@ -10,8 +10,8 @@ export default class Login {
   secret = process.env.JWT_PRIVATE_KEY
 
   options = {
-    algorithm: 'RS256',
-    expiresIn: "2h"
+    algorithm: `RS256`,
+    expiresIn: `2h`
   }
 
   constructor() {
@@ -26,7 +26,7 @@ export default class Login {
   }
 
   list(req, res) {
-    res.send('Login')
+    res.send(`Login`)
   }
 
   createToken(user) {

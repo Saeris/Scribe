@@ -3,14 +3,14 @@ export default class Example {
   /** GET / - List all entities */
   list(req, res) {
     res.json({
-      message: "yay I work!"
+      message: `yay I work!`
     })
   }
 
   /** POST / - Create a new entity */
   create(req, res) {
-    console.log(req.body);
-    res.json(req.body);
+    console.log(req.body)
+    res.json(req.body)
   }
 
   /** GET /:id - Return a given entity */

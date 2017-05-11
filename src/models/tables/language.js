@@ -1,14 +1,13 @@
 import db from '../../config/bookshelf.config'
+import { LanguageCode } from './'
 
-export default class language extends db.Model {
-  get tableName() {
-   return 'language'
-  }
-
+export default class Language extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     table.string(`name`)
@@ -25,13 +24,10 @@ export default class language extends db.Model {
     table.timestamps()
   }
 
-  static foreignKeys(table) {
-    table.foreign(`code`)
-         .references(`id`)
-         .inTable(`languagecode`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
-  }
-}
+  // Bookshelf Relation Definitions
+  get tableName() { return `language` }
 
-export const Language = new language()
+  get hasTimestamps() { return true }
+
+  code = () => this.hasOne(LanguageCode, `id`, `code`)
+}

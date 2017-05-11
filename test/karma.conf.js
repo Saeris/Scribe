@@ -1,4 +1,3 @@
-import path from `path`;
 import testRunnerConfig from 'test-runner-config'
 
 let karmaFiles = testRunnerConfig.getKarmaFiles(files)
@@ -22,6 +21,5 @@ export default (config) => {
       }
     },
     singleRun: true
-  });
-
-};
+  })
+}

@@ -1,14 +1,13 @@
 import db from '../../config/bookshelf.config'
+import { Icon } from './'
 
-export default class layout extends db.Model {
-  get tableName() {
-   return 'layout'
-  }
-
+export default class Layout extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     table.string(`name`)
@@ -22,7 +21,6 @@ export default class layout extends db.Model {
 
     table.bigInteger(`icons`)
          .comment(`List of icons used in this layout.`)
-         .notNullable()
          .unsigned()
          .index(`layout_icons`)
 
@@ -30,13 +28,10 @@ export default class layout extends db.Model {
     table.timestamps()
   }
 
-  static foreignKeys(table) {
-    table.foreign(`icons`)
-         .references(`layout`)
-         .inTable(`icons`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-  }
-}
+  // Bookshelf Relation Definitions
+  get tableName() { return `layout` }
 
-export const Layout = new layout()
+  get hasTimestamps() { return true }
+
+  icons = () => this.hasMany(Icon, `icons`)
+}

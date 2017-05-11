@@ -1,14 +1,13 @@
 import db from '../../config/bookshelf.config'
+import { Format, Card } from './'
 
-export default class legality extends db.Model {
-  get tableName() {
-   return 'legality'
-  }
-
+export default class Legality extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Indexes
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     // Fields
@@ -36,19 +35,12 @@ export default class legality extends db.Model {
     table.timestamps()
   }
 
-  static foreignKeys(table) {
-    table.foreign(`format`)
-         .references(`id`)
-         .inTable(`format`)
-         .onDelete(`NO ACTION`)
-         .onUpdate(`NO ACTION`)
+  // Bookshelf Relation Definitions
+  get tableName() { return `legality` }
 
-    table.foreign(`cards`)
-         .references(`legality`)
-         .inTable(`legalitycards`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-  }
+  get hasTimestamps() { return true }
+
+  format = () => this.hasOne(Format, `format`)
+
+  cards = () => this.belongsToMany(Card, `cards`)
 }
-
-export const Legality = new legality()

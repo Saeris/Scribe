@@ -1,18 +1,14 @@
 import db from '../../config/bookshelf.config'
+import { Card } from './'
+import { CategoryCards } from '../lists'
 
-import Card from './card'
-import Categories from './categories'
-import CategoryCards from './categoryCards'
-
-export default class category extends db.Model {
-  get tableName() {
-   return 'category'
-  }
-
+export default class Category extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     table.string(`name`)
@@ -32,23 +28,10 @@ export default class category extends db.Model {
     table.timestamps()
   }
 
-  static foreignKeys(table) {
-    table.foreign(`cards`)
-         .references(`category`)
-         .inTable(`categorycards`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-  }
+  // Bookshelf Relation Definitions
+  get tableName() { return `category` }
 
-  card() {
-    return this.belongsTo(Card, 'categories')
-               .through(Categories, 'category')
-  }
+  get hasTimestamps() { return true }
 
-  cards() {
-    return this.hasMany(Card)
-               .through(CategoryCards, 'category')
-  }
+  cards = () => this.hasMany(Card).through(CategoryCards, `category`)
 }
-
-export const Category = new category()

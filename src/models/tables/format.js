@@ -1,14 +1,13 @@
 import db from '../../config/bookshelf.config'
+import { Set } from './'
 
-export default class format extends db.Model {
-  get tableName() {
-   return 'format'
-  }
-
+export default class Format extends db.Model {
+  // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
          .notNullable()
+         .unsigned()
          .primary()
 
     table.string(`name`)
@@ -25,13 +24,10 @@ export default class format extends db.Model {
     table.timestamps()
   }
 
-  static foreignKeys(table) {
-    table.foreign(`sets`)
-         .references(`format`)
-         .inTable(`formatSets`)
-         .onDelete(`CASCADE`)
-         .onUpdate(`NO ACTION`)
-  }
-}
+  // Bookshelf Relation Definitions
+  get tableName() { return `format` }
 
-export const Format = new format()
+  get hasTimestamps() { return true }
+
+  sets = () => this.hasMany(Set, `sets`)
+}
