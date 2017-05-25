@@ -1,5 +1,5 @@
 import { GraphQLInputObjectType, GraphQLNonNull } from 'graphql'
-import sort from './'
+import { sort } from './'
 
 const order = (name, fields) => new GraphQLInputObjectType({
   name: `${name}OrderBy`,
