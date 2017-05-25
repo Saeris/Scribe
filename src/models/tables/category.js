@@ -10,10 +10,12 @@ export default class Category extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     table.string(`name`)
          .comment(`The name of the category.`)
          .notNullable()
+         .unique()
 
     table.text(`description`)
          .comment(`The description of the category.`)

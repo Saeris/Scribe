@@ -1,8 +1,7 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import order from './utilities/order'
+import { create, destroy, order, read, update } from './utilities'
 import Models from '../models'
-import * as ColorIdentity from './colorIdentity'
-import * as Icon from './icon'
+import { ColorIdentity, Icon } from './'
 
 export const Input = new GraphQLInputObjectType({
   name: `ColorInput`,
@@ -75,20 +74,7 @@ export const Queries = {
       offset: { type: GraphQLInt },
       orderBy: { type: order(`color`, Fields) }
     },
-    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.Color
-      .query(qb => {
-        if (!!id) qb.whereIn(`id`, id)
-        if (!!filter) {
-          for (let field in filter) {
-            qb.whereIn(field, filter[field])
-          }
-        }
-        if (!!limit) qb.limit(limit)
-        if (!!offset) qb.offset(offset)
-        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
-      })
-      .fetchAll()
-      .then(collection => collection.toJSON())
+    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
   }
 }
 
@@ -97,24 +83,18 @@ export const Mutations = {
     type: Definition,
     description: `Creates a new Color`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => Models.Color
-      .findOrCreate(input)
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
   },
   updateColor: {
     type: Definition,
     description: `Updates an existing Color, creates it if it does not already exist`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => Models.Color
-      .upsert(input, input)
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `symbol`)
   },
   deleteColor: {
     type: Definition,
     description: `Deletes a Color by id`,
     args: { id: { type: GraphQLID } },
-    resolve: (root, { id }) => Models.Color
-      .destroy({ id })
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
   }
 }

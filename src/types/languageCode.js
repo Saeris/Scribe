@@ -1,7 +1,7 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import order from './utilities/order'
+import { create, destroy, order, read, update } from './utilities'
 import Models from '../models'
-import * as Language from './language'
+import { Language } from './'
 
 export const Input = new GraphQLInputObjectType({
   name: `LanguageCodeInput`,
@@ -45,9 +45,9 @@ export const Definition = new GraphQLObjectType({
     language: {
       type: Language.Definition,
       description: `The language associated with the language code.`,
-      resolve: (type) => Models.LanguageCode
-        .findById(type.id, { withRelated: [`language`] })
-        .then(model => model.toJSON().language)
+      resolve: (type) => Models.Language
+        .findById(type.language)
+        .then(model => model.toJSON())
     }
   })
 })
@@ -65,20 +65,7 @@ export const Queries = {
       offset: { type: GraphQLInt },
       orderBy: { type: order(`languageCode`, Fields) }
     },
-    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.LanguageCode
-      .query(qb => {
-        if (!!id) qb.whereIn(`id`, id)
-        if (!!filter) {
-          for (let field in filter) {
-            qb.whereIn(field, filter[field])
-          }
-        }
-        if (!!limit) qb.limit(limit)
-        if (!!offset) qb.offset(offset)
-        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
-      })
-      .fetchAll()
-      .then(collection => collection.toJSON())
+    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
   }
 }
 
@@ -87,24 +74,18 @@ export const Mutations = {
     type: Definition,
     description: `Creates a new LanguageCode`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => Models.LanguageCode
-      .findOrCreate(input)
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
   },
   updateLanguageCode: {
     type: Definition,
     description: `Updates an existing LanguageCode, creates it if it does not already exist`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => Models.LanguageCode
-      .upsert(input, input)
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `code`)
   },
   deleteLanguageCode: {
     type: Definition,
     description: `Deletes a LanguageCode by id`,
     args: { id: { type: GraphQLID } },
-    resolve: (root, { id }) => Models.LanguageCode
-      .destroy({ id })
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
   }
 }

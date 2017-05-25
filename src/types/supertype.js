@@ -1,6 +1,5 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import order from './utilities/order'
-import Models from '../models'
+import { create, destroy, order, read, update } from './utilities'
 
 export const Input = new GraphQLInputObjectType({
   name: `SupertypeInput`,
@@ -54,20 +53,7 @@ export const Queries = {
       offset: { type: GraphQLInt },
       orderBy: { type: order(`supertype`, Fields) }
     },
-    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.Supertype
-      .query(qb => {
-        if (!!id) qb.whereIn(`id`, id)
-        if (!!filter) {
-          for (let field in filter) {
-            qb.whereIn(field, filter[field])
-          }
-        }
-        if (!!limit) qb.limit(limit)
-        if (!!offset) qb.offset(offset)
-        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
-      })
-      .fetchAll()
-      .then(collection => collection.toJSON())
+    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
   }
 }
 
@@ -76,24 +62,18 @@ export const Mutations = {
     type: Definition,
     description: `Creates a new Supertype`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => Models.Supertype
-      .findOrCreate(input)
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
   },
   updateSupertype: {
     type: Definition,
     description: `Updates an existing Supertype, creates it if it does not already exist`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => Models.Supertype
-      .upsert(input, input)
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => update(parent, args, context, Definition.name)
   },
   deleteSupertype: {
     type: Definition,
     description: `Deletes a Supertype by id`,
     args: { id: { type: GraphQLID } },
-    resolve: (root, { id }) => Models.Supertype
-      .destroy({ id })
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
   }
 }

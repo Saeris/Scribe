@@ -8,6 +8,7 @@ export default class Booster extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     // Timestamps
     table.timestamps()

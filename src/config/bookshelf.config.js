@@ -10,6 +10,4 @@ db.plugin(`registry`) // https://github.com/tgriesser/bookshelf/wiki/Plugin:-Mod
 db.plugin(`visibility`) // https://github.com/tgriesser/bookshelf/wiki/Plugin:-Visibility
 db.plugin(`pagination`) // https://github.com/tgriesser/bookshelf/wiki/Plugin:-Pagination
 
-console.log(`✓ Bookshelf configured using: ${config.db.client}`)
-
 export default db

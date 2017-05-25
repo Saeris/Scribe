@@ -1,6 +1,5 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import order from './utilities/order'
-import Models from '../models'
+import { create, destroy, order, read, update } from './utilities'
 
 export const Input = new GraphQLInputObjectType({
   name: `TypeInput`,
@@ -55,20 +54,7 @@ export const Queries = {
       offset: { type: GraphQLInt },
       orderBy: { type: order(`type`, Fields) }
     },
-    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.Type
-      .query(qb => {
-        if (!!id) qb.whereIn(`id`, id)
-        if (!!filter) {
-          for (let field in filter) {
-            qb.whereIn(field, filter[field])
-          }
-        }
-        if (!!limit) qb.limit(limit)
-        if (!!offset) qb.offset(offset)
-        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
-      })
-      .fetchAll()
-      .then(collection => collection.toJSON())
+    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
   }
 }
 
@@ -77,24 +63,18 @@ export const Mutations = {
     type: Definition,
     description: `Creates a new Type`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => Models.Type
-      .findOrCreate(input)
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
   },
   updateType: {
     type: Definition,
     description: `Updates an existing Type, creates it if it does not already exist`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => Models.Type
-      .upsert(input, input)
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => update(parent, args, context, Definition.name)
   },
-  deleteType: {
+  destroyType: {
     type: Definition,
     description: `Deletes a Type by id`,
     args: { id: { type: GraphQLID } },
-    resolve: (root, { id }) => Models.Type
-      .destroy({ id })
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
   }
 }

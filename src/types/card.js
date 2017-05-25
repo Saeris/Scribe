@@ -1,32 +1,16 @@
-import { GraphQLID, GraphQLNonNull, GraphQLInt, GraphQLEnumType, GraphQLString, GraphQLBoolean, GraphQLList, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import order from './utilities/order'
+import { GraphQLID, GraphQLNonNull, GraphQLInt, GraphQLEnumType, GraphQLString, GraphQLList, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import { destroy, order, read } from './utilities'
+import { info, error } from 'winston'
 import Models from '../models'
-import * as Name from './name'
-import * as Image from './image'
-import * as Layout from './layout'
-import * as Color from './color'
-import * as ColorIdentity from './colorIdentity'
-import * as Supertype from './supertype'
-import * as Type from './type'
-import * as Subtype from './subtype'
-import * as Rarity from './rarity'
-import * as Set from './set'
-import * as Category from './category'
-import * as AbilityType from './abilityType'
-import * as Keyword from './keyword'
-import * as Legality from './legality'
-import * as Ruling from './ruling'
-import * as Artist from './artist'
+import { Name, Layout, Color, ColorIdentity, Category, AbilityType, Keyword, Legality, Ruling, Printing } from './'
 
 export const Input = new GraphQLInputObjectType({
   name: `CardInput`,
   description: `Required fields for a new Card object`,
   fields: () => ({
+    name:          { type: new GraphQLNonNull(GraphQLString) },
     names:         { type: new GraphQLList(GraphQLID) },
-    images:        { type: new GraphQLList(GraphQLID) },
-    sides:         { type: new GraphQLList(GraphQLID) },
-    variations:    { type: new GraphQLList(GraphQLID) },
-    border:        { type: new GraphQLNonNull(GraphQLString) },
+    border:        { type: GraphQLString },
     layout:        { type: new GraphQLNonNull(GraphQLID) },
     watermark:     { type: GraphQLString },
     manaCost:      { type: GraphQLString },
@@ -34,33 +18,21 @@ export const Input = new GraphQLInputObjectType({
     colors:        { type: new GraphQLList(GraphQLID) },
     colorIdentity: { type: new GraphQLNonNull(GraphQLID) },
     typeLine:      { type: GraphQLString },
-    originalType:  { type: GraphQLString },
     supertypes:    { type: new GraphQLList(GraphQLID) },
     types:         { type: new GraphQLList(GraphQLID) },
     subtypes:      { type: new GraphQLList(GraphQLID) },
     rarity:        { type: GraphQLID },
-    set:           { type: GraphQLID },
     text:          { type: GraphQLString },
-    originalText:  { type: GraphQLString },
     categories:    { type: new GraphQLList(GraphQLID) },
     abilityTypes:  { type: new GraphQLList(GraphQLID) },
     keywords:      { type: new GraphQLList(GraphQLID) },
-    flavor:        { type: GraphQLString },
     hand:          { type: GraphQLString },
     life:          { type: GraphQLString },
     power:         { type: GraphQLString },
     toughness:     { type: GraphQLString },
     loyalty:       { type: GraphQLInt },
     legalities:    { type: new GraphQLList(GraphQLID) },
-    rulings:       { type: new GraphQLList(GraphQLID) },
-    artist:        { type: new GraphQLNonNull(GraphQLID) },
-    number:        { type: GraphQLString },
-    releaseDate:   { type: GraphQLString },
-    printings:     { type: new GraphQLList(GraphQLID) },
-    timeshifted:   { type: GraphQLBoolean },
-    starter:       { type: GraphQLBoolean },
-    reserved:      { type: GraphQLBoolean },
-    source:        { type: GraphQLString }
+    rulings:       { type: new GraphQLList(GraphQLID) }
   })
 })
 
@@ -69,8 +41,6 @@ const Filter = new GraphQLInputObjectType({
   description: `Queryable fields for Card.`,
   fields: () => ({
     name:          { type: new GraphQLList(GraphQLString) },
-    sides:         { type: new GraphQLList(GraphQLID) },
-    variations:    { type: new GraphQLList(GraphQLID) },
     border:        { type: new GraphQLList(GraphQLString) },
     layout:        { type: new GraphQLList(GraphQLID) },
     watermark:     { type: GraphQLString },
@@ -82,26 +52,17 @@ const Filter = new GraphQLInputObjectType({
     types:         { type: new GraphQLList(GraphQLID) },
     subtypes:      { type: new GraphQLList(GraphQLID) },
     rarity:        { type: new GraphQLList(GraphQLID) },
-    set:           { type: new GraphQLList(GraphQLID) },
     text:          { type: GraphQLString },
     categories:    { type: new GraphQLList(GraphQLID) },
     abilityTypes:  { type: new GraphQLList(GraphQLID) },
     keywords:      { type: new GraphQLList(GraphQLID) },
-    flavor:        { type: GraphQLString },
     hand:          { type: new GraphQLList(GraphQLString) },
     life:          { type: new GraphQLList(GraphQLString) },
     power:         { type: new GraphQLList(GraphQLString) },
     toughness:     { type: new GraphQLList(GraphQLString) },
     loyalty:       { type: new GraphQLList(GraphQLInt) },
     legalities:    { type: new GraphQLList(GraphQLID) },
-    rulings:       { type: new GraphQLList(GraphQLID) },
-    artist:        { type: new GraphQLList(GraphQLID) },
-    number:        { type: new GraphQLList(GraphQLString) },
-    releaseDate:   { type: new GraphQLList(GraphQLString) },
-    printings:     { type: new GraphQLList(GraphQLID) },
-    timeshifted:   { type: GraphQLBoolean },
-    starter:       { type: GraphQLBoolean },
-    reserved:      { type: GraphQLBoolean }
+    rulings:       { type: new GraphQLList(GraphQLID) }
   })
 })
 
@@ -120,19 +81,12 @@ const Fields = new GraphQLEnumType({
     types:         { value: `types` },
     subtypes:      { value: `subtypes` },
     rarity:        { value: `rarity` },
-    set:           { value: `set` },
     text:          { value: `text` },
     hand:          { value: `hand` },
     life:          { value: `life` },
     power:         { value: `power` },
     toughness:     { value: `toughness` },
-    loyalty:       { value: `loyalty` },
-    artist:        { value: `artist` },
-    number:        { value: `number` },
-    releaseDate:   { value: `releaseDate` },
-    timeshifted:   { value: `timeshifted` },
-    starter:       { value: `starter` },
-    reserved:      { value: `reserved` }
+    loyalty:       { value: `loyalty` }
   }
 })
 
@@ -146,10 +100,7 @@ export const Definition = new GraphQLObjectType({
     },
     name: {
       type: GraphQLString,
-      description: `The card's English name.`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`names`] })
-        .then(model => model.toJSON().names.find(name => name.language === 1 ? true : false).name)
+      description: `The card's English name.`
     },
     names: {
       type: new GraphQLList(Name.Definition),
@@ -158,27 +109,6 @@ export const Definition = new GraphQLObjectType({
         .findById(type.id, { withRelated: [`names`] })
         .then(model => model.toJSON().names)
     },
-    images: {
-      type: new GraphQLList(Image.Definition),
-      description: `The card images. This includes a list of foreign images indexed by a language code. Example: enUS`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`images`] })
-        .then(model => model.toJSON().images)
-    },
-    sides: {
-      type: new GraphQLList(Definition),
-      description: `Only used for split, flip and dual cards. Will contain a lit of cards representing each side of this card, front or back.`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`sides`] })
-        .then(model => model.toJSON().sides)
-    },
-    variations: {
-      type: new GraphQLList(Definition),
-      description: `If a card has alternate art (for example, 4 different Forests, or the 2 Brothers Yamazaki) then each other variation’s card will be listed here, NOT including the current card.`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`variations`] })
-        .then(model => model.toJSON().variations)
-    },
     border: {
       type: GraphQLString,
       description: `If the border for this specific card is DIFFERENT than the border specified in the top level set JSON, then it will be specified here. (Example: Unglued has silver borders, except for the lands which are black bordered)`
@@ -186,15 +116,15 @@ export const Definition = new GraphQLObjectType({
     layout: {
       type: Layout.Definition,
       description: `The card layout.`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`layout`] })
-        .then(model => model.toJSON().layout)
+      resolve: (type) => Models.Layout
+        .findById(type.layout)
+        .then(model => model.toJSON())
     },
     watermark: {
       type: GraphQLString,
       description: `The watermark on the card. Note: Split cards don’t currently have this field set, despite having a watermark on each side of the split card.`
     },
-    manaCost: {
+    manacost: {
       type: GraphQLString,
       description: `The mana cost of this card. Consists of one or more mana symbols. (use cmc and colors to query)`
     },
@@ -212,60 +142,45 @@ export const Definition = new GraphQLObjectType({
     colorIdentity: {
       type: ColorIdentity.Definition,
       description: `The card colors by color code. [“Red”, “Blue”] becomes [“R”, “U”]`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`colorIdentity`] })
-        .then(model => model.toJSON().colorIdentity)
+      resolve: (type) => Models.ColorIdentity
+        .findById(type.colorIdentity)
+        .then(model => model.toJSON())
     },
     typeLine: {
       type: GraphQLString,
       description: `The card type. This is the type you would see on the card if printed today. Note: The dash is a UTF8 'long dash’ as per the MTG rules.`
     },
-    originalType: {
-      type: GraphQLString,
-      description: `The original type on the card at the time it was printed. This field is not available for promo cards.`
-    },
     supertypes: {
-      type: new GraphQLList(Supertype.Definition),
+      type: new GraphQLList(GraphQLString),
       description: `The supertypes of the card. These appear to the far left of the card type.`,
       resolve: (type) => Models.Card
         .findById(type.id, { withRelated: [`supertypes`] })
-        .then(model => model.toJSON().supertypes)
+        .then(model => model.toJSON().supertypes.map(supertype => supertype.name))
     },
     types: {
-      type: new GraphQLList(Type.Definition),
+      type: new GraphQLList(GraphQLString),
       description: `The types of the card. These appear to the left of the dash in a card type.`,
       resolve: (type) => Models.Card
         .findById(type.id, { withRelated: [`types`] })
-        .then(model => model.toJSON().types)
+        .then(model => model.toJSON().types.map(cardtype => cardtype.name))
     },
     subtypes: {
-      type: new GraphQLList(Subtype.Definition),
+      type: new GraphQLList(GraphQLString),
       description: `The subtypes of the card. These appear to the right of the dash in a card type. Usually each word is its own subtype.`,
       resolve: (type) => Models.Card
         .findById(type.id, { withRelated: [`subtypes`] })
-        .then(model => model.toJSON().subtypes)
+        .then(model => model.toJSON().subtypes.map(subtype => subtype.name))
     },
     rarity: {
-      type: Rarity.Definition,
+      type: GraphQLString,
       description: `The rarity of the card.`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`rarity`] })
-        .then(model => model.toJSON().rarity)
-    },
-    set: {
-      type: Set.Definition,
-      description: `The set the card belongs to (set code).`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`set`] })
-        .then(model => model.toJSON().set)
+      resolve: (type) => Models.Rarity
+        .findById(type.rarity)
+        .then(model => model.toJSON().name)
     },
     text: {
       type: GraphQLString,
       description: `The oracle text of the card. May contain mana symbols and other symbols.`
-    },
-    originalText: {
-      type: GraphQLString,
-      description: `The original text on the card at the time it was printed. This field is not available for promo cards.`
     },
     categories: {
       type: new GraphQLList(Category.Definition),
@@ -287,10 +202,6 @@ export const Definition = new GraphQLObjectType({
       resolve: (type) => Models.Card
         .findById(type.id, { withRelated: [`keywords`] })
         .then(model => model.toJSON().keywords)
-    },
-    flavor: {
-      type: GraphQLString,
-      description: `The flavor text of the card.`
     },
     hand: {
       type: GraphQLString,
@@ -326,43 +237,12 @@ export const Definition = new GraphQLObjectType({
         .findById(type.id, { withRelated: [`rulings`] })
         .then(model => model.toJSON().rulings)
     },
-    artist: {
-      type: Artist.Definition,
-      description: `The artist of the card. This may not match what is on the card as MTGJSON corrects many card misprints.`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`artist`] })
-        .then(model => model.toJSON().artist)
-    },
-    number: {
-      type: GraphQLString,
-      description: `The card number. This is printed at the bottom-center of the card in small text. This is a string, not an integer, because some cards have letters in their numbers.`
-    },
-    releaseDate: {
-      type: GraphQLString,
-      description: `The date this card was released. This is only set for promo cards. The date may not be accurate to an exact day and month, thus only a partial date may be set (YYYY-MM-DD or YYYY-MM or YYYY). Some promo cards do not have a known release date.`
-    },
     printings: {
-      type: new GraphQLList(Set.Definition),
+      type: new GraphQLList(Printing.Definition),
       description: `The sets that this card was printed in, expressed as an array of set codes.`,
       resolve: (type) => Models.Card
         .findById(type.id, { withRelated: [`printings`] })
         .then(model => model.toJSON().printings)
-    },
-    timeshifted: {
-      type: GraphQLBoolean,
-      description: `If this card was a timeshifted card in the set.`
-    },
-    starter: {
-      type: GraphQLBoolean,
-      description: `Set to true if this card was only released as part of a core box set. These are technically part of the core sets and are tournament legal despite not being available in boosters.`
-    },
-    reserved: {
-      type: GraphQLBoolean,
-      description: `Set to true if this card is reserved by Wizards Official Reprint Policy`
-    },
-    source: {
-      type: GraphQLString,
-      description: `For promo cards, this is where this card was originally obtained. For box sets that are theme decks, this is which theme deck the card is from.`
     }
   })
 })
@@ -380,21 +260,7 @@ export const Queries = {
       offset: { type: GraphQLInt },
       orderBy: { type: order(`card`, Fields) }
     },
-    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.Card
-      .query(qb => {
-        if (!!id) qb.whereIn(`id`, id)
-        if (!!filter) {
-          for (let field in filter) {
-            qb.whereIn(field, filter[field])
-          }
-        }
-        if (!!!limit || limit > 100) limit = 100
-        qb.limit(limit)
-        if (!!offset) qb.offset(offset)
-        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
-      })
-      .fetchAll()
-      .then(collection => collection.toJSON())
+    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
   }
 }
 
@@ -403,8 +269,8 @@ export const Mutations = {
     type: Definition,
     description: `Creates a new Card`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => {
-      let { names, images, sides, variations, colors, supertypes, types, subtypes, categories, abilityTypes, keywords, legalities, rulings, printings, ...fields } = input
+    resolve: (parent, { input }, context) => {
+      const { names, colors, supertypes, types, subtypes, categories, abilityTypes, keywords, legalities, rulings, ...fields } = input
       return Models.Card
         .findOrCreate(fields)
         .then(model => {
@@ -412,8 +278,6 @@ export const Mutations = {
 
           if (!!names) for (let name of names) Models.Names.findOrCreate({ card: card.id, name })
 
-          if (!!images) for (let image of images) Models.Images.findOrCreate({ card: card.id, image })
-
           if (!!colors) for (let color of colors) Models.CardColors.findOrCreate({ card: card.id, color })
 
           if (!!supertypes) for (let supertype of supertypes) Models.Supertypes.findOrCreate({ card: card.id, supertype })
@@ -424,22 +288,22 @@ export const Mutations = {
 
           return card
         })
+        .catch(err => error(`Failed to run Mutation: create${Definition.name}`, err))
+        .finally(info(`Resolved Mutation: create${Definition.name}`, { parent, input, context}))
     }
   },
   updateCard: {
     type: Definition,
     description: `Updates an existing Card, creates it if it does not already exist`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => {
-      let { names, images, sides, variations, colors, supertypes, types, subtypes, categories, abilityTypes, keywords, legalities, rulings, printings, ...fields } = input
+    resolve: (parent, { input }, context) => {
+      const { names, colors, supertypes, types, subtypes, categories, abilityTypes, keywords, legalities, rulings, ...fields } = input
       return Models.Card
-        .upsert(fields, fields)
+        .upsert({ name: fields.name }, fields)
         .then(model => {
           let card = model.toJSON()
 
           if (!!names) for (let name of names) Models.Names.findOrCreate({ card: card.id, name })
-
-          if (!!images) for (let image of images) Models.Images.findOrCreate({ card: card.id, image })
 
           if (!!colors) for (let color of colors) Models.CardColors.findOrCreate({ card: card.id, color })
 
@@ -451,14 +315,14 @@ export const Mutations = {
 
           return card
         })
+        .catch(err => error(`Failed to run Mutation: update${Definition.name}`, err))
+        .finally(info(`Resolved Mutation: update${Definition.name}`, { parent, input, context}))
     }
   },
   deleteCard: {
     type: Definition,
     description: `Deletes a Card by id`,
     args: { id: { type: GraphQLID } },
-    resolve: (root, { id }) => Models.Card
-      .destroy({ id })
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
   }
 }

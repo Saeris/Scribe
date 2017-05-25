@@ -8,19 +8,17 @@ export default class Printings extends db.Model {
          .comment(`The card associated with this printing.`)
          .notNullable()
          .unsigned()
-         .index(`printings_card`)
 
-    table.bigInteger(`set`)
-         .comment(`The set associated with this printing.`)
+    table.bigInteger(`printing`)
+         .comment(`The printing associated with this card.`)
          .notNullable()
          .unsigned()
-         .index(`printings_set`)
 
     // Timestamps
     table.timestamps()
 
     // Keys
-    table.primary([`card`, `set`])
+    table.primary([`card`, `printing`])
   }
 
   // Bookshelf Relation Definitions

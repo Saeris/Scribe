@@ -1,7 +1,7 @@
 import { GraphQLID, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import order from './utilities/order'
+import { destroy, order, read } from './utilities'
 import Models from '../models'
-import * as Color from './color'
+import { Color } from './'
 
 export const Input = new GraphQLInputObjectType({
   name: `ColorIdentityInput`,
@@ -84,20 +84,7 @@ export const Queries = {
       offset: { type: GraphQLInt },
       orderBy: { type: order(`colorIdentity`, Fields) }
     },
-    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.ColorIdentity
-      .query(qb => {
-        if (!!id) qb.whereIn(`id`, id)
-        if (!!filter) {
-          for (let field in filter) {
-            qb.whereIn(field, filter[field])
-          }
-        }
-        if (!!limit) qb.limit(limit)
-        if (!!offset) qb.offset(offset)
-        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
-      })
-      .fetchAll()
-      .then(collection => collection.toJSON())
+    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
   }
 }
 
@@ -124,9 +111,9 @@ export const Mutations = {
     description: `Updates an existing ColorIdentity, creates it if it does not already exist`,
     args: { input: { type: Input } },
     resolve: (root, { input }) => {
-      let { colors, ...fields } = input
+      let { name, colors, ...fields } = input
       return Models.ColorIdentity
-        .upsert(fields, fields)
+        .upsert({ name }, fields)
         .then(model => {
           let identity = model.toJSON()
 
@@ -140,8 +127,6 @@ export const Mutations = {
     type: Definition,
     description: `Deletes a ColorIdentity by id`,
     args: { id: { type: GraphQLID } },
-    resolve: (root, { id }) => Models.ColorIdentity
-      .destroy({ id })
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
   }
 }

@@ -10,10 +10,12 @@ export default class ColorIdentity extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     table.string(`name`)
          .comment(`The name of the color identity.`)
          .notNullable()
+         .unique()
 
     table.string(`alias`)
          .comment(`The alias of the color identity. Examples: Bant, Jeskai`)

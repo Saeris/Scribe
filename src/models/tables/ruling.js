@@ -9,6 +9,7 @@ export default class Ruling extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     // Fields
     table.text(`text`)

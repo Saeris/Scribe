@@ -5,6 +5,7 @@ import chalk from 'chalk'
 import present from 'present'
 import moment from 'moment'
 
+const { info, log, error } = console
 const BaseUrl = `https://api.magicthegathering.io/v1`
 
 const duration = ms => moment.utc(ms).format(`HH:mm:ss.SSS`)
@@ -20,7 +21,7 @@ const updateSet = async input => await client
     variables: { input }
   })
   .then(res => res.data.updateSet)
-  .catch(err => console.log(`Failed to update Set.`, input,  err))
+  .catch(err => log(`Failed to update Set.`, input,  err))
 
 const updateSetType = async input => await client
   .mutate({
@@ -32,7 +33,7 @@ const updateSetType = async input => await client
     variables: { input }
   })
   .then(res => res.data.updateSetType.id)
-  .catch(err => console.log(`Failed to update Set Type.`, input, err))
+  .catch(err => log(`Failed to update Set Type.`, input, err))
 
 const updateSetIcon = async input => await client
   .mutate({
@@ -44,7 +45,7 @@ const updateSetIcon = async input => await client
     variables: { input }
   })
   .then(res => res.data.updateIcon.id)
-  .catch(err => console.log(`Failed to update Set Icon.`, input, err))
+  .catch(err => log(`Failed to update Set Icon.`, input, err))
 
 const updateBlock = async input => await client
   .mutate({
@@ -56,7 +57,7 @@ const updateBlock = async input => await client
     variables: { input }
   })
   .then(res => res.data.updateBlock.id)
-  .catch(err => console.log(`Failed to update Block.`, input, err))
+  .catch(err => log(`Failed to update Block.`, input, err))
 
 export { updateSet, updateSetType, updateSetIcon, updateBlock }
 
@@ -65,7 +66,7 @@ export async function fetchSets() {
     let data = await fetch(`${BaseUrl}/sets`).then(response => response.json())
     return data.sets
   } catch (err) {
-    console.error(err)
+    error(err)
   }
 }
 
@@ -73,10 +74,10 @@ export async function insertSets(sets) {
   const start = present()
   const prefix = `${chalk.blue(`[insertSets]: `)}`
   try {
-    console.log(`${prefix}Adding all sets to database`)
+    log(`${prefix}Adding all sets to database`)
     let results = []
     for (let set of await sets) {
-      console.info(`${prefix}Adding set ${chalk.green(set.name)}`)
+      info(`${prefix}Adding set ${chalk.green(set.name)}`)
       const code = set.code.toLowerCase()
       set.type = await updateSetType({ name: set.type })
       set.icon = await updateSetIcon({ name: code, class: `ss-${code}` })
@@ -84,11 +85,11 @@ export async function insertSets(sets) {
       results.push(await updateSet(new Set(set)))
     }
     const end = present()
-    console.log(`${prefix}Finished inserting all sets! (${duration(end - start)})`)
+    log(`${prefix}Finished inserting all sets! (${duration(end - start)})`)
     return results
   } catch (err) {
     const end = present()
-    console.error(`${prefix}Failed to add all sets to the database. (${duration(end - start)})`, err)
+    error(`${prefix}Failed to add all sets to the database. (${duration(end - start)})`, err)
   }
 }
 

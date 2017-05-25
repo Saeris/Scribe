@@ -9,10 +9,12 @@ export default class Image extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     table.string(`multiverseid`)
-         .comment(`The multiverseid of the card on Wizard’s Gatherer web page. Cards from sets that do not exist on Gatherer will NOT have a multiverseid.`)
+         .comment(`The multiverseid of the printing on Wizard’s Gatherer web page. Cards from sets that do not exist on Gatherer will NOT have a multiverseid.`)
          .notNullable()
+         .unique()
 
     table.text(`url`)
          .comment(`A URL pointing to an image of the card.`)
@@ -22,7 +24,6 @@ export default class Image extends db.Model {
          .comment(`The language code of the language the image is localized in.`)
          .notNullable()
          .unsigned()
-         .index(`image_language`)
 
     // Timestamps
     table.timestamps()

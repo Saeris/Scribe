@@ -1,8 +1,7 @@
 import { GraphQLID, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import order from './utilities/order'
+import { create, destroy, order, read, update } from './utilities'
 import Models from '../models'
-import * as Card from './format'
-import * as Format from './format'
+import { Card, Format } from './'
 
 export const Input = new GraphQLInputObjectType({
   name: `LegalityInput`,
@@ -84,20 +83,7 @@ export const Queries = {
       offset: { type: GraphQLInt },
       orderBy: { type: order(`legality`, Fields) }
     },
-    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.Legality
-      .query(qb => {
-        if (!!id) qb.whereIn(`id`, id)
-        if (!!filter) {
-          for (let field in filter) {
-            qb.whereIn(field, filter[field])
-          }
-        }
-        if (!!limit) qb.limit(limit)
-        if (!!offset) qb.offset(offset)
-        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
-      })
-      .fetchAll()
-      .then(collection => collection.toJSON())
+    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
   }
 }
 
@@ -106,24 +92,18 @@ export const Mutations = {
     type: Definition,
     description: `Creates a new Legality`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => Models.Legality
-      .findOrCreate(input)
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
   },
   updateLegality: {
     type: Definition,
     description: `Updates an existing Legality, creates it if it does not already exist`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => Models.Legality
-      .upsert(input, input)
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => update(parent, args, context, Definition.name)
   },
   deleteLegality: {
     type: Definition,
     description: `Deletes a Legality by id`,
     args: { id: { type: GraphQLID } },
-    resolve: (root, { id }) => Models.Legality
-      .destroy({ id })
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
   }
 }

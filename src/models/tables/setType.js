@@ -8,10 +8,12 @@ export default class SetType extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     table.string(`name`)
          .comment(`The name of the set type.`)
          .notNullable()
+         .unique()
 
     table.text(`description`)
          .comment(`The description of the set type.`)

@@ -1,11 +1,9 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
 import { GraphQLDate } from 'graphql-iso-date'
-import order from './utilities/order'
+import { destroy, order, read } from './utilities'
+import { info, error } from 'winston'
 import Models from '../models'
-import * as Block from './block'
-import * as SetType from './setType'
-import * as Icon from './icon'
-import * as Booster from './booster'
+import { Block, SetType, Icon, Booster } from './'
 
 export const Input = new GraphQLInputObjectType({
   name: `SetInput`,
@@ -74,16 +72,16 @@ export const Definition = new GraphQLObjectType({
     type: {
       type: SetType.Definition,
       description: `The set type.`,
-      resolve: (type) => Models.Set
-        .findById(type.id, { withRelated: [`type`] })
-        .then(model => model.toJSON().type)
+      resolve: (type) => Models.SetType
+        .findById(type.type)
+        .then(model => model.toJSON())
     },
     icon: {
       type: Icon.Definition,
       description: `The icon associated with the set.`,
-      resolve: (type) => Models.Set
-        .findById(type.id, { withRelated: [`icon`] })
-        .then(model => model.toJSON().icon)
+      resolve: (type) => Models.Icon
+        .findById(type.icon)
+        .then(model => model.toJSON())
     },
     border: {
       type: GraphQLString,
@@ -96,9 +94,9 @@ export const Definition = new GraphQLObjectType({
     booster: {
       type: Booster.Definition,
       description: `A booster pack for this set`,
-      resolve: (type) => Models.Set
-        .findById(type.id, { withRelated: [`booster`] })
-        .then(model => model.toJSON().booster)
+      resolve: (type) => Models.Booster
+        .findById(type.booster)
+        .then(model => model.toJSON())
     }
   })
 })
@@ -116,20 +114,7 @@ export const Queries = {
       offset: { type: GraphQLInt },
       orderBy: { type: order(`set`, Fields) }
     },
-    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.Set
-      .query(qb => {
-        if (!!id) qb.whereIn(`id`, id)
-        if (!!filter) {
-          for (let field in filter) {
-            qb.whereIn(field, filter[field])
-          }
-        }
-        if (!!limit) qb.limit(limit)
-        if (!!offset) qb.offset(offset)
-        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
-      })
-      .fetchAll()
-      .then(collection => collection.toJSON())
+    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
   }
 }
 
@@ -138,7 +123,7 @@ export const Mutations = {
     type: Definition,
     description: `Creates a new Set`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => Models.Set
+    resolve: (parent, { input }, context) => Models.Set
       .findOrCreate(input)
       .then(model => {
         let set = model.toJSON()
@@ -147,27 +132,32 @@ export const Mutations = {
 
         return set
       })
+      .catch(err => error(`Failed to run Mutation: create${Definition.name}`, err))
+      .finally(info(`Resolved Mutation: create${Definition.name}`, { parent, input, context}))
   },
   updateSet: {
     type: Definition,
     description: `Updates an existing Set, creates it if it does not already exist`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => Models.Set
-      .upsert(input, input)
-      .then(model => {
-        let set = model.toJSON()
+    resolve: (parent, { input }, context) => {
+      const { name, ...fields } = input
+      return Models.Set
+        .upsert({ name }, { ...fields })
+        .then(model => {
+          let set = model.toJSON()
 
-        if (!!set.block) Models.BlockSets.findOrCreate({ block: set.block, set: set.id })
+          if (!!set.block) Models.BlockSets.findOrCreate({ block: set.block, set: set.id })
 
-        return set
-      })
+          return set
+        })
+        .catch(err => error(`Failed to run Mutation: update${Definition.name}`, err))
+        .finally(info(`Resolved Mutation: update${Definition.name}`, { parent, input, context}))
+    }
   },
   deleteSet: {
     type: Definition,
     description: `Deletes a Set by id`,
     args: { id: { type: GraphQLID } },
-    resolve: (root, { id }) => Models.Set
-      .destroy({ id })
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
   }
 }

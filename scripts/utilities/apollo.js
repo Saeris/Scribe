@@ -1,11 +1,12 @@
 import 'isomorphic-fetch'
-import ApolloClient, { createNetworkInterface } from 'apollo-client'
+import ApolloClient, { createBatchingNetworkInterface } from 'apollo-client'
 
 const client = new ApolloClient({
-  networkInterface: createNetworkInterface({
-    uri: `http://localhost:1337/api`
+  networkInterface: createBatchingNetworkInterface({
+    uri: `http://localhost:1337/api`,
+    batchInterval: 10
   }),
-  shouldBatch: true
+  queryDeduplication: true
 })
 
 export default client

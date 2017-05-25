@@ -10,10 +10,12 @@ export default class Artist extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     table.string(`name`)
          .comment(`The name of the artist.`)
          .notNullable()
+         .unique()
 
     table.text(`website`)
          .comment(`The website of the artist, if they have one.`)
