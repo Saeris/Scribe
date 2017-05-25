@@ -1,7 +1,8 @@
 import { info, error } from 'winston'
+import Dataloader from 'dataloader' //eslint-disable-line
 import Models from '../../models'
 
-const read = (parent, args, context, type) => {
+export const read = (parent, args, context, type) => {
   const { id, filter, limit, offset, orderBy } = args
   return Models[`${type}`]
     .query(qb => {
@@ -16,5 +17,3 @@ const read = (parent, args, context, type) => {
     .catch(err => error(`Failed to resolve Query: ${type}`, err))
     .finally(info(`Resolved Query: ${type}`, { parent, args, context }))
 }
-
-export default read

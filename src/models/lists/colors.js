@@ -5,14 +5,14 @@ export default class Colors extends db.Model {
   static fields(table) {
     // Fields
     table.bigInteger(`coloridentity`)
-         .comment(`The colorIdentity associated with the color.`)
-         .notNullable()
-         .unsigned()
+      .comment(`The colorIdentity associated with the color.`)
+      .notNullable()
+      .unsigned()
 
     table.bigInteger(`color`)
-         .comment(`The color associated with the colorIdentity.`)
-         .notNullable()
-         .unsigned()
+      .comment(`The color associated with the colorIdentity.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()

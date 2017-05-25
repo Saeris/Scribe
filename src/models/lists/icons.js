@@ -5,16 +5,14 @@ export default class Icons extends db.Model {
   static fields(table) {
     // Fields
     table.bigInteger(`layout`)
-         .comment(`The layout associated with this icon.`)
-         .notNullable()
-         .unsigned()
-         .index(`icons_layout`)
+      .comment(`The layout associated with this icon.`)
+      .notNullable()
+      .unsigned()
 
     table.bigInteger(`icon`)
-         .comment(`The icon associated with this layout.`)
-         .notNullable()
-         .unsigned()
-         .index(`icons_icon`)
+      .comment(`The icon associated with this layout.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()

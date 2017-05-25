@@ -5,16 +5,14 @@ export default class Keywords extends db.Model {
   static fields(table) {
     // Fields
     table.bigInteger(`card`)
-         .comment(`The card associated with this keyword.`)
-         .notNullable()
-         .unsigned()
-         .index(`keywords_card`)
+      .comment(`The card associated with this keyword.`)
+      .notNullable()
+      .unsigned()
 
     table.bigInteger(`keyword`)
-         .comment(`The keyword associated with this card.`)
-         .notNullable()
-         .unsigned()
-         .index(`keywords_keyword`)
+      .comment(`The keyword associated with this card.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()

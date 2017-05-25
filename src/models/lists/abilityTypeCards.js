@@ -6,16 +6,14 @@ export default class AbilityTypeCards extends db.Model {
   static fields(table) {
     // Fields
     table.bigInteger(`abilitytype`)
-         .comment(`The abilityType associated with this card.`)
-         .notNullable()
-         .unsigned()
-         .index(`abilitytypecards_abilitytype`)
+      .comment(`The abilityType associated with this card.`)
+      .notNullable()
+      .unsigned()
 
     table.bigInteger(`card`)
-         .comment(`The card associated with this abilityType.`)
-         .notNullable()
-         .unsigned()
-         .index(`abilitytypecards_card`)
+      .comment(`The card associated with this abilityType.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()

@@ -5,16 +5,14 @@ export default class FormatSets extends db.Model {
   static fields(table) {
     // Fields
     table.bigInteger(`format`)
-         .comment(`The format associated with this set.`)
-         .notNullable()
-         .unsigned()
-         .index(`formatsets_format`)
+      .comment(`The format associated with this set.`)
+      .notNullable()
+      .unsigned()
 
     table.bigInteger(`set`)
-         .comment(`The set associated with this format.`)
-         .notNullable()
-         .unsigned()
-         .index(`formatsets_set`)
+      .comment(`The set associated with this format.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()

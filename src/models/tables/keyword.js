@@ -1,35 +1,33 @@
 import db from '../../config/bookshelf.config'
-import { Card, LanguageCode } from './'
+import { Card, Language } from './'
 
 export default class Keyword extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
-         .notNullable()
-         .unsigned()
-         .primary()
-         .unique()
+      .notNullable()
+      .unsigned()
+      .primary()
+      .unique()
 
     table.string(`name`)
-         .comment(`The name of the keyword.`)
-         .notNullable()
-         .unique()
+      .comment(`The name of the keyword.`)
+      .notNullable()
+      .unique()
 
     table.text(`reminderText`)
-         .comment(`A short description of the keyword rules.`)
+      .comment(`A short description of the keyword rules.`)
 
-    table.bigInteger(`languageCode`)
-         .comment(`The language code the reminder text of keyword is localized in.`)
-         .notNullable()
-         .unsigned()
-         .index(`keyword_code`)
+    table.bigInteger(`language`)
+      .comment(`The language the reminder text of keyword is localized in.`)
+      .notNullable()
+      .unsigned()
 
     table.bigInteger(`cards`)
-         .comment(`A list of cards that have this keyword.`)
-         .notNullable()
-         .unsigned()
-         .index(`keyword_cards`)
+      .comment(`A list of cards that have this keyword.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()
@@ -40,7 +38,7 @@ export default class Keyword extends db.Model {
 
   get hasTimestamps() { return true }
 
-  languageCode = () => this.hasOne(LanguageCode, `languageCode`)
+  language = () => this.hasOne(Language, `language`)
 
   cards = () => this.belongsToMany(Card, `cards`)
 }

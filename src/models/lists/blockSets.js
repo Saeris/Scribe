@@ -5,16 +5,14 @@ export default class BlockSets extends db.Model {
   static fields(table) {
     // Fields
     table.bigInteger(`block`)
-         .comment(`The block associated with this set.`)
-         .notNullable()
-         .unsigned()
-         .index(`blocksets_block`)
+      .comment(`The block associated with this set.`)
+      .notNullable()
+      .unsigned()
 
     table.bigInteger(`set`)
-         .comment(`The set associated with this block.`)
-         .notNullable()
-         .unsigned()
-         .index(`blocksets_set`)
+      .comment(`The set associated with this block.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()

@@ -1,5 +1,5 @@
 import { GraphQLID, GraphQLNonNull, GraphQLInt, GraphQLEnumType, GraphQLString, GraphQLList, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { destroy, order, read } from './utilities'
+import { destroy, load, loadRelated, order, read } from './utilities'
 import { info, error } from 'winston'
 import Models from '../models'
 import { Name, Layout, Color, ColorIdentity, Category, AbilityType, Keyword, Legality, Ruling, Printing } from './'
@@ -105,9 +105,7 @@ export const Definition = new GraphQLObjectType({
     names: {
       type: new GraphQLList(Name.Definition),
       description: `The card names. This includes a list of foreign names indexed by a language code. Example: enUS`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`names`] })
-        .then(model => model.toJSON().names)
+      resolve: type => loadRelated(type.id, Models.Card, `names`)
     },
     border: {
       type: GraphQLString,
@@ -116,9 +114,7 @@ export const Definition = new GraphQLObjectType({
     layout: {
       type: Layout.Definition,
       description: `The card layout.`,
-      resolve: (type) => Models.Layout
-        .findById(type.layout)
-        .then(model => model.toJSON())
+      resolve: type => load(type.layout, Models.Layout)
     },
     watermark: {
       type: GraphQLString,
@@ -135,16 +131,12 @@ export const Definition = new GraphQLObjectType({
     colors: {
       type: new GraphQLList(Color.Definition),
       description: `The card colors.`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`colors`] })
-        .then(model => model.toJSON().colors)
+      resolve: type => loadRelated(type.id, Models.Card, `colors`)
     },
     colorIdentity: {
       type: ColorIdentity.Definition,
       description: `The card colors by color code. [“Red”, “Blue”] becomes [“R”, “U”]`,
-      resolve: (type) => Models.ColorIdentity
-        .findById(type.colorIdentity)
-        .then(model => model.toJSON())
+      resolve: type => load(type.colorIdentity, Models.ColorIdentity)
     },
     typeLine: {
       type: GraphQLString,
@@ -153,30 +145,25 @@ export const Definition = new GraphQLObjectType({
     supertypes: {
       type: new GraphQLList(GraphQLString),
       description: `The supertypes of the card. These appear to the far left of the card type.`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`supertypes`] })
-        .then(model => model.toJSON().supertypes.map(supertype => supertype.name))
+      resolve: type => loadRelated(type.id, Models.Card, `supertypes`)
+        .then(supertypes => supertypes.map(supertype => supertype.name))
     },
     types: {
       type: new GraphQLList(GraphQLString),
       description: `The types of the card. These appear to the left of the dash in a card type.`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`types`] })
-        .then(model => model.toJSON().types.map(cardtype => cardtype.name))
+      resolve: type => loadRelated(type.id, Models.Card, `types`)
+        .then(cardtypes => cardtypes.map(cardtype => cardtype.name))
     },
     subtypes: {
       type: new GraphQLList(GraphQLString),
       description: `The subtypes of the card. These appear to the right of the dash in a card type. Usually each word is its own subtype.`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`subtypes`] })
-        .then(model => model.toJSON().subtypes.map(subtype => subtype.name))
+      resolve: type => loadRelated(type.id, Models.Card, `subtypes`)
+        .then(subtypes => subtypes.map(subtype => subtype.name))
     },
     rarity: {
       type: GraphQLString,
       description: `The rarity of the card.`,
-      resolve: (type) => Models.Rarity
-        .findById(type.rarity)
-        .then(model => model.toJSON().name)
+      resolve: type => load(type.rarity, Models.Rarity).then(rarity => rarity.name)
     },
     text: {
       type: GraphQLString,
@@ -185,23 +172,17 @@ export const Definition = new GraphQLObjectType({
     categories: {
       type: new GraphQLList(Category.Definition),
       description: `A list of categories describind this card. Examples: Acceleration, Removal`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`categories`] })
-        .then(model => model.toJSON().categories)
+      resolve: type => loadRelated(type.id, Models.Card, `categories`)
     },
     abilityTypes: {
       type: new GraphQLList(AbilityType.Definition),
       description: `A list of Ability Types this card has. Examples: Activated, Triggered`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`abilityTypes`] })
-        .then(model => model.toJSON().abilityTypes)
+      resolve: type => loadRelated(type.id, Models.Card, `abilityTypes`)
     },
     keywords: {
       type: new GraphQLList(Keyword.Definition),
       description: `A list of keyword abilities this card has. Examples: Haste, Trample`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`keywords`] })
-        .then(model => model.toJSON().keywords)
+      resolve: type => loadRelated(type.id, Models.Card, `keywords`)
     },
     hand: {
       type: GraphQLString,
@@ -226,23 +207,17 @@ export const Definition = new GraphQLObjectType({
     legalities: {
       type: new GraphQLList(Legality.Definition),
       description: `The legality of the card for a given format, such as Legal, Banned or Restricted.`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`legalities`] })
-        .then(model => model.toJSON().legalities)
+      resolve: type => loadRelated(type.id, Models.Card, `legalities`)
     },
     rulings: {
       type: new GraphQLList(Ruling.Definition),
       description: `The rulings for the card. An array of objects, each object having 'date’ and 'text’ keys.`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`rulings`] })
-        .then(model => model.toJSON().rulings)
+      resolve: type => loadRelated(type.id, Models.Card, `rulings`)
     },
     printings: {
       type: new GraphQLList(Printing.Definition),
       description: `The sets that this card was printed in, expressed as an array of set codes.`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`printings`] })
-        .then(model => model.toJSON().printings)
+      resolve: type => loadRelated(type.id, Models.Card, `printings`)
     }
   })
 })
@@ -270,7 +245,7 @@ export const Mutations = {
     description: `Creates a new Card`,
     args: { input: { type: Input } },
     resolve: (parent, { input }, context) => {
-      const { names, colors, supertypes, types, subtypes, categories, abilityTypes, keywords, legalities, rulings, ...fields } = input
+      const { names, colors, supertypes, types, subtypes, categories, abilityTypes, keywords, legalities, rulings, ...fields } = input //eslint-disable-line
       return Models.Card
         .findOrCreate(fields)
         .then(model => {
@@ -297,7 +272,7 @@ export const Mutations = {
     description: `Updates an existing Card, creates it if it does not already exist`,
     args: { input: { type: Input } },
     resolve: (parent, { input }, context) => {
-      const { names, colors, supertypes, types, subtypes, categories, abilityTypes, keywords, legalities, rulings, ...fields } = input
+      const { names, colors, supertypes, types, subtypes, categories, abilityTypes, keywords, legalities, rulings, ...fields } = input //eslint-disable-line
       return Models.Card
         .upsert({ name: fields.name }, fields)
         .then(model => {

@@ -1,14 +1,12 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
 import { create, destroy, order, read, update } from './utilities'
-import Models from '../models'
-import { LanguageCode } from './'
 
 export const Input = new GraphQLInputObjectType({
   name: `LanguageInput`,
   description: `Required fields for a new language object`,
   fields: () => ({
     name: { type: new GraphQLNonNull(GraphQLString) },
-    code: { type: new GraphQLNonNull(GraphQLID) }
+    code: { type: new GraphQLNonNull(GraphQLString) }
   })
 })
 
@@ -17,7 +15,7 @@ const Filter = new GraphQLInputObjectType({
   description: `Queryable fields for Language.`,
   fields: () => ({
     name: { type: new GraphQLList(GraphQLString) },
-    code: { type: new GraphQLList(GraphQLID) }
+    code: { type: new GraphQLList(GraphQLString) }
   })
 })
 
@@ -43,11 +41,8 @@ export const Definition = new GraphQLObjectType({
       description: `The name of the language.`
     },
     code: {
-      type: LanguageCode.Definition,
-      description: `The language code associated with this language.`,
-      resolve: (type) => Models.LanguageCode
-        .findById(type.code)
-        .then(model => model.toJSON())
+      type: GraphQLString,
+      description: `The language code.`
     }
   })
 })

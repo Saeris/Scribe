@@ -5,18 +5,18 @@ export default class SetType extends db.Model {
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
-         .notNullable()
-         .unsigned()
-         .primary()
-         .unique()
+      .notNullable()
+      .unsigned()
+      .primary()
+      .unique()
 
     table.string(`name`)
-         .comment(`The name of the set type.`)
-         .notNullable()
-         .unique()
+      .comment(`The name of the set type.`)
+      .notNullable()
+      .unique()
 
     table.text(`description`)
-         .comment(`The description of the set type.`)
+      .comment(`The description of the set type.`)
 
     // Timestamps
     table.timestamps()

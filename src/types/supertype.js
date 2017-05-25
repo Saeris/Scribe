@@ -68,7 +68,7 @@ export const Mutations = {
     type: Definition,
     description: `Updates an existing Supertype, creates it if it does not already exist`,
     args: { input: { type: Input } },
-    resolve: (parent, args, context) => update(parent, args, context, Definition.name)
+    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `name`)
   },
   deleteSupertype: {
     type: Definition,

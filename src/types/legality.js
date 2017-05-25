@@ -1,5 +1,5 @@
 import { GraphQLID, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, order, read, update } from './utilities'
+import { create, destroy, loadRelated, order, read, update } from './utilities'
 import Models from '../models'
 import { Card, Format } from './'
 
@@ -46,18 +46,12 @@ export const Definition = new GraphQLObjectType({
     cards: {
       type: new GraphQLList(Card.Definition),
       description: `The ID of the card.`,
-      resolve: (root, { id }) => Models.Legality
-        .forge({ id })
-        .fetch({ withRelated: [`cards`] })
-        .then(model => model.toJSON().cards)
+      resolve: type => loadRelated(type.id, Models.Legality, `cards`)
     },
     format: {
       type: Format.Definition,
       description: `The format the card is legal in.`,
-      resolve: (root, { id }) => Models.Legality
-        .forge({ id })
-        .fetch({ withRelated: [`format`] })
-        .then(model => model.toJSON().format)
+      resolve: type => loadRelated(type.id, Models.Legality, `format`)
     },
     legal: {
       type: GraphQLBoolean,

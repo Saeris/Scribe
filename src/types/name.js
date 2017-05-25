@@ -1,5 +1,5 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, order, read, update } from './utilities'
+import { create, destroy, load, loadRelated, order, read, update } from './utilities'
 import Models from '../models'
 import { Card, Language } from './'
 
@@ -46,16 +46,12 @@ export const Definition = new GraphQLObjectType({
     language: {
       type: Language.Definition,
       description: `The language name.`,
-      resolve: (type) => Models.Language
-        .findById(type.language)
-        .then(model => model.toJSON())
+      resolve: type => load(type.language, Models.Language)
     },
     cards: {
       type: new GraphQLList(Card.Definition),
       description: `A list of cards featuring art from this artist.`,
-      resolve: (type) => Models.Name
-        .findById(type.id, { withRelated: [`cards`] })
-        .then(model => model.toJSON().cards)
+      resolve: type => loadRelated(type.id, Models.Name, `cards`)
     }
   })
 })

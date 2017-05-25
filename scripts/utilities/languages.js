@@ -7,36 +7,21 @@ import moment from 'moment'
 const { info, log, error } = console
 const duration = ms => moment.utc(ms).format(`HH:mm:ss.SSS`)
 
-const updateLanguageCode = input => client
-  .mutate({
-    mutation: gql`mutation updateLanguageCode($input: LanguageCodeInput) {
-      updateLanguageCode(input: $input) {
-        id
-      }
-    }`,
-    variables: { input }
-  })
-  .then(res => res.data.updateLanguageCode)
-  .catch(err => log(`Failed to update Language Code.`, input,  err))
-
-const getLanguageCode = async input => await client
+export const getLanguages = async input => await client
   .query({
     query: gql`query getLanguageCode($input: [String]) {
       language(filter: { name: $input }) {
         id
-        code {
-          id
-          code
-        }
+        code
       }
     }`,
     variables: { input },
     fetchPolicy: `cache-first`
   })
-  .then(res => res.data.language[0].code)
+  .then(res => res.data.language)
   .catch(err => log(`Failed to get Language Code.`, input,  err))
 
-const updateLanguage = input => client
+export const updateLanguage = input => client
   .mutate({
     mutation: gql`mutation updateLangauge($input: LanguageInput) {
       updateLanguage(input: $input) {
@@ -48,31 +33,28 @@ const updateLanguage = input => client
   .then(res => res.data.updateLanguage)
   .catch(err => log(`Failed to update Language.`, input,  err))
 
-export { updateLanguageCode, getLanguageCode, updateLanguage }
-
-export async function insertLanguages() {
+export const insertLanguages = async () => {
   const start = present()
   const prefix = `${chalk.green(`[insertLanguages]: `)}`
   try {
     log(`${prefix}Begin adding languages to database...`)
     const languages = [
-      { code: `en-US`, language: `English`},
-      { code: `zh-Hans`, language: `Chinese Simplified`},
-      { code: `zh-Hant`, language: `Chinese Traditional`},
-      { code: `fr`, language: `French`},
-      { code: `de`, language: `German`},
-      { code: `it`, language: `Italian`},
-      { code: `ja`, language: `Japanese`},
-      { code: `ko`, language: `Korean`},
-      { code: `pt`, language: `Portuguese`},
-      { code: `ru`, language: `Russian`},
-      { code: `es`, language: `Spanish`},
-      { code: `pt-br`, language: `Portuguese (Brazil)`}
+      { code: `en-US`, name: `English`},
+      { code: `zh-Hans`, name: `Chinese Simplified`},
+      { code: `zh-Hant`, name: `Chinese Traditional`},
+      { code: `fr`, name: `French`},
+      { code: `de`, name: `German`},
+      { code: `it`, name: `Italian`},
+      { code: `ja`, name: `Japanese`},
+      { code: `ko`, name: `Korean`},
+      { code: `pt`, name: `Portuguese`},
+      { code: `ru`, name: `Russian`},
+      { code: `es`, name: `Spanish`},
+      { code: `pt-br`, name: `Portuguese (Brazil)`}
     ]
-    await Promise.all(languages.map(({code, language}, index) => {
-      info(`${prefix}Adding language ${chalk.green(language)}`)
-      updateLanguageCode({ code, language: index })
-      updateLanguage({ name: language, code: index })
+    await Promise.all(languages.map(language => {
+      info(`${prefix}Adding language ${chalk.green(language.name)}`)
+      updateLanguage(language)
     }))
     .then(info(`${prefix}Finished adding Languages.`))
     .catch(err => error(`${prefix}Failed to add Languages.`, { err }))

@@ -7,15 +7,15 @@ export default class Block extends db.Model {
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
-         .notNullable()
-         .unsigned()
-         .primary()
-         .unique()
+      .notNullable()
+      .unsigned()
+      .primary()
+      .unique()
 
     table.string(`name`)
-         .comment(`The name of the block.`)
-         .notNullable()
-         .unique()
+      .comment(`The name of the block.`)
+      .notNullable()
+      .unique()
 
     // Timestamps
     table.timestamps()

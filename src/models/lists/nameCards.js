@@ -5,16 +5,14 @@ export default class NameCards extends db.Model {
   static fields(table) {
     // Fields
     table.bigInteger(`name`)
-         .comment(`The name associated with this card.`)
-         .notNullable()
-         .unsigned()
-         .index(`namecards_name`)
+      .comment(`The name associated with this card.`)
+      .notNullable()
+      .unsigned()
 
     table.bigInteger(`card`)
-         .comment(`The card associated with this name.`)
-         .notNullable()
-         .unsigned()
-         .index(`namecards_card`)
+      .comment(`The card associated with this name.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()

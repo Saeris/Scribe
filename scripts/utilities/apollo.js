@@ -6,7 +6,8 @@ const client = new ApolloClient({
     uri: `http://localhost:1337/api`,
     batchInterval: 10
   }),
-  queryDeduplication: true
+  queryDeduplication: true,
+  dataIdFromObject: o => o.id
 })
 
 export default client

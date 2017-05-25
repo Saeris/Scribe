@@ -5,15 +5,15 @@ export default class Subtype extends db.Model {
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
-         .notNullable()
-         .unsigned()
-         .primary()
-         .unique()
+      .notNullable()
+      .unsigned()
+      .primary()
+      .unique()
 
     table.string(`name`)
-         .comment(`The name of the subtype.`)
-         .notNullable()
-         .unique()
+      .comment(`The name of the subtype.`)
+      .notNullable()
+      .unique()
 
     // Timestamps
     table.timestamps()

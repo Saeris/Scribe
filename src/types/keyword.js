@@ -1,7 +1,7 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, order, read, update } from './utilities'
+import { create, destroy, loadRelated, order, read, update } from './utilities'
 import Models from '../models'
-import { Card, LanguageCode } from './'
+import { Card, Language } from './'
 
 export const Input = new GraphQLInputObjectType({
   name: `KeywordInput`,
@@ -52,20 +52,14 @@ export const Definition = new GraphQLObjectType({
       description: `A short description of the keyword ability's rules.`
     },
     languageCode: {
-      type: LanguageCode.Definition,
+      type: Language.Definition,
       description: `The language code the reminder text of keyword is localized in.`,
-      resolve: (root, { id }) => Models.Keyword
-        .forge({ id })
-        .fetch({ withRelated: [`LanguageCode`] })
-        .then(model => model.toJSON().languageCode)
+      resolve: type => loadRelated(type.id, Models.Keyword, `language`)
     },
     cards: {
       type: new GraphQLList(Card.Definition),
       description: `A list of cards featuring art from this artist.`,
-      resolve: (root, { id }) => Models.Keyword
-        .forge({ id })
-        .fetch({ withRelated: [`cards`] })
-        .then(model => model.toJSON().cards)
+      resolve: type => loadRelated(type.id, Models.Keyword, `cards`)
     }
   })
 })

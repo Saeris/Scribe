@@ -7,7 +7,7 @@ export const Models = { ...Tables, ...Lists }
 
 export default Models
 
-const create = (knex) => Object.values(Models)
+const create = knex => Object.values(Models)
   .filter(migration => (!!migration.fields || !!migration.foreignKeys))
   .map(migration => knex.schema.createTableIfNotExists(migration.name, (table) => {
     migration.fields(table)
@@ -16,13 +16,13 @@ const create = (knex) => Object.values(Models)
   .then(() => log(`Created table: ${migration.name}`))
   .catch(err => error(`Failed to create table: ${migration.name}`, err)))
 
-const update = (knex) => Object.values(Models)
+const update = knex => Object.values(Models)
   .filter(migration => !!migration.foreignKeys)
   .map(migration => knex.schema.table(migration.name, table => migration.foreignKeys(table))
   .then(() => log(`Set Foreign Keys on table: ${migration.name}`))
   .catch(err => error(`Failed to alter table: ${migration.name}`, err)))
 
-const destroy = (knex) => Object.values(Models)
+const destroy = knex => Object.values(Models)
   .map(migration => knex.schema.dropTableIfExists(migration.name)
   .then(() => log(`Destroyed table: ${migration.name}`))
   .catch(err => error(`Failed to destroy table: ${migration.name}`, err)))
@@ -38,12 +38,12 @@ const pragma = `
   `
 
 export const up = (knex, Promise) => knex
-  .raw(`${ config.ENV === `production` ? `SET foreign_key_checks = 0;` : pragma }`)
+  .raw(`${ config.env === `production` ? `SET foreign_key_checks = 0;` : pragma }`)
   .then(() => Promise.all(create(knex)))
-  .then(() => config.ENV === `production` ? Promise.all(update(knex)) : null)
-  .then(() => config.ENV === `production` ? knex.raw(`SET foreign_key_checks = 1;`) : null)
+  .then(() => config.env === `production` ? Promise.all(update(knex)) : null)
+  .then(() => config.env === `production` ? knex.raw(`SET foreign_key_checks = 1;`) : null)
 
 export const down = (knex, Promise) => knex
-  .raw(`${ config.ENV === `production` ? `SET foreign_key_checks = 0;` : `` }`)
+  .raw(`${ config.env === `production` ? `SET foreign_key_checks = 0;` : `` }`)
   .then(() => Promise.all(destroy(knex)))
-  .then(() => config.ENV === `production` ? knex.raw(`SET foreign_key_checks = 1;`) : null)
+  .then(() => config.env === `production` ? knex.raw(`SET foreign_key_checks = 1;`) : null)

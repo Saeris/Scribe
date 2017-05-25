@@ -7,23 +7,18 @@ export default class Artist extends db.Model {
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
-         .notNullable()
-         .unsigned()
-         .primary()
-         .unique()
+      .notNullable()
+      .unsigned()
+      .primary()
+      .unique()
 
     table.string(`name`)
-         .comment(`The name of the artist.`)
-         .notNullable()
-         .unique()
+      .comment(`The name of the artist.`)
+      .notNullable()
+      .unique()
 
     table.text(`website`)
-         .comment(`The website of the artist, if they have one.`)
-
-    table.bigInteger(`cards`)
-         .comment(`The cards associated with this artist.`)
-         .unsigned()
-         .index(`artist_cards`)
+      .comment(`The website of the artist, if they have one.`)
 
     // Timestamps
     table.timestamps()
@@ -34,5 +29,5 @@ export default class Artist extends db.Model {
 
   get hasTimestamps() { return true }
 
-  cards = () => this.hasMany(Card, `cards`).through(ArtistCards)
+  cards = () => this.hasMany(Card, `id`).through(ArtistCards, `id`, `card`, `artist`)
 }

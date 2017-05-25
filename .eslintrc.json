@@ -19,8 +19,7 @@
     "objectLiteralShorthandProperties": true,
     "spread": true,
     "superInFunctions": true,
-    "templateStrings": true,
-    "jsx": false
+    "templateStrings": true
   },
   "rules": {
     "strict": [2, "never"],
@@ -120,7 +119,6 @@
     "no-multiple-empty-lines": [2, {
       "max": 2
     }],
-    "no-nested-ternary": 2,
     "no-new-object": 2,
     "no-spaced-func": 2,
     "no-trailing-spaces": 2,
@@ -144,5 +142,4 @@
         "exceptions": ["*"],
         "markers": ["*"]
     }]
-  }
 }

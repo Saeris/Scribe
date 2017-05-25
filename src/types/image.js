@@ -1,7 +1,7 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
 import { create, destroy, order, read, update } from './utilities'
 import Models from '../models'
-import { LanguageCode } from './'
+import { Language } from './'
 
 export const Input = new GraphQLInputObjectType({
   name: `ImageInput`,
@@ -48,9 +48,9 @@ export const Definition = new GraphQLObjectType({
       description: `The localized image of a card.`
     },
     language: {
-      type: LanguageCode.Definition,
+      type: Language.Definition,
       description: `The language image.`,
-      resolve: (type) => Models.LanguageCode
+      resolve: (type) => Models.Language
         .findById(type.language)
         .then(model => model.toJSON())
     }

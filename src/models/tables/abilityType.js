@@ -7,24 +7,18 @@ export default class AbilityType extends db.Model {
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
-         .notNullable()
-         .unsigned()
-         .primary()
-         .unique()
+      .notNullable()
+      .unsigned()
+      .primary()
+      .unique()
 
     table.string(`name`)
-         .comment(`The name of the ability type.`)
-         .notNullable()
-         .unique()
+      .comment(`The name of the ability type.`)
+      .notNullable()
+      .unique()
 
     table.text(`description`)
-         .comment(`Description of the ability type.`)
-
-    table.bigInteger(`cards`)
-         .comment(`The cards associated with this abilityType.`)
-         .notNullable()
-         .unsigned()
-         .index(`abilitytype_cards`)
+      .comment(`Description of the ability type.`)
 
     // Timestamps
     table.timestamps()

@@ -1,6 +1,6 @@
 import { GraphQLEnumType } from 'graphql'
 
-const sort = new GraphQLEnumType({
+export const sort = new GraphQLEnumType({
   name: `Sort`,
   description: `Sort options for OrderBy`,
   values: {
@@ -8,5 +8,3 @@ const sort = new GraphQLEnumType({
     descending: { value: `desc`}
   }
 })
-
-export default sort

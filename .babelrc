@@ -4,7 +4,7 @@
     "transform-decorators-legacy",
     "transform-object-rest-spread",
     "transform-class-properties",
-    "import-glob"
+    "transform-function-bind"
   ],
   "presets": [
     "es2015",

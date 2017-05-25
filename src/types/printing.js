@@ -1,5 +1,5 @@
 import { GraphQLID, GraphQLNonNull, GraphQLInt, GraphQLEnumType, GraphQLString, GraphQLBoolean, GraphQLList, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { destroy, order, read } from './utilities'
+import { baseResolver, destroy, load, loadRelated, order, read } from './utilities'
 import { info, error } from 'winston'
 import Models from '../models'
 import { Card, Set, Image, Artist } from './'
@@ -69,44 +69,32 @@ export const Definition = new GraphQLObjectType({
     card: {
       type: Card.Definition,
       description: `The Card represented by this Printing.`,
-      resolve: (type) => Models.Card
-        .findById(type.card)
-        .then(model => model.toJSON())
+      resolve: type => load(type.card, Models.Card)
     },
     set: {
       type: Set.Definition,
       description: `The set the card belongs to (set code).`,
-      resolve: (type) => Models.Set
-        .findById(type.set)
-        .then(model => model.toJSON())
+      resolve: type => load(type.set, Models.Set)
     },
     images: {
       type: new GraphQLList(Image.Definition),
       description: `The card images. This includes a list of foreign images indexed by a language code. Example: enUS`,
-      resolve: (type) => Models.Printing
-        .findById(type.id, { withRelated: [`images`] })
-        .then(model => model.toJSON().images)
+      resolve: type => loadRelated(type.id, Models.Printing, `images`)
     },
     artist: {
       type: Artist.Definition,
       description: `The artist of the image. This may not match what is on the card as MTGJSON corrects many card misprints.`,
-      resolve: (type) => Models.Artist
-        .findById(type.artist)
-        .then(model => model.toJSON())
+      resolve: type => load(type.artist, Models.Artist)
     },
     sides: {
       type: new GraphQLList(Definition),
       description: `Only used for split, flip and dual cards. Will contain a lit of cards representing each side of this card, front or back.`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`sides`] })
-        .then(model => model.toJSON().sides)
+      resolve: type => loadRelated(type.id, Models.Card, `sides`)
     },
     variations: {
       type: new GraphQLList(Definition),
       description: `If a card has alternate art (for example, 4 different Forests, or the 2 Brothers Yamazaki) then each other variation’s card will be listed here, NOT including the current card.`,
-      resolve: (type) => Models.Card
-        .findById(type.id, { withRelated: [`variations`] })
-        .then(model => model.toJSON().variations)
+      resolve: type => baseResolver(loadRelated(type.id, Models.Card, `variations`))
     },
     originalType: {
       type: GraphQLString,
@@ -166,7 +154,7 @@ export const Mutations = {
     description: `Creates a new Printing`,
     args: { input: { type: Input } },
     resolve: (parent, { input }, context) => {
-      let { images, sides, variations, ...fields } = input
+      let { images, sides, variations, ...fields } = input //eslint-disable-line
       return Models.Printing
         .findOrCreate(fields)
         .then(model => {
@@ -187,7 +175,7 @@ export const Mutations = {
     description: `Updates an existing Printing, creates it if it does not already exist`,
     args: { input: { type: Input } },
     resolve: (parent, { input }, context) => {
-      const { card, set, number, images, sides, variations, ...fields } = input
+      const { card, set, number, images, sides, variations, ...fields } = input //eslint-disable-line
       return Models.Printing
         .upsert({ card, set, number }, fields)
         .then(model => {

@@ -6,21 +6,20 @@ export default class Format extends db.Model {
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
-         .notNullable()
-         .unsigned()
-         .primary()
-         .unique()
+      .notNullable()
+      .unsigned()
+      .primary()
+      .unique()
 
     table.string(`name`)
-         .comment(`The name of the format.`)
-         .notNullable()
-         .unique()
+      .comment(`The name of the format.`)
+      .notNullable()
+      .unique()
 
     table.bigInteger(`sets`)
-         .comment(`List of sets that are included in this format.`)
-         .notNullable()
-         .unsigned()
-         .index(`format_sets`)
+      .comment(`List of sets that are included in this format.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()

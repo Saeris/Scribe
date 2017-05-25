@@ -9,7 +9,7 @@ const BaseUrl = `https://api.magicthegathering.io/v1`
 const { info, log, error } = console
 const duration = ms => moment.utc(ms).format(`HH:mm:ss.SSS`)
 
-const updateType = input => client
+export const updateType = input => client
   .mutate({
     mutation: gql`mutation updateType($input: TypeInput) {
       updateType(input: $input) {
@@ -21,7 +21,7 @@ const updateType = input => client
   .then(res => res.data.updateType.id)
   .catch(err => log(`Failed to update Type.`, input,  err))
 
-const getType = async input => await client
+export const getType = async input => await client
   .query({
     query: gql`query getType($input: [String]) {
       type(filter: { name: $input }) {
@@ -34,7 +34,7 @@ const getType = async input => await client
   .then(res => res.data.type.map(type => type.id))
   .catch(err => log(`Failed to get Type.`, input,  err))
 
-const updateSubtype = input => client
+export const updateSubtype = input => client
   .mutate({
     mutation: gql`mutation updateSubtype($input: SubtypeInput) {
       updateSubtype(input: $input) {
@@ -46,7 +46,7 @@ const updateSubtype = input => client
   .then(res => res.data.updateSubtype.id)
   .catch(err => log(`Failed to update Subtype.`, input,  err))
 
-const getSubtype = async input => await client
+export const getSubtype = async input => await client
   .query({
     query: gql`query getSubtype($input: [String]) {
       subtype(filter: { name: $input }) {
@@ -59,7 +59,7 @@ const getSubtype = async input => await client
   .then(res => res.data.subtype.map(subtype => subtype.id))
   .catch(err => log(`Failed to get Subtype.`, input,  err))
 
-const updateSupertype = input => client
+export const updateSupertype = input => client
   .mutate({
     mutation: gql`mutation updateSupertype($input: SupertypeInput) {
       updateSupertype(input: $input) {
@@ -71,7 +71,7 @@ const updateSupertype = input => client
   .then(res => res.data.updateSupertype.id)
   .catch(err => log(`Failed to update Supertype.`, input,  err))
 
-const getSupertype = async input => await client
+export const getSupertype = async input => await client
   .query({
     query: gql`query getSupertype($input: [String]) {
       supertype(filter: { name: $input }) {
@@ -84,9 +84,7 @@ const getSupertype = async input => await client
   .then(res => res.data.supertype.map(supertype => supertype.id))
   .catch(err => log(`Failed to get Supertype.`, input,  err))
 
-export { updateSupertype, updateType, updateSubtype, getSupertype, getType, getSubtype }
-
-export async function fetchTypes() {
+export const fetchTypes = async () => {
   try {
     let supertypes = await fetch(`${BaseUrl}/supertypes`).then(response => response.json())
     let types = await fetch(`${BaseUrl}/types`).then(response => response.json())
@@ -97,7 +95,7 @@ export async function fetchTypes() {
   }
 }
 
-export async function insertTypes(data) {
+export const insertTypes = async data => {
   const start = present()
   const prefix = `${chalk.yellow(`[insertTypes]: `)}`
   try {

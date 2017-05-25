@@ -7,7 +7,7 @@ import moment from 'moment'
 const { info, log, error } = console
 const duration = ms => moment.utc(ms).format(`HH:mm:ss.SSS`)
 
-const getColor = async input => await client
+export const getColor = async input => await client
   .query({
     query: gql`query getColor($input: [String]) {
       color(filter: {symbol: $input}) {
@@ -20,7 +20,7 @@ const getColor = async input => await client
   .then(res => res.data.color.map(color => color.id))
   .catch(err => log(`Failed to get Color.`, input,  err))
 
-const getColorIdentity = async input => await client
+export const getColorIdentity = async input => await client
   .query({
     query: gql`query getColorIdentity($input: [String]) {
       colorIdentity(filter: { name: $input }) {
@@ -33,7 +33,7 @@ const getColorIdentity = async input => await client
   .then(res =>  res.data.colorIdentity.map(identity => identity.id))
   .catch(err => log(`Failed to get Color Identity.`, input,  err))
 
-const updateColorIcon = input => client
+export const updateColorIcon = input => client
   .mutate({
     mutation: gql`mutation updateColorIcon($input: IconInput) {
       updateIcon(input: $input) {
@@ -45,7 +45,7 @@ const updateColorIcon = input => client
   .then(res => res.data.updateIcon.id)
   .catch(err => log(`Failed to update Color Icon.`, input,  err))
 
-const updateColorIdentity = input => client
+export const updateColorIdentity = input => client
   .mutate({
     mutation: gql`mutation updateColorIdentity($input: ColorIdentityInput) {
       updateColorIdentity(input: $input) {
@@ -57,7 +57,7 @@ const updateColorIdentity = input => client
   .then(res => res.data.updateColorIdentity.id)
   .catch(err => log(`Failed to update Color Identity.`, input,  err))
 
-const updateColor = input => client
+export const updateColor = input => client
   .mutate({
     mutation: gql`mutation updateColor($input: ColorInput) {
       updateColor(input: $input) {
@@ -69,9 +69,7 @@ const updateColor = input => client
   .then(res => res.data.updateColor.id)
   .catch(err => log(`Failed to update Color.`, input,  err))
 
-export { getColor, getColorIdentity, updateColorIcon, updateColorIdentity, updateColor }
-
-export async function insertColors() {
+export const insertColors = async () => {
   const start = present()
   const prefix = `${chalk.red(`[insertColors]: `)}`
   try {

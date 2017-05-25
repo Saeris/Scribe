@@ -6,25 +6,23 @@ export default class Layout extends db.Model {
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
-         .notNullable()
-         .unsigned()
-         .primary()
-         .unique()
+      .notNullable()
+      .unsigned()
+      .primary()
+      .unique()
 
     table.string(`name`)
-         .comment(`The name of the layout.`)
-         .notNullable()
-         .unique()
+      .comment(`The name of the layout.`)
+      .notNullable()
+      .unique()
 
     table.bigInteger(`watermark`)
-         .comment(`Watermark icon used in this layout.`)
-         .unsigned()
-         .index(`layout_watermark`)
+      .comment(`Watermark icon used in this layout.`)
+      .unsigned()
 
     table.bigInteger(`icons`)
-         .comment(`List of icons used in this layout.`)
-         .unsigned()
-         .index(`layout_icons`)
+      .comment(`List of icons used in this layout.`)
+      .unsigned()
 
     // Timestamps
     table.timestamps()

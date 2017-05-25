@@ -5,16 +5,14 @@ export default class ArtistCards extends db.Model {
   static fields(table) {
     // Fields
     table.bigInteger(`artist`)
-         .comment(`The artist associated with this card.`)
-         .notNullable()
-         .unsigned()
-         .index(`artistcards_artist`)
+      .comment(`The artist associated with this card.`)
+      .notNullable()
+      .unsigned()
 
     table.bigInteger(`card`)
-         .comment(`The card associated with this artist.`)
-         .notNullable()
-         .unsigned()
-         .index(`artistcards_card`)
+      .comment(`The card associated with this artist.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()

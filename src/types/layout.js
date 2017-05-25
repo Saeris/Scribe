@@ -1,5 +1,5 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, order, read, update } from './utilities'
+import { create, destroy, loadRelated, order, read, update } from './utilities'
 import Models from '../models'
 import { Icon } from './'
 
@@ -49,10 +49,7 @@ export const Definition = new GraphQLObjectType({
     icons: {
       type: new GraphQLList(Icon.Definition),
       description: `A list of icons featured on this card.`,
-      resolve: (root, { id }) => Models.Layout
-        .forge({ id })
-        .fetch({ withRelated: [`icons`] })
-        .then(model => model.toJSON().icons)
+      resolve: type => loadRelated(type.id, Models.Layout, `icons`)
     }
   })
 })

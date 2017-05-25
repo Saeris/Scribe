@@ -5,16 +5,14 @@ export default class RulingCards extends db.Model {
   static fields(table) {
     // Fields
     table.bigInteger(`ruling`)
-         .comment(`The ruling associated with this card.`)
-         .notNullable()
-         .unsigned()
-         .index(`rulingcards_ruling`)
+      .comment(`The ruling associated with this card.`)
+      .notNullable()
+      .unsigned()
 
     table.bigInteger(`card`)
-         .comment(`The card associated with this ruling.`)
-         .notNullable()
-         .unsigned()
-         .index(`rulingcards_card`)
+      .comment(`The card associated with this ruling.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()

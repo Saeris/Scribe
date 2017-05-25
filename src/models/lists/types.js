@@ -5,16 +5,14 @@ export default class Types extends db.Model {
   static fields(table) {
     // Fields
     table.bigInteger(`card`)
-         .comment(`The card associated with this type.`)
-         .notNullable()
-         .unsigned()
-         .index(`types_card`)
+      .comment(`The card associated with this type.`)
+      .notNullable()
+      .unsigned()
 
     table.bigInteger(`type`)
-         .comment(`The type associated with this card.`)
-         .notNullable()
-         .unsigned()
-         .index(`types_type`)
+      .comment(`The type associated with this card.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()

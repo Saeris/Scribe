@@ -5,7 +5,16 @@ import 'winston-loggly-bulk' // https://github.com/loggly/winston-loggly-bulk
 dotenv.config()
 
 class Config {
-  ENV = process.env.NODE_ENV && process.env.NODE_ENV.toLowerCase() || (process.env.NODE_ENV === `development`)
+  env = process.env.NODE_ENV && process.env.NODE_ENV.toLowerCase() || (process.env.NODE_ENV === `development`)
+
+  getDBClient = () => {
+    if (!!process.env.USE_DB) {
+      const db = process.env.USE_DB.toLowerCase()
+      if (db === `mysql`) return db
+      if (db === `sqlite`) return db
+    }
+    return this.env === `production` ? `mysql` : `sqlite`
+  }
 
   // HTTP Server Settings
   http = {
@@ -22,6 +31,39 @@ class Config {
     port: process.env.HTTPS || 8080,
     routes: {
       cors: true
+    }
+  }
+
+  // Define Cron Jobs
+  cron = {
+    jobs: [/*{
+      name: `testcron`,
+      time: `*\/6 * * * * *`,
+      timezone: `America/Los_Angeles`,
+      request: {
+        method: `GET`,
+        url: `/graphiql`
+      },
+      callback: (res) => console.info(`testcron has run!`)
+    }*/]
+  }
+
+  // Define Content Security Policy Settings
+  csp = {}
+
+  error = {
+    statusCodes: {
+      '400': { redirect: `/graphiql` }, // bad request
+      '401': { redirect: `/graphiql` }, // unauthorized
+      '403': { redirect: `/graphiql` }, // forbidden
+      '404': { redirect: `/graphiql` }, // not found
+      '408': { redirect: `/graphiql` }, // request timeout
+      '418': { redirect: `/graphiql` }, // teapot
+      '429': { redirect: `/graphiql` }, // too many requests
+      '500': { redirect: `/graphiql` }, // internal server error
+      '502': { redirect: `/graphiql` }, // bad gateway
+      '503': { redirect: `/graphiql` }, // service unavailable
+      '504': { redirect: `/graphiql` }  // gateway timeout
     }
   }
 
@@ -83,14 +125,25 @@ class Config {
 
   // Settings for Knex
   db = {
-    client:     this.ENV === `test` || this.ENV === `development` ? `sqlite` : `mysql`,
-    connection: this.ENV === `test` || this.ENV === `development` ? this.sqlite : this.mysql,
+    client:     (this.getDBClient)(),
+    connection: this[(this.getDBClient)()],
     migrations: {
       directory: `./src/models`,
       tableName: `migrations`
     },
-    useNullAsDefault: this.ENV === `test` || this.ENV === `development` ? true : false
+    useNullAsDefault: this.env === `test` || this.env === `development` ? true : false
   }
+
+  redis = {
+    host: process.env.REDIS_HOST || `127.0.0.1`,
+    port: process.env.REDIS_PORT || 6379
+  }
+
+  rateLimit = client => ({
+    redisClient: client,
+    rateLimitKey: request => `${request.info.remoteAddress}`,
+    overLimitError: rate => new Error(`Rate Limit Exceeded - try again in ${rate.window} seconds`)
+  })
 }
 
 export default new Config()

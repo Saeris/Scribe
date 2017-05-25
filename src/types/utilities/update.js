@@ -1,7 +1,7 @@
 import { info, error } from 'winston'
 import Models from '../../models'
 
-const update = (parent, { input }, context, type, selection, callback) => {
+export const update = (parent, { input }, context, type, selection, callback) => {
   if (!!selection && typeof selection === `string`) selection = [`${selection}`]
 
   const filter = !!selection
@@ -19,5 +19,3 @@ const update = (parent, { input }, context, type, selection, callback) => {
     .catch(err => error(`Failed to run Mutation: update${type}`, err))
     .finally(info(`Resolved Mutation: update${type}`, { parent, input, context, selection }))
 }
-
-export default update

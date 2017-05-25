@@ -7,24 +7,23 @@ export default class Category extends db.Model {
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
-         .notNullable()
-         .unsigned()
-         .primary()
-         .unique()
+      .notNullable()
+      .unsigned()
+      .primary()
+      .unique()
 
     table.string(`name`)
-         .comment(`The name of the category.`)
-         .notNullable()
-         .unique()
+      .comment(`The name of the category.`)
+      .notNullable()
+      .unique()
 
     table.text(`description`)
-         .comment(`The description of the category.`)
+      .comment(`The description of the category.`)
 
     table.bigInteger(`cards`)
-         .comment(`A list of cards that have this category.`)
-         .notNullable()
-         .unsigned()
-         .index(`category_cards`)
+      .comment(`A list of cards that have this category.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()

@@ -1,6 +1,6 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
 import { GraphQLDate } from 'graphql-iso-date'
-import { destroy, order, read } from './utilities'
+import { destroy, load, loadRelated, order, read } from './utilities'
 import { info, error } from 'winston'
 import Models from '../models'
 import { Block, SetType, Icon, Booster } from './'
@@ -65,23 +65,17 @@ export const Definition = new GraphQLObjectType({
     block: {
       type: Block.Definition,
       description: `The block the set belongs to.`,
-      resolve: (type) => Models.Set
-        .findById(type.id, { withRelated: [`block`] })
-        .then(model => model.toJSON().block)
+      resolve: type => loadRelated(type.id, Models.Set, `block`)
     },
     type: {
       type: SetType.Definition,
       description: `The set type.`,
-      resolve: (type) => Models.SetType
-        .findById(type.type)
-        .then(model => model.toJSON())
+      resolve: type => load(type.type, Models.SetType)
     },
     icon: {
       type: Icon.Definition,
       description: `The icon associated with the set.`,
-      resolve: (type) => Models.Icon
-        .findById(type.icon)
-        .then(model => model.toJSON())
+      resolve: type => load(type.icon, Models.Icon)
     },
     border: {
       type: GraphQLString,
@@ -94,9 +88,7 @@ export const Definition = new GraphQLObjectType({
     booster: {
       type: Booster.Definition,
       description: `A booster pack for this set`,
-      resolve: (type) => Models.Booster
-        .findById(type.booster)
-        .then(model => model.toJSON())
+      resolve: type => load(type.booster, Models.Booster)
     }
   })
 })

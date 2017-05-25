@@ -1,36 +1,29 @@
 import db from '../../config/bookshelf.config'
-import { Card, LanguageCode } from './'
+import { Card, Language } from './'
 
 export default class Ruling extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Indexes
     table.bigIncrements(`id`)
-         .notNullable()
-         .unsigned()
-         .primary()
-         .unique()
+      .notNullable()
+      .unsigned()
+      .primary()
+      .unique()
 
     // Fields
     table.text(`text`)
-         .comment(`The localized text of the ruling.`)
-         .notNullable()
+      .comment(`The localized text of the ruling.`)
+      .notNullable()
 
     table.date(`date`)
-         .comment(`The date the ruling was issued.`)
-         .notNullable()
+      .comment(`The date the ruling was issued.`)
+      .notNullable()
 
     table.bigInteger(`language`)
-         .comment(`The language code of this ruling.`)
-         .notNullable()
-         .unsigned()
-         .index(`ruling_language`)
-
-    table.bigInteger(`cards`)
-         .comment(`List of cards that have this ruling.`)
-         .notNullable()
-         .unsigned()
-         .index(`ruling_cards`)
+      .comment(`The language this ruling is localized in.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()
@@ -41,7 +34,7 @@ export default class Ruling extends db.Model {
 
   get hasTimestamps() { return true }
 
-  language = () => this.hasOne(LanguageCode, `language`)
+  language = () => this.hasOne(Language, `language`)
 
-  cards = () => this.belongsToMany(Card, `cards`)
+  cards = () => this.hasMany(Card, `id`).through(RulingCards, `id`, `card`, `ruling`)
 }

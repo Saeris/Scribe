@@ -5,14 +5,14 @@ export default class Images extends db.Model {
   static fields(table) {
     // Fields
     table.bigInteger(`printing`)
-         .comment(`The printing associated with this image.`)
-         .notNullable()
-         .unsigned()
+      .comment(`The printing associated with this image.`)
+      .notNullable()
+      .unsigned()
 
     table.bigInteger(`image`)
-         .comment(`The image associated with this printing.`)
-         .notNullable()
-         .unsigned()
+      .comment(`The image associated with this printing.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()

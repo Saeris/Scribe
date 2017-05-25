@@ -1,5 +1,5 @@
 import { GraphQLID, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { destroy, order, read } from './utilities'
+import { destroy, loadRelated, order, read } from './utilities'
 import Models from '../models'
 import { Color } from './'
 
@@ -56,9 +56,7 @@ export const Definition = new GraphQLObjectType({
     colors: {
       type: new GraphQLList(Color.Definition),
       description: `A list of colors included in this color identity.`,
-      resolve: (type) => Models.ColorIdentity
-        .findById(type.id, { withRelated: [`colors`] })
-        .then(model => model.toJSON().colors)
+      resolve: type => loadRelated(type.id, Models.ColorIdentity, `colors`)
     },
     multicolored: {
       type: GraphQLBoolean,

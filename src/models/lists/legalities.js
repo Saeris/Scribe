@@ -5,16 +5,14 @@ export default class Legalities extends db.Model {
   static fields(table) {
     // Fields
     table.bigInteger(`card`)
-         .comment(`The card associated with this legality.`)
-         .notNullable()
-         .unsigned()
-         .index(`legalities_card`)
+      .comment(`The card associated with this legality.`)
+      .notNullable()
+      .unsigned()
 
     table.bigInteger(`legality`)
-         .comment(`The legality associated with this card.`)
-         .notNullable()
-         .unsigned()
-         .index(`legalities_legality`)
+      .comment(`The legality associated with this card.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()

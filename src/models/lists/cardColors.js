@@ -5,16 +5,14 @@ export default class CardColors extends db.Model {
   static fields(table) {
     // Fields
     table.bigInteger(`card`)
-         .comment(`The card associated with the color.`)
-         .notNullable()
-         .unsigned()
-         .index(`cardColors_card`)
+      .comment(`The card associated with the color.`)
+      .notNullable()
+      .unsigned()
 
     table.bigInteger(`color`)
-         .comment(`The color associated with the card.`)
-         .notNullable()
-         .unsigned()
-         .index(`cardColors_color`)
+      .comment(`The color associated with the card.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()

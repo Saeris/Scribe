@@ -5,16 +5,14 @@ export default class Variations extends db.Model {
   static fields(table) {
     // Fields
     table.bigInteger(`card`)
-         .comment(`The card associated with this variation.`)
-         .notNullable()
-         .unsigned()
-         .index(`variations_card`)
+      .comment(`The card associated with this variation.`)
+      .notNullable()
+      .unsigned()
 
     table.bigInteger(`variation`)
-         .comment(`The variation associated with this card.`)
-         .notNullable()
-         .unsigned()
-         .index(`variations_variation`)
+      .comment(`The variation associated with this card.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()

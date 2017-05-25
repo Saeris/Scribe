@@ -6,25 +6,23 @@ export default class Name extends db.Model {
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
-         .notNullable()
-         .unsigned()
-         .primary()
-         .unique()
+      .notNullable()
+      .unsigned()
+      .primary()
+      .unique()
 
     table.string(`name`)
-         .comment(`The localized name of the card.`)
-         .notNullable()
+      .comment(`The localized name of the card.`)
+      .notNullable()
 
     table.bigInteger(`language`)
-         .comment(`The language code of the language the name is localized in.`)
-         .notNullable()
-         .unsigned()
-         .index(`name_language`)
+      .comment(`The language the name is localized in.`)
+      .notNullable()
+      .unsigned()
 
     table.bigInteger(`cards`)
-         .comment(`A list of cards that have this name.`)
-         .unsigned()
-         .index(`name_cards`)
+      .comment(`A list of cards that have this name.`)
+      .unsigned()
 
     // Timestamps
     table.timestamps()

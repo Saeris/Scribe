@@ -5,16 +5,14 @@ export default class CategoryCards extends db.Model {
   static fields(table) {
     // Fields
     table.bigInteger(`category`)
-         .comment(`The category associated with this card.`)
-         .notNullable()
-         .unsigned()
-         .index(`categorycards_category`)
+      .comment(`The category associated with this card.`)
+      .notNullable()
+      .unsigned()
 
     table.bigInteger(`card`)
-         .comment(`The card associated with this category.`)
-         .notNullable()
-         .unsigned()
-         .index(`categorycards_card`)
+      .comment(`The card associated with this category.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()

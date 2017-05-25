@@ -1,8 +1,8 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
 import { GraphQLDate } from 'graphql-iso-date'
-import { create, destroy, order, read, update } from './utilities'
+import { create, destroy, loadRelated, order, read, update } from './utilities'
 import Models from '../models'
-import { Card, LanguageCode } from './'
+import { Card, Language } from './'
 
 export const Input = new GraphQLInputObjectType({
   name: `RulingInput`,
@@ -52,20 +52,14 @@ export const Definition = new GraphQLObjectType({
       description: `The date this ruling was issued.`
     },
     language: {
-      type: LanguageCode.Definition,
+      type: Language.Definition,
       description: `The language code of this ruling.`,
-      resolve: (root, { id }) => Models.Ruling
-        .forge({ id })
-        .fetch({ withRelated: [`language`] })
-        .then(model => model.toJSON().language)
+      resolve: type => loadRelated(type.id, Models.Ruling, `language`)
     },
     cards: {
       type: new GraphQLList(Card.Definition),
       description: `List of cards that have this ruling.`,
-      resolve: (root, { id }) => Models.Ruling
-        .forge({ id })
-        .fetch({ withRelated: [`cards`] })
-        .then(model => model.toJSON().cards)
+      resolve: type => loadRelated(type.id, Models.Ruling, `cards`)
     }
   })
 })

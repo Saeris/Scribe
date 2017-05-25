@@ -5,19 +5,19 @@ export default class Rarity extends db.Model {
   static fields(table) {
     // Fields
     table.bigIncrements(`id`)
-         .notNullable()
-         .unsigned()
-         .primary()
-         .unique()
+      .notNullable()
+      .unsigned()
+      .primary()
+      .unique()
 
     table.string(`name`)
-         .comment(`The name of the rarity.`)
-         .notNullable()
-         .unique()
+      .comment(`The name of the rarity.`)
+      .notNullable()
+      .unique()
 
     table.string(`class`)
-         .comment(`CSS class name used to display the rarity.`)
-         .notNullable()
+      .comment(`CSS class name used to display the rarity.`)
+      .notNullable()
 
     // Timestamps
     table.timestamps()

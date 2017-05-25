@@ -5,16 +5,14 @@ export default class Sides extends db.Model {
   static fields(table) {
     // Fields
     table.bigInteger(`card`)
-         .comment(`The card associated with this side.`)
-         .notNullable()
-         .unsigned()
-         .index(`sides_card`)
+      .comment(`The card associated with this side.`)
+      .notNullable()
+      .unsigned()
 
     table.bigInteger(`side`)
-         .comment(`The side associated with this card.`)
-         .notNullable()
-         .unsigned()
-         .index(`sides_side`)
+      .comment(`The side associated with this card.`)
+      .notNullable()
+      .unsigned()
 
     // Timestamps
     table.timestamps()

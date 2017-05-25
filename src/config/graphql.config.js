@@ -1,16 +1,26 @@
 import Schema from '../schema'
+import { formatError } from '../utilities'
 
 class Graphql {
   // API Endpoint Settings
   api = {
     path: `/api`,
-    graphqlOptions: (request) => {
+    graphqlOptions: request => {
       let options = {
-        schema:     Schema,
-        root_value: Schema,
-        debug:      true
+        formatError : formatError,
+        schema:       Schema,
+        root_value:   Schema,
+        debug:        true
       }
       return options
+    },
+    route: {
+      plugins: {
+        rateLimit: {
+          enabled: true,
+          rate: request => ({limit: 5000, window: 3600 })
+        }
+      }
     }
   }
 

@@ -1,5 +1,5 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, order, read, update } from './utilities'
+import { create, destroy, loadRelated, order, read, update } from './utilities'
 import Models from '../models'
 import { Card } from './'
 
@@ -49,10 +49,7 @@ export const Definition = new GraphQLObjectType({
     cards: {
       type: new GraphQLList(Card.Definition),
       description: `A list of cards that have this category.`,
-      resolve: (root, { id }) => Models.Category
-        .forge({ id })
-        .fetch({ withRelated: [`cards`] })
-        .then(model => model.toJSON().cards)
+      resolve: type => loadRelated(type.id, Models.Category, `cards`)
     }
   })
 })
