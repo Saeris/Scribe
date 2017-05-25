@@ -9,6 +9,7 @@ export default class Legality extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     // Fields
     table.bigInteger(`format`)

@@ -9,10 +9,12 @@ export default class Layout extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     table.string(`name`)
          .comment(`The name of the layout.`)
          .notNullable()
+         .unique()
 
     table.bigInteger(`watermark`)
          .comment(`Watermark icon used in this layout.`)

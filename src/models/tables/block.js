@@ -10,10 +10,12 @@ export default class Block extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     table.string(`name`)
          .comment(`The name of the block.`)
          .notNullable()
+         .unique()
 
     // Timestamps
     table.timestamps()

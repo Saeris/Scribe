@@ -11,14 +11,17 @@ export default class Set extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     table.string(`name`)
          .comment(`The name of the set.`)
          .notNullable()
+         .unique()
 
     table.string(`code`)
          .comment(`The set code.`)
          .notNullable()
+         .unique()
 
     table.bigInteger(`block`)
          .comment(`The block the set belongs to.`)

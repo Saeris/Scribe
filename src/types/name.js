@@ -1,16 +1,14 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import order from './utilities/order'
+import { create, destroy, order, read, update } from './utilities'
 import Models from '../models'
-import * as Card from './card'
-import * as Language from './language'
+import { Card, Language } from './'
 
 export const Input = new GraphQLInputObjectType({
   name: `NameInput`,
   description: `Required fields for a new Name object`,
   fields: () => ({
     name:         { type: new GraphQLNonNull(GraphQLString) },
-    language:     { type: new GraphQLNonNull(GraphQLID) },
-    cards:        { type: new GraphQLList(GraphQLID) }
+    language:     { type: new GraphQLNonNull(GraphQLID) }
   })
 })
 
@@ -48,9 +46,9 @@ export const Definition = new GraphQLObjectType({
     language: {
       type: Language.Definition,
       description: `The language name.`,
-      resolve: (type) => Models.Name
-        .findById(type.id, { withRelated: [`language`] })
-        .then(model => model.toJSON().language)
+      resolve: (type) => Models.Language
+        .findById(type.language)
+        .then(model => model.toJSON())
     },
     cards: {
       type: new GraphQLList(Card.Definition),
@@ -75,20 +73,7 @@ export const Queries = {
       offset: { type: GraphQLInt },
       orderBy: { type: order(`name`, Fields) }
     },
-    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.Name
-      .query(qb => {
-        if (!!id) qb.whereIn(`id`, id)
-        if (!!filter) {
-          for (let field in filter) {
-            qb.whereIn(field, filter[field])
-          }
-        }
-        if (!!limit) qb.limit(limit)
-        if (!!offset) qb.offset(offset)
-        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
-      })
-      .fetchAll()
-      .then(collection => collection.toJSON())
+    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
   }
 }
 
@@ -97,24 +82,18 @@ export const Mutations = {
     type: Definition,
     description: `Creates a new Name`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => Models.Name
-      .findOrCreate(input)
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
   },
   updateName: {
     type: Definition,
     description: `Updates an existing Name, creates it if it does not already exist`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => Models.Name
-      .upsert(input, input)
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `name`)
   },
   deleteName: {
     type: Definition,
     description: `Deletes a Name by id`,
     args: { id: { type: GraphQLID } },
-    resolve: (root, { id }) => Models.Name
-      .destroy({ id })
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
   }
 }

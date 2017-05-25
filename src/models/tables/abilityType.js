@@ -10,10 +10,12 @@ export default class AbilityType extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     table.string(`name`)
          .comment(`The name of the ability type.`)
          .notNullable()
+         .unique()
 
     table.text(`description`)
          .comment(`Description of the ability type.`)

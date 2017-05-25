@@ -5,10 +5,10 @@ import 'winston-loggly-bulk' // https://github.com/loggly/winston-loggly-bulk
 dotenv.config()
 
 class Config {
-  ENV     = process.env.NODE_ENV && process.env.NODE_ENV.toLowerCase() || (process.env.NODE_ENV = `development`)
+  ENV = process.env.NODE_ENV && process.env.NODE_ENV.toLowerCase() || (process.env.NODE_ENV === `development`)
 
   // HTTP Server Settings
-  http    = {
+  http = {
     host: `127.0.0.1`,
     port: process.env.HTTP || 1337,
     routes: {
@@ -17,7 +17,7 @@ class Config {
   }
 
   // HTTPS Server Settings
-  https   = {
+  https = {
     host: `127.0.0.1`,
     port: process.env.HTTPS || 8080,
     routes: {
@@ -26,7 +26,7 @@ class Config {
   }
 
   // Sets the server's log level
-  level   = process.env.LOGLEVEL || `info`
+  level = process.env.LOGLEVEL || `info`
 
   // Winston Logger Settings
   winston = {
@@ -41,6 +41,7 @@ class Config {
         level:            this.level,
         prettyPrint:      true,
         handleExceptions: true,
+        humanReadableUnhandledException: true,
         json:             false,
         colorize:         true
       })
@@ -48,7 +49,7 @@ class Config {
   }
 
   // Good Logger Settings
-  good    = {
+  good = {
     ops: {
       interval: 1000
     },
@@ -67,7 +68,7 @@ class Config {
   }
 
   // Settings for MySQL Database
-  mysql   = {
+  mysql = {
     host:     process.env.DB_HOST || `127.0.0.1`,
     user:     process.env.DB_USERNAME || `root`,
     password: process.env.DB_PASSWORD || `password`,
@@ -76,18 +77,19 @@ class Config {
   }
 
   // Settings for SQLite3 Database
-  sqlite  = {
+  sqlite = {
     filename: `./src/scribe.sqlite`
   }
 
   // Settings for Knex
-  db      = {
+  db = {
     client:     this.ENV === `test` || this.ENV === `development` ? `sqlite` : `mysql`,
     connection: this.ENV === `test` || this.ENV === `development` ? this.sqlite : this.mysql,
     migrations: {
       directory: `./src/models`,
       tableName: `migrations`
-    }
+    },
+    useNullAsDefault: this.ENV === `test` || this.ENV === `development` ? true : false
   }
 }
 

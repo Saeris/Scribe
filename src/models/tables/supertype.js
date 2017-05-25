@@ -8,10 +8,12 @@ export default class Supertype extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     table.string(`name`)
          .comment(`The name of the supertype.`)
          .notNullable()
+         .unique()
 
     // Timestamps
     table.timestamps()

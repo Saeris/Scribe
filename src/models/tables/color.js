@@ -10,11 +10,13 @@ export default class Color extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     table.string(`symbol`)
          .comment(`The color symbol code for this color.`)
          .notNullable()
          .notNullable()
+         .unique()
 
     table.bigInteger(`icon`)
          .comment(`The icon associated with the color.`)

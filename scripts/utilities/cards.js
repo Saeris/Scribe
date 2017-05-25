@@ -6,12 +6,13 @@ import gql from 'graphql-tag'
 import chalk from 'chalk'
 import present from 'present'
 import moment from 'moment'
+import minimist from 'minimist'
 import { getSupertype, getType, getSubtype } from './types'
 import { getColor, getColorIdentity } from './colors'
 import { getLanguageCode } from './languages'
 
 const BaseUrl = `https://api.magicthegathering.io/v1`
-
+const { info, log, error } = console
 const duration = ms => moment.utc(ms).format(`HH:mm:ss.SSS`)
 
 const updateCard = async input => await client
@@ -24,7 +25,19 @@ const updateCard = async input => await client
     variables: { input }
   })
   .then(res => res.data.updateCard.id)
-  .catch(err => console.log(`Failed to update Card.`, input, err))
+  .catch(err => log(`Failed to update Card.`, input, err))
+
+const updatePrinting = async input => await client
+  .mutate({
+    mutation: gql`mutation updatePrinting($input: PrintingInput) {
+      updatePrinting(input: $input) {
+        id
+      }
+    }`,
+    variables: { input }
+  })
+  .then(res => res.data.updatePrinting.id)
+  .catch(err => log(`Failed to update Printing.`, input, err))
 
 const updateName = async input => await client
   .mutate({
@@ -36,16 +49,18 @@ const updateName = async input => await client
     variables: { input: input }
   })
   .then(res => res.data.updateName.id)
-  .catch(err => console.log(`Failed to update Name.`, input, err))
+  .catch(err => log(`Failed to update Name.`, input, err))
 
-const fetchImage = (url, set, num, language) => {
+const fetchImage = async (url, set, num, language) => {
+  if (!!!minimist(process.argv.slice(2)).getImages) return url
+
   const dir = `./src/images/sets/${set}`
   const image = `${dir}/${set}_${num}_${language}.jpg`
 
   if (fs.existsSync(image)) return image
   if (!fs.existsSync(dir)) mkdirp.sync(dir)
 
-  fetch(url).then(resp => resp.body.pipe(fs.createWriteStream(image)))
+  await fetch(url).then(resp => resp.body.pipe(fs.createWriteStream(image)))
 
   return image
 }
@@ -60,7 +75,7 @@ const updateImage = async input => await client
     variables: { input }
   })
   .then(res => res.data.updateImage.id)
-  .catch(err => console.log(`Failed to update Image.`, input, err))
+  .catch(err => log(`Failed to update Image.`, input, err))
 
 const updateArtist = async input => await client
   .mutate({
@@ -72,7 +87,7 @@ const updateArtist = async input => await client
     variables: { input }
   })
   .then(res => res.data.updateArtist.id)
-  .catch(err => console.log(`Failed to update Artist.`, input, err))
+  .catch(err => log(`Failed to update Artist.`, input, err))
 
 const updateLayout = async input => await client
   .mutate({
@@ -84,7 +99,7 @@ const updateLayout = async input => await client
     variables: { input }
   })
   .then(res => res.data.updateLayout.id)
-  .catch(err => console.log(`Failed to update Layout.`, input, err))
+  .catch(err => log(`Failed to update Layout.`, input, err))
 
 const updateRarity = async input => await client
   .mutate({
@@ -96,7 +111,7 @@ const updateRarity = async input => await client
     variables: { input }
   })
   .then(res => res.data.updateRarity.id)
-  .catch(err => console.log(`Failed to update Rarity.`, input, err))
+  .catch(err => log(`Failed to update Rarity.`, input, err))
 
 export { updateCard, updateName, updateImage, updateArtist, updateLayout, updateRarity }
 
@@ -108,37 +123,34 @@ export async function fetchCards(setCode) {
     let remaining
     let done = true
     let cards = []
-    console.log(`${prefix}Fetching card data for set ${chalk.green(setCode)}...`)
+    log(`${prefix}Fetching card data for set ${chalk.green(setCode)}...`)
     do {
       let response = await fetch(`${BaseUrl}/cards?set=${setCode}&page=${page}`).then(resp => resp)
       let data = await response.json()
       cards.push(...data.cards)
       let total = response.headers.get(`total-count`)
       remaining = total - (page * 100)
-      console.info(`${prefix}Retrieved page ${page}: ${cards.length} of ${total} cards.`)
+      info(`${prefix}Retrieved page ${page}: ${cards.length} of ${total} cards.`)
       remaining <= 0 ? done = false : page++
     } while (done)
     const end = present()
-    console.log(`${prefix}Finished fetching cards for set ${chalk.green(setCode)}! (${duration(end - start)})`)
+    log(`${prefix}Finished fetching cards for set ${chalk.green(setCode)}! (${duration(end - start)})`)
     return cards
   } catch (err) {
     const end = present()
-    console.error(`${prefix}Failed to fetch all cards. (${duration(end - start)})`, err)
+    error(`${prefix}Failed to fetch all cards. (${duration(end - start)})`, err)
   }
 }
 
 export async function insertCards(cards, set) {
   const start = present()
   const prefix = `${chalk.magenta(`[insertCards]: `)}`
-  console.log(`${prefix}Adding card data for set ${chalk.green(set.code)}`)
+  log(`${prefix}Adding card data for set ${chalk.green(set.code)}`)
   try {
     let i = 1
-    let results = []
     for (let card of await cards) {
-      console.info(`${prefix}Adding card ${chalk.green(card.name)}`)
-      if (!!!card.number) card.number = i
-      i++
-      card.set = set.id
+      info(`${prefix}Adding card ${chalk.green(card.name)}`)
+      const number = (!!card.number && card.number !== 0) ? card.number : i++
 
       let names = []
       let srcImages = []
@@ -150,104 +162,77 @@ export async function insertCards(cards, set) {
       if (!!card.foreignNames) {
         for (let name of card.foreignNames) {
           if (!!name.multiverseid) {
-            let languageCode = await getLanguageCode([name.language])
-            console.log(`Adding name: ${name.name}, language: ${name.language}, code: ${languageCode.id}`)
+            const languageCode = await getLanguageCode([`${name.language}`])
+            log(`Adding name: ${name.name}, language: ${name.language}, code: ${languageCode.code}`)
             names.push(await updateName({ name: name.name, language: languageCode.id }))
             srcImages.push({ url: name.imageUrl, multiverseid: name.multiverseid, code: languageCode.code, codeID: languageCode.id })
           }
         }
       }
-      card.names = await names
 
       let images = []
       for (let image of srcImages) {
         images.push(await updateImage({
-          url: fetchImage(image.url, set.code, card.number, image.code),
+          url: await fetchImage(image.url, set.code, number, image.code),
           multiverseid: image.multiverseid,
           language: image.codeID
         }))
       }
-      card.images = await images
-
-      card.layout = await updateLayout({ name:card.layout })
-
-      let colors = []
-      if (!!card.colorIdentity) colors = card.colorIdentity.map(color => `{${color}}`)
 
       let colorIdentity = ``
       if (!!card.colorIdentity && !!card.colors) {
         for (let identity of card.colors) colorIdentity = `${colorIdentity}/${identity}`
       }
 
-      card.colors = await getColor(colors)
-      card.colorIdentity = (colorIdentity !== ``) ? await getColorIdentity([colorIdentity.substring(1)]) : 6
+      const cardID = await updateCard({
+        name:           card.name,
+        names:          names,
+        border:         !!card.border ? card.border : null,
+        layout:         await updateLayout({ name:card.layout }),
+        watermark:      null,
+        manaCost:       !!card.manaCost ? card.manaCost : null,
+        cmc:            !!card.cmc ? card.cmc : 0,
+        colors:         !!card.colorIdentity ? await getColor(card.colorIdentity.map(color => `{${color}}`)) : null,
+        colorIdentity:  colorIdentity !== `` ? await getColorIdentity([colorIdentity.substring(1)]) : 6,
+        typeLine:       card.type,
+        supertypes:     !!card.supertypes ? await getSupertype(card.supertypes.map(name => `${name}`)) : null,
+        types:          !!card.types ? await getType(card.types.map(name => `${name}`)) : null,
+        subtypes:       !!card.subtypes ? await getSubtype(card.subtypes.map(name => `${name}`)) : null,
+        rarity:         await updateRarity({ name: card.rarity, class: `ss-${card.rarity.toLowerCase()}` }),
+        text:           !!card.text ? card.text : null,
+        categories:     null,
+        abilityTypes:   null,
+        keywords:       null,
+        hand:           !!card.hand ? card.hand : null,
+        life:           !!card.life ? card.life : null,
+        power:          !!card.power ? card.power : null,
+        toughness:      !!card.toughness ? card.toughness : null,
+        loyalty:        !!card.loyalty ? card.loyalty : null,
+        legalities:     [],
+        rulings:        []
+      })
 
-      let supertypes = []
-      if (!!card.supertypes) supertypes = card.supertypes.map(supertype => `${supertype}`)
-      card.supertypes = await getSupertype(supertypes)
-
-      let types = []
-      if (!!card.types) types = card.types.map(type => `${type}`)
-      card.types = await getType(types)
-
-      let subtypes = []
-      if (!!card.subtypes) subtypes = card.subtypes.map(subtype => `${subtype}`)
-      card.subtypes = await getSubtype(subtypes)
-
-      card.rarity = await updateRarity({ name: card.rarity, class: `ss-${card.rarity.toLowerCase()}` })
-      card.artist = await updateArtist({ name: card.artist })
-
-      results.push(await updateCard(new Card(card)))
+      await updatePrinting({
+        card:           cardID,
+        set:            set.id,
+        images:         images,
+        artist:         await updateArtist({ name: card.artist }),
+        sides:          [],
+        variations:     [],
+        originalType:   card.originalType,
+        originalText:   !!card.originalText ? card.originalText : null,
+        flavor:         !!card.flavor ? card.flavor : null,
+        number:         number,
+        timeshifted:    !!card.timeshifted ? card.timeshifted : false,
+        starter:        !!card.starter ? card.starter : false,
+        reserved:       !!card.reserved ? card.reserved : false,
+        source:         !!card.source ? card.source : null
+      })
     }
     const end = present()
-    console.log(`${prefix}Finished inserting ${results.length} cards for set ${chalk.green(set.code)}! (${duration(end - start)})`)
-    return results
+    log(`${prefix}Finished inserting cards for set ${chalk.green(set.code)}! (${duration(end - start)})`)
   } catch (err) {
     const end = present()
-    console.error(`${prefix}Failed to insert all cards for set ${chalk.green(set.code)}! (${duration(end - start)})`, err)
-  }
-}
-
-class Card {
-  constructor(data) {
-    this.names           = data.names
-    this.images          = data.images
-    this.sides           = !!data.sides ? data.sides : null
-    this.variations      = !!data.variations ? data.variations : null
-    this.border          = !!data.border ? data.border : `Black`
-    this.layout          = data.layout
-    this.watermark       = !!data.watermark ? data.watermark : null
-    this.manaCost        = !!data.manaCost ? data.manaCost : null
-    this.cmc             = !!data.cmc ? data.cmc : 0
-    this.colors          = data.colors
-    this.colorIdentity   = !!data.colorIdentity ? data.colorIdentity : 6
-    this.typeLine        = data.type
-    this.originalType    = data.originalType
-    this.supertypes      = data.supertypes
-    this.types           = data.types
-    this.subtypes        = data.subtypes
-    this.rarity          = data.rarity
-    this.set             = data.set
-    this.text            = !!data.text ? data.text : null
-    this.originalText    = !!data.originalText ? data.originalText : null
-    this.categories      = null
-    this.abilityTypes    = null
-    this.keywords        = null
-    this.flavor          = !!data.flavor ? data.flavor : null
-    this.hand            = !!data.hand ? data.hand : null
-    this.life            = !!data.life ? data.life : null
-    this.power           = !!data.power ? data.power : null
-    this.toughness       = !!data.toughness ? data.toughness : null
-    this.loyalty         = !!data.loyalty ? data.loyalty : null
-    this.legalities      = !!data.legalities ? data.legalities : null
-    this.rulings         = !!data.rulings ? data.rulings : null
-    this.artist          = data.artist
-    this.number          = data.number
-    this.releaseDate     = moment(data.releaseDate).format(`YYYY-MM-DD`)
-    this.printings       = !!data.printings ? data.printings : null
-    this.timeshifted     = !!data.timeshifted ? data.timeshifted : false
-    this.starter         = !!data.starter ? data.starter : false
-    this.reserved        = !!data.reserved ? data.reserved : false
-    this.source          = !!data.source ? data.source : null
+    error(`${prefix}Failed to insert all cards for set ${chalk.green(set.code)}! (${duration(end - start)})`, err)
   }
 }

@@ -6,10 +6,10 @@ import present from 'present'
 import moment from 'moment'
 
 const BaseUrl = `https://api.magicthegathering.io/v1`
-
+const { info, log, error } = console
 const duration = ms => moment.utc(ms).format(`HH:mm:ss.SSS`)
 
-const updateType = async input => await client
+const updateType = input => client
   .mutate({
     mutation: gql`mutation updateType($input: TypeInput) {
       updateType(input: $input) {
@@ -19,7 +19,7 @@ const updateType = async input => await client
     variables: { input }
   })
   .then(res => res.data.updateType.id)
-  .catch(err => console.log(`Failed to update Type.`, input,  err))
+  .catch(err => log(`Failed to update Type.`, input,  err))
 
 const getType = async input => await client
   .query({
@@ -28,12 +28,13 @@ const getType = async input => await client
         id
       }
     }`,
-    variables: { input }
+    variables: { input },
+    fetchPolicy: `cache-first`
   })
   .then(res => res.data.type.map(type => type.id))
-  .catch(err => console.log(`Failed to get Type.`, input,  err))
+  .catch(err => log(`Failed to get Type.`, input,  err))
 
-const updateSubtype = async input => await client
+const updateSubtype = input => client
   .mutate({
     mutation: gql`mutation updateSubtype($input: SubtypeInput) {
       updateSubtype(input: $input) {
@@ -43,7 +44,7 @@ const updateSubtype = async input => await client
     variables: { input }
   })
   .then(res => res.data.updateSubtype.id)
-  .catch(err => console.log(`Failed to update Subtype.`, input,  err))
+  .catch(err => log(`Failed to update Subtype.`, input,  err))
 
 const getSubtype = async input => await client
   .query({
@@ -52,12 +53,13 @@ const getSubtype = async input => await client
         id
       }
     }`,
-    variables: { input }
+    variables: { input },
+    fetchPolicy: `cache-first`
   })
   .then(res => res.data.subtype.map(subtype => subtype.id))
-  .catch(err => console.log(`Failed to get Subtype.`, input,  err))
+  .catch(err => log(`Failed to get Subtype.`, input,  err))
 
-const updateSupertype = async input => await client
+const updateSupertype = input => client
   .mutate({
     mutation: gql`mutation updateSupertype($input: SupertypeInput) {
       updateSupertype(input: $input) {
@@ -67,7 +69,7 @@ const updateSupertype = async input => await client
     variables: { input }
   })
   .then(res => res.data.updateSupertype.id)
-  .catch(err => console.log(`Failed to update Supertype.`, input,  err))
+  .catch(err => log(`Failed to update Supertype.`, input,  err))
 
 const getSupertype = async input => await client
   .query({
@@ -76,10 +78,11 @@ const getSupertype = async input => await client
         id
       }
     }`,
-    variables: { input }
+    variables: { input },
+    fetchPolicy: `cache-first`
   })
   .then(res => res.data.supertype.map(supertype => supertype.id))
-  .catch(err => console.log(`Failed to get Supertype.`, input,  err))
+  .catch(err => log(`Failed to get Supertype.`, input,  err))
 
 export { updateSupertype, updateType, updateSubtype, getSupertype, getType, getSubtype }
 
@@ -90,7 +93,7 @@ export async function fetchTypes() {
     let subtypes = await fetch(`${BaseUrl}/subtypes`).then(response => response.json())
     return { ...supertypes, ...types, ...subtypes }
   } catch (err) {
-    console.error(err)
+    error(err)
   }
 }
 
@@ -104,24 +107,37 @@ export async function insertTypes(data) {
       types: []
     }
     let types = await data
-    console.log(`${prefix}Adding all types to database.`)
-    for (let supertype of types.supertypes) {
-      console.info(`${prefix}Adding supertype ${chalk.green(supertype)}`)
-      results.supertypes.push(await updateSupertype({ name: supertype }))
-    }
-    for (let type of types.types) {
-      console.info(`${prefix}Adding type ${chalk.green(type)}`)
-      results.types.push(await updateType({ name: type }))
-    }
-    for (let subtype of types.subtypes) {
-      console.info(`${prefix}Adding subtype ${chalk.green(subtype)}`)
-      results.subtypes.push(await updateSubtype({ name: subtype }))
-    }
+    log(`${prefix}Adding all types to database.`)
+
+    results.supertypes = await Promise
+      .all(types.supertypes.map(supertype => {
+        info(`${prefix}Adding Supertype ${chalk.green(supertype)}`)
+        return updateSupertype({ name: supertype })
+      }))
+      .then(info(`${prefix}Finished adding Supertypes`))
+      .catch(err => error(`${prefix}Failed to add Supertypes.`, { err }))
+
+    results.types = await Promise
+      .all(types.types.map(type => {
+        info(`${prefix}Adding Type ${chalk.green(type)}`)
+        return updateType({ name: type })
+      }))
+      .then(info(`${prefix}Finished adding Types`))
+      .catch(err => error(`${prefix}Failed to add Types.`, { err }))
+
+    results.types = await Promise
+      .all(types.subtypes.map(subtype => {
+        info(`${prefix}Adding Subtype ${chalk.green(subtype)}`)
+        return updateType({ name: subtype })
+      }))
+      .then(info(`${prefix}Finished adding Subtypes`))
+      .catch(err => error(`${prefix}Failed to add Subtypes.`, { err }))
+
     const end = present()
-    console.log(`${prefix}Finished inserting all types! (${duration(end - start)})`)
+    log(`${prefix}Finished inserting all types! (${duration(end - start)})`)
     return results
   } catch (err) {
     const end = present()
-    console.error(`${prefix}Failed to add all types to the database. (${duration(end - start)})`, err)
+    error(`${prefix}Failed to add all types to the database. (${duration(end - start)})`, err)
   }
 }

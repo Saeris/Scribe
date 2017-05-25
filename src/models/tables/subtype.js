@@ -8,10 +8,12 @@ export default class Subtype extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     table.string(`name`)
          .comment(`The name of the subtype.`)
          .notNullable()
+         .unique()
 
     // Timestamps
     table.timestamps()

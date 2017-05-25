@@ -4,6 +4,7 @@ import chalk from 'chalk'
 import present from 'present'
 import moment from 'moment'
 
+const { info, log, error } = console
 const duration = ms => moment.utc(ms).format(`HH:mm:ss.SSS`)
 
 const getColor = async input => await client
@@ -13,10 +14,11 @@ const getColor = async input => await client
         id
       }
     }`,
-    variables: { input }
+    variables: { input },
+    fetchPolicy: `cache-first`
   })
   .then(res => res.data.color.map(color => color.id))
-  .catch(err => console.log(`Failed to get Color.`, input,  err))
+  .catch(err => log(`Failed to get Color.`, input,  err))
 
 const getColorIdentity = async input => await client
   .query({
@@ -25,12 +27,13 @@ const getColorIdentity = async input => await client
         id
       }
     }`,
-    variables: { input }
+    variables: { input },
+    fetchPolicy: `cache-first`
   })
   .then(res =>  res.data.colorIdentity.map(identity => identity.id))
-  .catch(err => console.log(`Failed to get Color Identity.`, input,  err))
+  .catch(err => log(`Failed to get Color Identity.`, input,  err))
 
-const updateColorIcon = async input => await client
+const updateColorIcon = input => client
   .mutate({
     mutation: gql`mutation updateColorIcon($input: IconInput) {
       updateIcon(input: $input) {
@@ -40,9 +43,9 @@ const updateColorIcon = async input => await client
     variables: { input }
   })
   .then(res => res.data.updateIcon.id)
-  .catch(err => console.log(`Failed to update Color Icon.`, input,  err))
+  .catch(err => log(`Failed to update Color Icon.`, input,  err))
 
-const updateColorIdentity = async input => await client
+const updateColorIdentity = input => client
   .mutate({
     mutation: gql`mutation updateColorIdentity($input: ColorIdentityInput) {
       updateColorIdentity(input: $input) {
@@ -52,9 +55,9 @@ const updateColorIdentity = async input => await client
     variables: { input }
   })
   .then(res => res.data.updateColorIdentity.id)
-  .catch(err => console.log(`Failed to update Color Identity.`, input,  err))
+  .catch(err => log(`Failed to update Color Identity.`, input,  err))
 
-const updateColor = async input => await client
+const updateColor = input => client
   .mutate({
     mutation: gql`mutation updateColor($input: ColorInput) {
       updateColor(input: $input) {
@@ -64,7 +67,7 @@ const updateColor = async input => await client
     variables: { input }
   })
   .then(res => res.data.updateColor.id)
-  .catch(err => console.log(`Failed to update Color.`, input,  err))
+  .catch(err => log(`Failed to update Color.`, input,  err))
 
 export { getColor, getColorIdentity, updateColorIcon, updateColorIdentity, updateColor }
 
@@ -72,7 +75,7 @@ export async function insertColors() {
   const start = present()
   const prefix = `${chalk.red(`[insertColors]: `)}`
   try {
-    console.log(`${prefix}Adding all colors and identities to database...`)
+    log(`${prefix}Adding all colors and identities to database...`)
     const colorIdentities = [
       { name: `White`, alias: `White`, colorList: [1], multicolored: false, devoid: false },
       { name: `Blue`, alias: `Blue`, colorList: [2], multicolored: false, devoid: false },
@@ -167,19 +170,24 @@ export async function insertColors() {
       { symbol: `{G/P}`, className: `ms-gp ms-split`, identity: 5 }
     ]
 
-    for (let { name, alias, colorList, multicolored, devoid } of colorIdentities) {
-      console.info(`${prefix}Adding color identity ${chalk.green(alias)}`)
-      await updateColorIdentity({ name, alias, colors: colorList, multicolored, devoid })
-    }
-    for (let { symbol, className, identity } of colors) {
-      console.info(`${prefix}Adding color ${chalk.green(symbol)}`)
+    await Promise.all(colorIdentities.map(({ name, alias, colorList, multicolored, devoid }) => {
+      info(`${prefix}Adding color identity ${chalk.green(alias)}`)
+      updateColorIdentity({ name, alias, colors: colorList, multicolored, devoid })
+    }))
+    .then(info(`${prefix}Finished adding Color Identities.`))
+    .catch(err => error(`${prefix}Failed to add Color Identities.`, { err }))
+
+    await Promise.all(colors.map(async ({ symbol, className, identity }) => {
+      info(`${prefix}Adding color ${chalk.green(symbol)}`)
       const icon = await updateColorIcon({ name: symbol, class: className })
-      await updateColor({ symbol, icon, identity })
-    }
+      updateColor({ symbol, icon, identity })
+    }))
+    .then(info(`${prefix}Finished adding Colors.`))
+    .catch(err => error(`${prefix}Failed to add Colors.`, { err }))
     const end = present()
-    console.log(`${prefix}Finished inserting all colors and identities! (${duration(end - start)})`)
+    log(`${prefix}Finished inserting all colors and identities! (${duration(end - start)})`)
   } catch (err) {
     const end = present()
-    console.error(`${prefix}Failed to add all colors and identities to the database. (${duration(end - start)})`, err)
+    error(`${prefix}Failed to add all colors and identities to the database. (${duration(end - start)})`, err)
   }
 }

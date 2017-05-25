@@ -9,10 +9,12 @@ export default class Language extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     table.string(`name`)
          .comment(`The name of the language.`)
          .notNullable()
+         .unique()
 
     table.bigInteger(`code`)
          .comment(`The language code associated with this language.`)

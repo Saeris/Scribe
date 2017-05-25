@@ -9,10 +9,12 @@ export default class Keyword extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     table.string(`name`)
          .comment(`The name of the keyword.`)
          .notNullable()
+         .unique()
 
     table.text(`reminderText`)
          .comment(`A short description of the keyword rules.`)

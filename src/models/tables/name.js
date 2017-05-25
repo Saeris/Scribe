@@ -9,6 +9,7 @@ export default class Name extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     table.string(`name`)
          .comment(`The localized name of the card.`)

@@ -9,10 +9,12 @@ export default class Format extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     table.string(`name`)
          .comment(`The name of the format.`)
          .notNullable()
+         .unique()
 
     table.bigInteger(`sets`)
          .comment(`List of sets that are included in this format.`)

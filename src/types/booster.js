@@ -1,5 +1,4 @@
 import { GraphQLID, GraphQLInt, GraphQLEnumType, GraphQLList, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import order from './utilities/order'
 import Models from '../models'
 
 export const Input = new GraphQLInputObjectType({

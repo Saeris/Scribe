@@ -15,14 +15,8 @@ const db = knex({
 })
 
 async function resetdb() {
-  const destroy = await db.raw(`DROP DATABASE IF EXISTS scribe;`).then(res => res)
-
-  console.log(destroy)
-
-  const create = await db.raw(`CREATE DATABASE IF NOT EXISTS scribe;`).then(res => res)
-
-  console.log(create)
-
+  await db.raw(`DROP DATABASE IF EXISTS scribe;`).then(res => res)
+  await db.raw(`CREATE DATABASE IF NOT EXISTS scribe;`).then(res => res)
   db.destroy()
 }
 

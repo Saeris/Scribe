@@ -1,9 +1,8 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
 import { GraphQLDate } from 'graphql-iso-date'
-import order from './utilities/order'
+import { create, destroy, order, read, update } from './utilities'
 import Models from '../models'
-import * as Card from './card'
-import * as LanguageCode from './languageCode'
+import { Card, LanguageCode } from './'
 
 export const Input = new GraphQLInputObjectType({
   name: `RulingInput`,
@@ -84,20 +83,7 @@ export const Queries = {
       offset: { type: GraphQLInt },
       orderBy: { type: order(`ruling`, Fields) }
     },
-    resolve: (root, { id, filter, limit, offset, orderBy }) => Models.Ruling
-      .query(qb => {
-        if (!!id) qb.whereIn(`id`, id)
-        if (!!filter) {
-          for (let field in filter) {
-            qb.whereIn(field, filter[field])
-          }
-        }
-        if (!!limit) qb.limit(limit)
-        if (!!offset) qb.offset(offset)
-        if (!!orderBy) qb.orderBy(...Object.values(orderBy))
-      })
-      .fetchAll()
-      .then(collection => collection.toJSON())
+    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
   }
 }
 
@@ -106,24 +92,18 @@ export const Mutations = {
     type: Definition,
     description: `Creates a new Ruling`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => Models.Ruling
-      .findOrCreate(input)
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
   },
   updateRuling: {
     type: Definition,
     description: `Updates an existing Ruling, creates it if it does not already exist`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => Models.Ruling
-      .upsert(input, input)
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => update(parent, args, context, Definition.name)
   },
   deleteRuling: {
     type: Definition,
     description: `Deletes a Ruling by id`,
     args: { id: { type: GraphQLID } },
-    resolve: (root, { id }) => Models.Ruling
-      .destroy({ id })
-      .then(model => model.toJSON())
+    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
   }
 }

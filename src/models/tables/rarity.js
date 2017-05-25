@@ -8,10 +8,12 @@ export default class Rarity extends db.Model {
          .notNullable()
          .unsigned()
          .primary()
+         .unique()
 
     table.string(`name`)
          .comment(`The name of the rarity.`)
          .notNullable()
+         .unique()
 
     table.string(`class`)
          .comment(`CSS class name used to display the rarity.`)
