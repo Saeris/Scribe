@@ -1,5 +1,6 @@
 import { GraphQLID, GraphQLNonNull, GraphQLInt, GraphQLEnumType, GraphQLString, GraphQLList, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { destroy, load, loadRelated, order, read } from './utilities'
+import { isAuthenticated, estroy, load, loadRelated, order, read, trace } from './utilities'
+import { pipe } from '../utilities'
 import { info, error } from 'winston'
 import Models from '../models'
 import { Name, Layout, Color, ColorIdentity, Category, AbilityType, Keyword, Legality, Ruling, Printing } from './'
@@ -105,7 +106,7 @@ export const Definition = new GraphQLObjectType({
     names: {
       type: new GraphQLList(Name.Definition),
       description: `The card names. This includes a list of foreign names indexed by a language code. Example: enUS`,
-      resolve: type => loadRelated(type.id, Models.Card, `names`)
+      resolve: (parent, args, context, info) => pipe(isAuthenticated, loadRelated(parent.id, Models.Card, `names`))(parent, args, context, info)
     },
     border: {
       type: GraphQLString,

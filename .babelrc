@@ -18,7 +18,8 @@
         "loose": true,
         "useBuiltIns": true
       }
-    ]
+    ],
+    "stage-0"
   ],
   "sourceMaps": "both"
 }

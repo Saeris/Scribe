@@ -1,4 +1,5 @@
 export { isAuthenticated, isNotAuthenticated } from './authenticated'
+export { isAuthorized } from './authorized'
 export { baseResolver } from './baseResolver'
 export { create } from './create'
 export { destroy } from './destroy'

@@ -3,9 +3,9 @@ import moment from 'moment'
 import { log } from 'winston'
 const duration = ms => moment.utc(ms).format(`HH:mm:ss.SSS`)
 
-export const traceResolve = fn => async (obj, args, context, info) => {
+export const trace = resolver => async (...args) => {
   const start = present()
-  const result = await fn(obj, args, context, info)
+  const result = await resolver(...args)
   const end = present()
   log(`Resolver took ${duration(end - start)} ms`)
   return result

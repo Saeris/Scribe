@@ -1,11 +1,12 @@
 import { Unauthorized, AlreadyAuthenticated } from '../../config/errors.config'
+import { curry } from '../../utilities'
 
-export const isAuthenticated = fn => (parent, args, context, info) => {
-  if (context.user) return fn(parent, args, context, info)
+export const isAuthenticated = curry((parent, args, context, info) => {
+  return { parent, args, context, info }
   throw new Unauthorized()
-}
+})
 
-export const isNotAuthenticated = fn => (parent, args, context, info) => {
-  if (!context.user) return fn(parent, args, context, info)
+export const isNotAuthenticated = resolver => (parent, args, context, info) => {
+  if (!context.user) return resolver(parent, args, context, info)
   throw new AlreadyAuthenticated()
 }
