@@ -1,4 +1,4 @@
-import { invariant } from './'
+import { invariant } from './invariant'
 /**
  * Fancy ID generator that creates 20-character string identifiers with the
  * following properties:
@@ -16,7 +16,7 @@ import { invariant } from './'
  * Source: https://github.com/meldio/meldio/blob/master/src/jsutils/generatePushId.js
  */
 
-export const generatePushID = (function() {
+export const generatePushID = (() => {
   const PUSH_CHARS = `-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz`
   let   lastPushTime = 0
   const lastRandChars = []
@@ -36,21 +36,17 @@ export const generatePushID = (function() {
     let id = timeStampChars.join(``)
 
     if (!duplicateTime) {
-      for (let i = 0; i < 12; i++) {
-        lastRandChars[i] = Math.floor(Math.random() * 64)
-      }
+      for (let i = 0; i < 12; i++) lastRandChars[i] = Math.floor(Math.random() * 64)
     } else {
       let i
-      for (i = 11; i >= 0 && lastRandChars[i] === 63; i--) {
-        lastRandChars[i] = 0
-      }
+      for (i = 11; i >= 0 && lastRandChars[i] === 63; i--) lastRandChars[i] = 0
       lastRandChars[i]++
     }
-    for (let i = 0; i < 12; i++) {
-      id += PUSH_CHARS.charAt(lastRandChars[i])
-    }
+    for (let i = 0; i < 12; i++) id += PUSH_CHARS.charAt(lastRandChars[i])
     invariant(id.length === 20, `Length should be 20.`)
 
     return id
   }
-}())
+})()
+
+generatePushID()

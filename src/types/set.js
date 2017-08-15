@@ -118,7 +118,7 @@ export const Mutations = {
     resolve: (parent, { input }, context) => Models.Set
       .findOrCreate(input)
       .then(model => {
-        let set = model.toJSON()
+        const set = model.toJSON()
 
         if (!!set.block) Models.BlockSets.findOrCreate({ block: set.block, set: set.id })
 
@@ -136,7 +136,7 @@ export const Mutations = {
       return Models.Set
         .upsert({ name }, { ...fields })
         .then(model => {
-          let set = model.toJSON()
+          const set = model.toJSON()
 
           if (!!set.block) Models.BlockSets.findOrCreate({ block: set.block, set: set.id })
 

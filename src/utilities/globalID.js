@@ -1,4 +1,5 @@
-import { invariant, generatePushId } from './'
+import { invariant } from './invariant'
+import { generatePushID } from './generatePushID'
 
 const ENCODING_MAP =
   { '0': `q`, '1': `r`, '2': `s`, '3': `t`, '4': `u`, '5': `v`, '6': `w`,
@@ -40,7 +41,21 @@ const fromGlobalId = globalId => {
   }
 }
 
-export const newGlobalId = type => toGlobalId(type, generatePushId())
+export const newGlobalId = type => toGlobalId(type, generatePushID())
+
+export const bookshelfGlobalID = bookshelf => {
+  // Store prototypes for later
+  let modelPrototype = bookshelf.Model.prototype
+
+  // Extends the default model class
+  bookshelf.Model = bookshelf.Model.extend({
+    initialize: function(attributes, options) {
+      modelPrototype.initialize.call(this)
+
+      if (this.useGlobalID) this.defaults = { ...this.defaults, [this.idAttribute]: newGlobalId(this.tableName) }
+    }
+  })
+}
 
 export const typeFromGlobalId = globalId =>fromGlobalId(globalId).type
 

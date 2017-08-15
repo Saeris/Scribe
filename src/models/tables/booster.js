@@ -1,21 +1,17 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 
+@bookshelfOptions
 export default class Booster extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigIncrements(`id`)
+    table.string(`id`)
       .notNullable()
-      .unsigned()
       .primary()
       .unique()
 
     // Timestamps
     table.timestamps()
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `booster` }
-
-  get hasTimestamps() { return true }
 }

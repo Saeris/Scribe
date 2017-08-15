@@ -1,31 +1,29 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 import { Card, Set, Image, Artist } from './'
 import { Images, Sides, Variations } from '../lists'
 
+@bookshelfOptions
 export default class Printing extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigIncrements(`id`)
+    table.string(`id`)
       .notNullable()
-      .unsigned()
       .primary()
       .unique()
 
-    table.bigInteger(`card`)
+    table.string(`card`)
       .comment(`The card this is a printing of.`)
       .notNullable()
-      .unsigned()
 
-    table.bigInteger(`set`)
+    table.string(`set`)
       .comment(`The set the card printed in.`)
       .notNullable()
-      .unsigned()
 
-    table.bigInteger(`artist`)
+    table.string(`artist`)
       .comment(`The artist of the card on this printing.`)
       .notNullable()
-      .unsigned()
 
     table.string(`originaltype`)
       .comment(`The original type on the card at the time it was printed.`)
@@ -55,11 +53,6 @@ export default class Printing extends db.Model {
     // Timestamps
     table.timestamps()
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `printing` }
-
-  get hasTimestamps() { return true }
 
   card = () => this.belongsTo(Card, `card`, `id`)
 

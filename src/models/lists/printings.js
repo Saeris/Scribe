@@ -1,18 +1,18 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 
+@bookshelfOptions({ gid: false })
 export default class Printings extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigInteger(`card`)
+    table.string(`card`)
       .comment(`The card associated with this printing.`)
       .notNullable()
-      .unsigned()
 
-    table.bigInteger(`printing`)
+    table.string(`printing`)
       .comment(`The printing associated with this card.`)
       .notNullable()
-      .unsigned()
 
     // Timestamps
     table.timestamps()
@@ -20,9 +20,4 @@ export default class Printings extends db.Model {
     // Keys
     table.primary([`card`, `printing`])
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `printings` }
-
-  get hasTimestamps() { return true }
 }

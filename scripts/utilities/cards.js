@@ -200,7 +200,7 @@ export const insertCards = async (cards, set) => {
         for (let identity of card.colors) colorIdentity = `${colorIdentity}/${identity}`
       }
 
-      const cardID = updateCard(await promiseMapAll({
+      const cardID = await updateCard(await promiseMapAll({
         name:           card.name,
         names:          Promise.all(names.map(name => updateName(name))),
         border:         !!card.border ? card.border : null,

@@ -1,18 +1,18 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 
+@bookshelfOptions({ gid: false })
 export default class FormatSets extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigInteger(`format`)
+    table.string(`format`)
       .comment(`The format associated with this set.`)
       .notNullable()
-      .unsigned()
 
-    table.bigInteger(`set`)
+    table.string(`set`)
       .comment(`The set associated with this format.`)
       .notNullable()
-      .unsigned()
 
     // Timestamps
     table.timestamps()
@@ -20,9 +20,4 @@ export default class FormatSets extends db.Model {
     // Keys
     table.primary([`format`, `set`])
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `formatsets` }
-
-  get hasTimestamps() { return true }
 }

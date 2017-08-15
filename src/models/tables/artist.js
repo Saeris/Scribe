@@ -1,14 +1,15 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 import { Card } from './'
 import { ArtistCards } from '../lists'
 
+@bookshelfOptions
 export default class Artist extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigIncrements(`id`)
+    table.string(`id`)
       .notNullable()
-      .unsigned()
       .primary()
       .unique()
 
@@ -23,11 +24,6 @@ export default class Artist extends db.Model {
     // Timestamps
     table.timestamps()
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `artist` }
-
-  get hasTimestamps() { return true }
 
   cards = () => this.hasMany(Card, `id`).through(ArtistCards, `id`, `card`, `artist`)
 }

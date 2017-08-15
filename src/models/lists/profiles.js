@@ -1,18 +1,18 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 
+@bookshelfOptions({ gid: false })
 export default class Profiles extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigInteger(`profile`)
+    table.string(`profile`)
       .comment(`The profile associated with this user.`)
       .notNullable()
-      .unsigned()
 
-    table.bigInteger(`user`)
+    table.string(`user`)
       .comment(`The user associated with this profile.`)
       .notNullable()
-      .unsigned()
 
     // Timestamps
     table.timestamps()
@@ -20,9 +20,4 @@ export default class Profiles extends db.Model {
     // Keys
     table.primary([`profile`, `user`])
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `profiles` }
-
-  get hasTimestamps() { return true }
 }

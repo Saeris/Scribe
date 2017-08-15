@@ -1,18 +1,18 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 
+@bookshelfOptions({ gid: false })
 export default class Supertypes extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigInteger(`card`)
+    table.string(`card`)
       .comment(`The card associated with this supertype.`)
       .notNullable()
-      .unsigned()
 
-    table.bigInteger(`supertype`)
+    table.string(`supertype`)
       .comment(`The supertype associated with this card.`)
       .notNullable()
-      .unsigned()
 
     // Timestamps
     table.timestamps()
@@ -20,9 +20,4 @@ export default class Supertypes extends db.Model {
     // Keys
     table.primary([`card`, `supertype`])
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `supertypes` }
-
-  get hasTimestamps() { return true }
 }

@@ -1,18 +1,18 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 
+@bookshelfOptions({ gid: false })
 export default class CategoryCards extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigInteger(`category`)
+    table.string(`category`)
       .comment(`The category associated with this card.`)
       .notNullable()
-      .unsigned()
 
-    table.bigInteger(`card`)
+    table.string(`card`)
       .comment(`The card associated with this category.`)
       .notNullable()
-      .unsigned()
 
     // Timestamps
     table.timestamps()
@@ -20,9 +20,4 @@ export default class CategoryCards extends db.Model {
     // Keys
     table.primary([`category`, `card`])
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `categorycards` }
-
-  get hasTimestamps() { return true }
 }

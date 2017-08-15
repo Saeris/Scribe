@@ -1,5 +1,5 @@
-import { GraphQLID, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, load, loadRelated, order, read, update } from './utilities'
+import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
+import { destroy, hashPassword, issueToken, load, loadRelated, order, read, update, validatePassword, verifyToken } from './utilities'
 import Models from '../models'
 import { Collection, Gender, Profile } from './'
 
@@ -91,6 +91,10 @@ export const Definition = new GraphQLObjectType({
       type: Collection.Definition,
       description: `A user's card collection.`,
       resolve: type => load(type.collection, Models.Collection)
+    },
+    token: {
+      type: GraphQLString,
+      description: `JSON Web Token for this User`
     }
   })
 })
@@ -113,12 +117,6 @@ export const Queries = {
 }
 
 export const Mutations = {
-  createUser: {
-    type: Definition,
-    description: `Creates a new User`,
-    args: { input: { type: Input } },
-    resolve: (parent, { input }, context) => create(parent, args, context, Definition.name)
-  },
   updateUser: {
     type: Definition,
     description: `Updates an existing User, creates it if it does not already exist`,
@@ -140,22 +138,25 @@ export const Mutations = {
       }
     }),
     args: {
-      username: { name: `username`, type: new GraphQLNonNull(GraphQLString) },
+      email: { name: `email`, type: new GraphQLNonNull(GraphQLString) },
       password: { name: `password`, type: new GraphQLNonNull(GraphQLString) }
     },
-    resolve: (parent, args, context) => {
-
-    }
-  },
-  logout: {
-    type: new GraphQLObjectType({
-      name: `logout`,
-      fields: {
-        result: { type: GraphQLBoolean }
-      }
-    }),
-    resolve: (parent, args, context) => {
-
+    resolve: (parent, { email, password }, context) => {
+      // find user by email
+      return Models.User.findOne({ where: { email } }).then(user => {
+        if (user) {
+          return validatePassword(password, user.password).then(res => {
+            if (res) {
+              const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET)
+              user.jwt = token
+              context.user = Promise.resolve(user)
+              return user
+            }
+            return Promise.reject(`Incorrect Password`)
+          })
+        }
+        return Promise.reject(`Email Address Not Found`)
+      })
     }
   },
   register: {
@@ -168,11 +169,28 @@ export const Mutations = {
       }
     }),
     args: {
-      username: { name: `username`, type: new GraphQLNonNull(GraphQLString) },
-      password: { name: `password`, type: new GraphQLNonNull(GraphQLString) }
+      email: { name: `email`, type: new GraphQLNonNull(GraphQLString) },
+      password: { name: `password`, type: new GraphQLNonNull(GraphQLString) },
+      username: { name: `username`, type: new GraphQLNonNull(GraphQLString) }
     },
-    resolve: (parent, args, context) => {
+    resolve: (parent, { email, password, username }, context) => {
+      return Models.User.findOne({ where: { email } }).then(exists => {
+        if (!exists) {
+          return hashPassword(password, 10).then(hash=> Models.User.create({
+            email,
+            password: hash,
+            username: username
+          })).then(user => {
+            const { id } = user
+            const token = jwt.sign({ id, email }, JWT_SECRET)
+            user.jwt = token
+            ctx.user = Promise.resolve(user)
+            return user
+          })
+        }
 
+        return Promise.reject(`A User With That Email Already Exists`)
+      })
     }
   }
 }

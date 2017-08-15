@@ -1,31 +1,26 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 import { Binder, Deck, OwnedCard, User } from './'
 import { Binders, Decks, CollectionCards } from '../lists'
 
+@bookshelfOptions
 export default class Collection extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigIncrements(`id`)
+    table.string(`id`)
       .notNullable()
-      .unsigned()
       .primary()
       .unique()
 
-    table.bigInteger(`owner`)
+    table.string(`owner`)
       .comment(`The owner of this collection.`)
       .notNullable()
-      .unsigned()
       .unique()
 
     // Timestamps
     table.timestamps()
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `collection` }
-
-  get hasTimestamps() { return true }
 
   owner = () => this.hasOne(User, `id`, `owner`)
 

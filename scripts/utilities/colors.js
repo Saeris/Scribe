@@ -75,113 +75,119 @@ export const insertColors = async () => {
   try {
     log(`${prefix}Adding all colors and identities to database...`)
     const colorIdentities = [
-      { name: `White`, alias: `White`, colorList: [1], multicolored: false, devoid: false },
-      { name: `Blue`, alias: `Blue`, colorList: [2], multicolored: false, devoid: false },
-      { name: `Black`, alias: `Black`, colorList: [3], multicolored: false, devoid: false },
-      { name: `Red`, alias: `Red`, colorList: [4], multicolored: false, devoid: false },
-      { name: `Green`, alias: `Green`, colorList: [5], multicolored: false, devoid: false },
-      { name: `Colorless`, alias: `Colorless`, colorList: Array(33 - 6 + 1).fill().map((_, i) => 6 + i), multicolored: false, devoid: false },
-      { name: `Devoid`, alias: `Devoid`, colorList: [6], multicolored: false, devoid: true },
-      { name: `Snow`, alias: `Snow`, colorList: [34], multicolored: false, devoid: false },
-      { name: `White/Blue`, alias: `Azorius Senate`, colorList: [1, 2], multicolored: true, devoid: false },
-      { name: `Blue/Black`, alias: `House Dimir`, colorList: [2, 3], multicolored: true, devoid: false },
-      { name: `Black/Red`, alias: `Cult of Rakdos`, colorList: [3, 4], multicolored: true, devoid: false },
-      { name: `Red/Green`, alias: `Gruul Clans`, colorList: [4, 5], multicolored: true, devoid: false },
-      { name: `White/Green`, alias: `Selesnya Conclave`, colorList: [5, 1], multicolored: true, devoid: false },
-      { name: `White/Black`, alias: `Orzhov Syndicate`, colorList: [1, 3], multicolored: true, devoid: false },
-      { name: `Blue/Red`, alias: `Izzet League`, colorList: [2, 4], multicolored: true, devoid: false },
-      { name: `Black/Green`, alias: `Golgari Swarm`, colorList: [3, 5], multicolored: true, devoid: false },
-      { name: `White/Red`, alias: `Boros Legion`, colorList: [4, 1], multicolored: true, devoid: false },
-      { name: `Blue/Green`, alias: `Simic Combine`, colorList: [5, 2], multicolored: true, devoid: false },
-      { name: `White/Blue/Green`, alias: `Bant`, colorList: [5, 1, 2], multicolored: true, devoid: false },
-      { name: `White/Blue/Black`, alias: `Esper`, colorList: [1, 2, 3], multicolored: true, devoid: false },
-      { name: `Blue/Black/Red`, alias: `Grixis`, colorList: [2, 3, 4], multicolored: true, devoid: false },
-      { name: `Black/Red/Green`, alias: `Jund`, colorList: [3, 4, 5], multicolored: true, devoid: false },
-      { name: `White/Red/Green`, alias: `Naya`, colorList: [4, 5, 1], multicolored: true, devoid: false },
-      { name: `White/Black/Green`, alias: `Abzan Houses`, colorList: [1, 3, 5], multicolored: true, devoid: false },
-      { name: `White/Blue/Red`, alias: `Jeskai Way`, colorList: [2, 4, 1], multicolored: true, devoid: false },
-      { name: `Blue/Black/Green`, alias: `Sultai Brood`, colorList: [3, 5, 2], multicolored: true, devoid: false },
-      { name: `White/Black/Red`, alias: `Mardu Horde`, colorList: [4, 1, 3], multicolored: true, devoid: false },
-      { name: `Blue/Red/Green`, alias: `Temur Frontier`, colorList: [5, 2, 4], multicolored: true, devoid: false },
-      { name: `White/Blue/Black/Red`, alias: `Artifice`, colorList: [1, 2, 3, 4], multicolored: true, devoid: false },
-      { name: `Blue/Black/Red/Green`, alias: `Chaos`, colorList: [2, 3, 4, 5], multicolored: true, devoid: false },
-      { name: `White/Black/Red/Green`, alias: `Aggression`, colorList: [3, 4, 5, 1], multicolored: true, devoid: false },
-      { name: `White/Blue/Red/Green`, alias: `Altruism`, colorList: [4, 5, 1, 2], multicolored: true, devoid: false },
-      { name: `White/Blue/Black/Green`, alias: `Growth`, colorList: [5, 1, 2, 3], multicolored: true, devoid: false },
-      { name: `White/Blue/Black/Red/Green`, alias: `Chromatic`, colorList: [1, 2, 3, 4, 5], multicolored: true, devoid: false }
+      { name: `White`, alias: `White`, multicolored: false, devoid: false },
+      { name: `Blue`, alias: `Blue`, multicolored: false, devoid: false },
+      { name: `Black`, alias: `Black`, multicolored: false, devoid: false },
+      { name: `Red`, alias: `Red`, multicolored: false, devoid: false },
+      { name: `Green`, alias: `Green`, multicolored: false, devoid: false },
+      { name: `Colorless`, alias: `Colorless`, multicolored: false, devoid: false },
+      { name: `Devoid`, alias: `Devoid`, multicolored: false, devoid: true },
+      { name: `Snow`, alias: `Snow`, multicolored: false, devoid: false },
+      { name: `White/Blue`, alias: `Azorius Senate`, multicolored: true, devoid: false },
+      { name: `Blue/Black`, alias: `House Dimir`, multicolored: true, devoid: false },
+      { name: `Black/Red`, alias: `Cult of Rakdos`, multicolored: true, devoid: false },
+      { name: `Red/Green`, alias: `Gruul Clans`, multicolored: true, devoid: false },
+      { name: `White/Green`, alias: `Selesnya Conclave`, multicolored: true, devoid: false },
+      { name: `White/Black`, alias: `Orzhov Syndicate`, multicolored: true, devoid: false },
+      { name: `Blue/Red`, alias: `Izzet League`, multicolored: true, devoid: false },
+      { name: `Black/Green`, alias: `Golgari Swarm`, multicolored: true, devoid: false },
+      { name: `White/Red`, alias: `Boros Legion`, multicolored: true, devoid: false },
+      { name: `Blue/Green`, alias: `Simic Combine`, multicolored: true, devoid: false },
+      { name: `White/Blue/Green`, alias: `Bant`, multicolored: true, devoid: false },
+      { name: `White/Blue/Black`, alias: `Esper`, multicolored: true, devoid: false },
+      { name: `Blue/Black/Red`, alias: `Grixis`, multicolored: true, devoid: false },
+      { name: `Black/Red/Green`, alias: `Jund`, multicolored: true, devoid: false },
+      { name: `White/Red/Green`, alias: `Naya`, multicolored: true, devoid: false },
+      { name: `White/Black/Green`, alias: `Abzan Houses`, multicolored: true, devoid: false },
+      { name: `White/Blue/Red`, alias: `Jeskai Way`, multicolored: true, devoid: false },
+      { name: `Blue/Black/Green`, alias: `Sultai Brood`, multicolored: true, devoid: false },
+      { name: `White/Black/Red`, alias: `Mardu Horde`, multicolored: true, devoid: false },
+      { name: `Blue/Red/Green`, alias: `Temur Frontier`, multicolored: true, devoid: false },
+      { name: `White/Blue/Black/Red`, alias: `Artifice`, multicolored: true, devoid: false },
+      { name: `Blue/Black/Red/Green`, alias: `Chaos`, multicolored: true, devoid: false },
+      { name: `White/Black/Red/Green`, alias: `Aggression`, multicolored: true, devoid: false },
+      { name: `White/Blue/Red/Green`, alias: `Altruism`, multicolored: true, devoid: false },
+      { name: `White/Blue/Black/Green`, alias: `Growth`, multicolored: true, devoid: false },
+      { name: `White/Blue/Black/Red/Green`, alias: `Chromatic`, multicolored: true, devoid: false }
     ]
 
     const colors = [
-      { symbol: `{W}`, className: `ms-w`, identity: 1 },
-      { symbol: `{U}`, className: `ms-u`, identity: 2 },
-      { symbol: `{B}`, className: `ms-b`, identity: 3 },
-      { symbol: `{R}`, className: `ms-r`, identity: 4 },
-      { symbol: `{G}`, className: `ms-g`, identity: 5 },
-      { symbol: `{C}`, className: `ms-c`, identity: 7 },
-      { symbol: `{0}`, className: `ms-0`, identity: 6 },
-      { symbol: `{1}`, className: `ms-1`, identity: 6 },
-      { symbol: `{2}`, className: `ms-2`, identity: 6 },
-      { symbol: `{3}`, className: `ms-3`, identity: 6 },
-      { symbol: `{4}`, className: `ms-4`, identity: 6 },
-      { symbol: `{5}`, className: `ms-5`, identity: 6 },
-      { symbol: `{6}`, className: `ms-6`, identity: 6 },
-      { symbol: `{7}`, className: `ms-7`, identity: 6 },
-      { symbol: `{8}`, className: `ms-8`, identity: 6 },
-      { symbol: `{9}`, className: `ms-9`, identity: 6 },
-      { symbol: `{10}`, className: `ms-10`, identity: 6 },
-      { symbol: `{11}`, className: `ms-11`, identity: 6 },
-      { symbol: `{12}`, className: `ms-12`, identity: 6 },
-      { symbol: `{13}`, className: `ms-13`, identity: 6 },
-      { symbol: `{14}`, className: `ms-14`, identity: 6 },
-      { symbol: `{15}`, className: `ms-15`, identity: 6 },
-      { symbol: `{16}`, className: `ms-16`, identity: 6 },
-      { symbol: `{17}`, className: `ms-17`, identity: 6 },
-      { symbol: `{18}`, className: `ms-18`, identity: 6 },
-      { symbol: `{19}`, className: `ms-19`, identity: 6 },
-      { symbol: `{20}`, className: `ms-20`, identity: 6 },
-      { symbol: `{100}`, className: `ms-100`, identity: 6 },
-      { symbol: `{1000000}`, className: `ms-1000000`, identity: 6 },
-      { symbol: `{infinity}`, className: `ms-infinity`, identity: 6 },
-      { symbol: `{X}`, className: `ms-x`, identity: 6 },
-      { symbol: `{Y}`, className: `ms-y`, identity: 6 },
-      { symbol: `{Z}`, className: `ms-z`, identity: 6 },
-      { symbol: `{S}`, className: `ms-s`, identity: 8 },
-      { symbol: `{W/U}`, className: `ms-wu ms-split`, identity: 9 },
-      { symbol: `{U/B}`, className: `ms-ub ms-split`, identity: 10 },
-      { symbol: `{B/R}`, className: `ms-br ms-split`, identity: 11 },
-      { symbol: `{R/G}`, className: `ms-rg ms-split`, identity: 12 },
-      { symbol: `{G/W}`, className: `ms-gw ms-split`, identity: 13 },
-      { symbol: `{W/B}`, className: `ms-wb ms-split`, identity: 14 },
-      { symbol: `{U/R}`, className: `ms-ur ms-split`, identity: 15 },
-      { symbol: `{B/G}`, className: `ms-bg ms-split`, identity: 16 },
-      { symbol: `{R/W}`, className: `ms-rw ms-split`, identity: 17 },
-      { symbol: `{G/U}`, className: `ms-gu ms-split`, identity: 18 },
-      { symbol: `{2/W}`, className: `ms-2w ms-split`, identity: 1 },
-      { symbol: `{2/U}`, className: `ms-2u ms-split`, identity: 2 },
-      { symbol: `{2/B}`, className: `ms-2b ms-split`, identity: 3 },
-      { symbol: `{2/R}`, className: `ms-2r ms-split`, identity: 4 },
-      { symbol: `{2/G}`, className: `ms-2g ms-split`, identity: 5 },
-      { symbol: `{W/P}`, className: `ms-wp ms-split`, identity: 1 },
-      { symbol: `{U/P}`, className: `ms-up ms-split`, identity: 2 },
-      { symbol: `{B/P}`, className: `ms-bp-split`, identity: 3 },
-      { symbol: `{R/P}`, className: `ms-rp ms-split`, identity: 4 },
-      { symbol: `{G/P}`, className: `ms-gp ms-split`, identity: 5 }
+      { symbol: `{W}`, className: `ms-w`, name: `White` },
+      { symbol: `{U}`, className: `ms-u`, name: `Blue` },
+      { symbol: `{B}`, className: `ms-b`, name: `Black` },
+      { symbol: `{R}`, className: `ms-r`, name: `Red` },
+      { symbol: `{G}`, className: `ms-g`, name: `Green` },
+      { symbol: `{C}`, className: `ms-c`, name: `Devoid` },
+      { symbol: `{0}`, className: `ms-0`, name: `Colorless` },
+      { symbol: `{1}`, className: `ms-1`, name: `Colorless` },
+      { symbol: `{2}`, className: `ms-2`, name: `Colorless` },
+      { symbol: `{3}`, className: `ms-3`, name: `Colorless` },
+      { symbol: `{4}`, className: `ms-4`, name: `Colorless` },
+      { symbol: `{5}`, className: `ms-5`, name: `Colorless` },
+      { symbol: `{6}`, className: `ms-6`, name: `Colorless` },
+      { symbol: `{7}`, className: `ms-7`, name: `Colorless` },
+      { symbol: `{8}`, className: `ms-8`, name: `Colorless` },
+      { symbol: `{9}`, className: `ms-9`, name: `Colorless` },
+      { symbol: `{10}`, className: `ms-10`, name: `Colorless` },
+      { symbol: `{11}`, className: `ms-11`, name: `Colorless` },
+      { symbol: `{12}`, className: `ms-12`, name: `Colorless` },
+      { symbol: `{13}`, className: `ms-13`, name: `Colorless` },
+      { symbol: `{14}`, className: `ms-14`, name: `Colorless` },
+      { symbol: `{15}`, className: `ms-15`, name: `Colorless` },
+      { symbol: `{16}`, className: `ms-16`, name: `Colorless` },
+      { symbol: `{17}`, className: `ms-17`, name: `Colorless` },
+      { symbol: `{18}`, className: `ms-18`, name: `Colorless` },
+      { symbol: `{19}`, className: `ms-19`, name: `Colorless` },
+      { symbol: `{20}`, className: `ms-20`, name: `Colorless` },
+      { symbol: `{100}`, className: `ms-100`, name: `Colorless` },
+      { symbol: `{1000000}`, className: `ms-1000000`, name: `Colorless` },
+      { symbol: `{infinity}`, className: `ms-infinity`, name: `Colorless` },
+      { symbol: `{X}`, className: `ms-x`, name: `Colorless` },
+      { symbol: `{Y}`, className: `ms-y`, name: `Colorless` },
+      { symbol: `{Z}`, className: `ms-z`, name: `Colorless` },
+      { symbol: `{S}`, className: `ms-s`, name: `Snow` },
+      { symbol: `{W/U}`, className: `ms-wu ms-split`, name: `White/Blue` },
+      { symbol: `{U/B}`, className: `ms-ub ms-split`, name: `Blue/Black` },
+      { symbol: `{B/R}`, className: `ms-br ms-split`, name: `Black/Red` },
+      { symbol: `{R/G}`, className: `ms-rg ms-split`, name: `Red/Green` },
+      { symbol: `{G/W}`, className: `ms-gw ms-split`, name: `White/Green` },
+      { symbol: `{W/B}`, className: `ms-wb ms-split`, name: `White/Black` },
+      { symbol: `{U/R}`, className: `ms-ur ms-split`, name: `Blue/Red` },
+      { symbol: `{B/G}`, className: `ms-bg ms-split`, name: `Black/Green` },
+      { symbol: `{R/W}`, className: `ms-rw ms-split`, name: `White/Red` },
+      { symbol: `{G/U}`, className: `ms-gu ms-split`, name: `Blue/Green` },
+      { symbol: `{2/W}`, className: `ms-2w ms-split`, name: `White` },
+      { symbol: `{2/U}`, className: `ms-2u ms-split`, name: `Blue` },
+      { symbol: `{2/B}`, className: `ms-2b ms-split`, name: `Black` },
+      { symbol: `{2/R}`, className: `ms-2r ms-split`, name: `Red` },
+      { symbol: `{2/G}`, className: `ms-2g ms-split`, name: `Green` },
+      { symbol: `{W/P}`, className: `ms-wp ms-split`, name: `White` },
+      { symbol: `{U/P}`, className: `ms-up ms-split`, name: `Blue` },
+      { symbol: `{B/P}`, className: `ms-bp-split`, name: `Black` },
+      { symbol: `{R/P}`, className: `ms-rp ms-split`, name: `Red` },
+      { symbol: `{G/P}`, className: `ms-gp ms-split`, name: `Green` }
     ]
 
-    await Promise.all(colorIdentities.map(({ name, alias, colorList, multicolored, devoid }) => {
+    let identityIDs = []
+    for (let { name, alias, multicolored, devoid } of colorIdentities) {
       info(`${prefix}Adding color identity ${chalk.green(alias)}`)
-      updateColorIdentity({ name, alias, colors: colorList, multicolored, devoid })
-    }))
-    .then(info(`${prefix}Finished adding Color Identities.`))
-    .catch(err => error(`${prefix}Failed to add Color Identities.`, { err }))
+      identityIDs.push(updateColorIdentity({ name, alias, multicolored, devoid }))
+    }
+    identityIDs = await Promise.all(identityIDs)
+      .then(info(`${prefix}Finished adding Color Identities.`))
+      .catch(err => error(`${prefix}Failed to add Color Identities.`, { err }))
 
-    await Promise.all(colors.map(async ({ symbol, className, identity }) => {
+    let colorIDs = []
+    for (let { symbol, className, name } of colors) {
       info(`${prefix}Adding color ${chalk.green(symbol)}`)
+      const colorIdentityID = await getColorIdentity([name])
       const icon = await updateColorIcon({ name: symbol, class: className })
-      updateColor({ symbol, icon, identity })
-    }))
-    .then(info(`${prefix}Finished adding Colors.`))
-    .catch(err => error(`${prefix}Failed to add Colors.`, { err }))
+      colorIDs.push(updateColor({ symbol, icon, identity: colorIdentityID[0] }))
+    }
+    colorIDs = await Promise.all(colorIDs)
+      .then(info(`${prefix}Finished adding Colors.`))
+      .catch(err => error(`${prefix}Failed to add Colors.`, { err }))
+
     const end = present()
     log(`${prefix}Finished inserting all colors and identities! (${duration(end - start)})`)
   } catch (err) {

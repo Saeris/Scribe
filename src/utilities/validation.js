@@ -1,4 +1,4 @@
-import { invariant } from './'
+import { invariant } from './invariant'
 
 export const isNullish = value => value === null || value === undefined
 

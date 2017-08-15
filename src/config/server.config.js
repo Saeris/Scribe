@@ -1,3 +1,4 @@
+import fs from 'fs'
 import dotenv  from 'dotenv' // https://github.com/motdotla/dotenv
 import Winston from 'winston' // https://github.com/winstonjs/winston
 import 'winston-loggly-bulk' // https://github.com/loggly/winston-loggly-bulk
@@ -6,6 +7,10 @@ dotenv.config()
 
 class Config {
   env = process.env.NODE_ENV && process.env.NODE_ENV.toLowerCase() || (process.env.NODE_ENV === `development`)
+
+  pubKey = fs.readFileSync(`${process.env.JWT_PUBLIC_KEY}`)
+  privateKey = fs.readFileSync(`${process.env.JWT_PRIVATE_KEY}`)
+  passphrase = process.env.JWT_PASSPHRASE
 
   getDBClient = () => {
     if (!!process.env.USE_DB) {

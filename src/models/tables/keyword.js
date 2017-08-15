@@ -1,13 +1,14 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 import { Card, Language } from './'
 
+@bookshelfOptions
 export default class Keyword extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigIncrements(`id`)
+    table.string(`id`)
       .notNullable()
-      .unsigned()
       .primary()
       .unique()
 
@@ -19,24 +20,13 @@ export default class Keyword extends db.Model {
     table.text(`reminderText`)
       .comment(`A short description of the keyword rules.`)
 
-    table.bigInteger(`language`)
+    table.string(`language`)
       .comment(`The language the reminder text of keyword is localized in.`)
       .notNullable()
-      .unsigned()
-
-    table.bigInteger(`cards`)
-      .comment(`A list of cards that have this keyword.`)
-      .notNullable()
-      .unsigned()
 
     // Timestamps
     table.timestamps()
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `keyword` }
-
-  get hasTimestamps() { return true }
 
   language = () => this.hasOne(Language, `language`)
 

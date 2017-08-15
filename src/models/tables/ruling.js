@@ -1,13 +1,14 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 import { Card, Language } from './'
 
+@bookshelfOptions
 export default class Ruling extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Indexes
-    table.bigIncrements(`id`)
+    table.string(`id`)
       .notNullable()
-      .unsigned()
       .primary()
       .unique()
 
@@ -20,19 +21,13 @@ export default class Ruling extends db.Model {
       .comment(`The date the ruling was issued.`)
       .notNullable()
 
-    table.bigInteger(`language`)
+    table.string(`language`)
       .comment(`The language this ruling is localized in.`)
       .notNullable()
-      .unsigned()
 
     // Timestamps
     table.timestamps()
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `ruling` }
-
-  get hasTimestamps() { return true }
 
   language = () => this.hasOne(Language, `language`)
 

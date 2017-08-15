@@ -1,14 +1,15 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 import { OwnedCard, Tag } from './'
 import { Decklist, Sideboard, Tags } from '../lists'
 
+@bookshelfOptions
 export default class Deck extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigIncrements(`id`)
+    table.string(`id`)
       .notNullable()
-      .unsigned()
       .primary()
       .unique()
 
@@ -16,10 +17,9 @@ export default class Deck extends db.Model {
       .comment(`The name of the deck.`)
       .notNullable()
 
-    table.bigInteger(`description`)
+    table.string(`description`)
       .comment(`A description of the deck.`)
       .notNullable()
-      .unsigned()
 
     table.integer(`privacy`)
       .comment(`The privacy setting of the deck.`)
@@ -28,11 +28,6 @@ export default class Deck extends db.Model {
     // Timestamps
     table.timestamps()
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `deck` }
-
-  get hasTimestamps() { return true }
 
   tags = () => this.hasMany(Tag, `id`).through(Tags, `id`, `tag`, `item`)
 

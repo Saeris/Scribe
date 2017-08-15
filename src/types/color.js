@@ -1,5 +1,6 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, order, read, update } from './utilities'
+import { destroy, order, read } from './utilities'
+import { info, error } from 'winston'
 import Models from '../models'
 import { ColorIdentity, Icon } from './'
 
@@ -83,13 +84,39 @@ export const Mutations = {
     type: Definition,
     description: `Creates a new Color`,
     args: { input: { type: Input } },
-    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
+    resolve: (parent, { input }, context) => {
+      const { identity, ...fields } = input
+      return Models.Color
+        .findOrCreate({identity, ...fields})
+        .then(model => {
+          const color = model.toJSON()
+
+          if (!!identity) Models.Colors.findOrCreate({ colorIdentity: identity, color: color.id })
+
+          return color
+        })
+        .catch(err => error(`Failed to run Mutation: create${Definition.name}`, err))
+        .finally(info(`Resolved Mutation: create${Definition.name}`, { parent, input, context}))
+    }
   },
   updateColor: {
     type: Definition,
     description: `Updates an existing Color, creates it if it does not already exist`,
     args: { input: { type: Input } },
-    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `symbol`)
+    resolve: (parent, { input }, context) => {
+      const { symbol, identity, ...fields } = input
+      return Models.Color
+        .upsert({ symbol }, { identity, ...fields })
+        .then(model => {
+          const color = model.toJSON()
+
+          if (!!identity) Models.Colors.findOrCreate({ colorIdentity: identity, color: color.id })
+
+          return color
+        })
+        .catch(err => error(`Failed to run Mutation: update${Definition.name}`, err))
+        .finally(info(`Resolved Mutation: update${Definition.name}`, { parent, input, context}))
+    }
   },
   deleteColor: {
     type: Definition,

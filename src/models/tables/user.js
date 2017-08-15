@@ -1,14 +1,15 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 import { Collection, Gender, Profile } from './'
 import { Profiles } from '../lists'
 
+@bookshelfOptions
 export default class User extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigIncrements(`id`)
+    table.string(`id`)
       .notNullable()
-      .unsigned()
       .primary()
       .unique()
 
@@ -20,10 +21,9 @@ export default class User extends db.Model {
       .comment(`The last name of the user.`)
       .notNullable()
 
-    table.bigInteger(`gender`)
+    table.string(`gender`)
       .comment(`The gender identity of the user.`)
       .notNullable()
-      .unsigned()
 
     table.string(`username`)
       .comment(`The username of the user.`)
@@ -41,20 +41,14 @@ export default class User extends db.Model {
     table.string(`location`)
       .comment(`The location of the user.`)
 
-    table.bigInteger(`collection`)
+    table.string(`collection`)
       .comment(`The card collection of the user.`)
       .notNullable()
-      .unsigned()
       .unique()
 
     // Timestamps
     table.timestamps()
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `user` }
-
-  get hasTimestamps() { return true }
 
   gender = () => this.hasOne(Gender, `id`, `gender`)
 

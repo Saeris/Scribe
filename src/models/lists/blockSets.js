@@ -1,18 +1,18 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 
+@bookshelfOptions({ gid: false })
 export default class BlockSets extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigInteger(`block`)
+    table.string(`block`)
       .comment(`The block associated with this set.`)
       .notNullable()
-      .unsigned()
 
-    table.bigInteger(`set`)
+    table.string(`set`)
       .comment(`The set associated with this block.`)
       .notNullable()
-      .unsigned()
 
     // Timestamps
     table.timestamps()
@@ -20,9 +20,4 @@ export default class BlockSets extends db.Model {
     // Keys
     table.primary([`block`, `set`])
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `blocksets` }
-
-  get hasTimestamps() { return true }
 }

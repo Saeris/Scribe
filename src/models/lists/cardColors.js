@@ -1,18 +1,18 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 
+@bookshelfOptions({ gid: false })
 export default class CardColors extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigInteger(`card`)
+    table.string(`card`)
       .comment(`The card associated with the color.`)
       .notNullable()
-      .unsigned()
 
-    table.bigInteger(`color`)
+    table.string(`color`)
       .comment(`The color associated with the card.`)
       .notNullable()
-      .unsigned()
 
     // Timestamps
     table.timestamps()
@@ -20,9 +20,4 @@ export default class CardColors extends db.Model {
     // Keys
     table.primary([`card`, `color`])
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `cardColors` }
-
-  get hasTimestamps() { return true }
 }

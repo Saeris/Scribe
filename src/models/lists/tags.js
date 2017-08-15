@@ -1,18 +1,18 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 
+@bookshelfOptions({ gid: false })
 export default class Tags extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigInteger(`item`)
+    table.string(`item`)
       .comment(`The item associated with this tag.`)
       .notNullable()
-      .unsigned()
 
-    table.bigInteger(`tag`)
+    table.string(`tag`)
       .comment(`The tag associated with this item.`)
       .notNullable()
-      .unsigned()
 
     // Timestamps
     table.timestamps()
@@ -20,9 +20,4 @@ export default class Tags extends db.Model {
     // Keys
     table.primary([`item`, `tag`])
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `tags` }
-
-  get hasTimestamps() { return true }
 }

@@ -1,15 +1,16 @@
 import moment from 'moment'
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 import { Icon, Block, Booster, SetType } from './'
 import { BlockSets } from '../lists'
 
+@bookshelfOptions
 export default class Set extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigIncrements(`id`)
+    table.string(`id`)
       .notNullable()
-      .unsigned()
       .primary()
       .unique()
 
@@ -23,19 +24,16 @@ export default class Set extends db.Model {
       .notNullable()
       .unique()
 
-    table.bigInteger(`block`)
+    table.string(`block`)
       .comment(`The block the set belongs to.`)
-      .unsigned()
 
-    table.bigInteger(`type`)
+    table.string(`type`)
       .comment(`The type of the set.`)
       .notNullable()
-      .unsigned()
 
-    table.bigInteger(`icon`)
+    table.string(`icon`)
       .comment(`The icon associated with the set.`)
       .notNullable()
-      .unsigned()
 
     table.string(`border`)
       .comment(`The border color of the set.`)
@@ -45,18 +43,12 @@ export default class Set extends db.Model {
       .comment(`The date on which the set was released.`)
       .notNullable()
 
-    table.bigInteger(`booster`)
+    table.string(`booster`)
       .comment(`Booster pack generation rules for this set.`)
-      .unsigned()
 
     // Timestamps
     table.timestamps()
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `set` }
-
-  get hasTimestamps() { return true }
 
   block = () => this.belongsTo(Block, `block`).through(BlockSets, `id`, `block`, `set`)
 

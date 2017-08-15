@@ -48,6 +48,7 @@
     "@easy-webpack/core": "^2.0.1",
     "apollo-client": "^1.2.0",
     "babel-cli": "^6.18.0",
+    "babel-core": "^6.25.0",
     "babel-eslint": "^7.1.1",
     "babel-plugin-import-glob": "^1.0.1",
     "babel-plugin-transform-commonjs-es2015-modules": "^3.0.2",

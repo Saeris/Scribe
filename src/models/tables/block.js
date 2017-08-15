@@ -1,14 +1,15 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 import { Set } from './'
 import { BlockSets } from '../lists'
 
+@bookshelfOptions
 export default class Block extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigIncrements(`id`)
+    table.string(`id`)
       .notNullable()
-      .unsigned()
       .primary()
       .unique()
 
@@ -20,11 +21,6 @@ export default class Block extends db.Model {
     // Timestamps
     table.timestamps()
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `block` }
-
-  get hasTimestamps() { return true }
 
   sets = () => this.hasMany(Set, `id`).through(BlockSets, `id`, `block`, `set`)
 }

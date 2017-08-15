@@ -1,14 +1,15 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 import { Name, Layout, Color, ColorIdentity, Supertype, Type, Subtype, Rarity, Category, AbilityType, Keyword, Legality, Ruling, Printing } from './'
 import { Names, CardColors, Supertypes, Types, Subtypes, Categories, AbilityTypes, Keywords, Legalities, Rulings, Printings } from '../lists'
 
+@bookshelfOptions
 export default class Card extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigIncrements(`id`)
+    table.string(`id`)
       .notNullable()
-      .unsigned()
       .primary()
       .unique()
 
@@ -20,10 +21,9 @@ export default class Card extends db.Model {
     table.string(`border`)
       .comment(`If the border for this specific card is DIFFERENT than the border specified in the top level set JSON, then it will be specified here. (Example: Unglued has silver borders, except for the lands which are black bordered)`)
 
-    table.bigInteger(`layout`)
+    table.string(`layout`)
       .comment(`The card layout.`)
       .notNullable()
-      .unsigned()
 
     table.string(`watermark`)
       .comment(`The watermark on the card. Note: Split cards don’t currently have this field set, despite having a watermark on each side of the split card.`)
@@ -35,19 +35,17 @@ export default class Card extends db.Model {
       .comment(`Converted mana cost.`)
       .notNullable()
 
-    table.bigInteger(`colorIdentity`)
+    table.string(`colorIdentity`)
       .comment(`The card colors by color code. [“Red”, “Blue”] becomes [“R”, “U”]`)
       .notNullable()
-      .unsigned()
 
     table.string(`typeLine`)
       .comment(`The card type. This is the type you would see on the card if printed today. Note: The dash is a UTF8 long dash as per the MTG rules.`)
       .notNullable()
 
-    table.bigInteger(`rarity`)
+    table.string(`rarity`)
       .comment(`The rarity of the card.`)
       .notNullable()
-      .unsigned()
 
     table.text(`text`)
       .comment(`The text of the card.`)
@@ -70,11 +68,6 @@ export default class Card extends db.Model {
     // Timestamps
     table.timestamps()
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `card` }
-
-  get hasTimestamps() { return true }
 
   names = () => this.hasMany(Name, `id`).through(Names, `id`, `card`, `name`)
 

@@ -1,14 +1,15 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 import { OwnedCard, Tag } from './'
 import { BinderCards, Tags } from '../lists'
 
+@bookshelfOptions
 export default class Binder extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigIncrements(`id`)
+    table.string(`id`)
       .notNullable()
-      .unsigned()
       .primary()
       .unique()
 
@@ -16,7 +17,7 @@ export default class Binder extends db.Model {
       .comment(`The name of the binder.`)
       .notNullable()
 
-    table.bigInteger(`description`)
+    table.string(`description`)
       .comment(`A description of the binder.`)
       .notNullable()
 
@@ -27,11 +28,6 @@ export default class Binder extends db.Model {
     // Timestamps
     table.timestamps()
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `binder` }
-
-  get hasTimestamps() { return true }
 
   tags = () => this.hasMany(Tag, `id`).through(Tags, `id`, `tag`, `item`)
 

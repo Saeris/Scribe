@@ -1,19 +1,19 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 import { Card, AbilityType } from '../tables'
 
+@bookshelfOptions({ gid: false })
 export default class AbilityTypeCards extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigInteger(`abilitytype`)
+    table.string(`abilitytype`)
       .comment(`The abilityType associated with this card.`)
       .notNullable()
-      .unsigned()
 
-    table.bigInteger(`card`)
+    table.string(`card`)
       .comment(`The card associated with this abilityType.`)
       .notNullable()
-      .unsigned()
 
     // Timestamps
     table.timestamps()
@@ -22,16 +22,7 @@ export default class AbilityTypeCards extends db.Model {
     table.primary([`abilitytype`, `card`])
   }
 
-  // Bookshelf Relation Definitions
-  get tableName() { return `abilitytypecards` }
+  abilityType = () => this.belongsTo(AbilityType)
 
-  get hasTimestamps() { return true }
-
-  abilityType() {
-    return this.belongsTo(AbilityType)
-  }
-
-  card() {
-    return this.hasMany(Card)
-  }
+  card = () => this.hasMany(Card)
 }

@@ -1,13 +1,14 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 import { Language } from './'
 
+@bookshelfOptions
 export default class Image extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigIncrements(`id`)
+    table.string(`id`)
       .notNullable()
-      .unsigned()
       .primary()
       .unique()
 
@@ -20,19 +21,13 @@ export default class Image extends db.Model {
       .comment(`A URL pointing to an image of the card.`)
       .notNullable()
 
-    table.bigInteger(`language`)
+    table.string(`language`)
       .comment(`The language the image is localized in.`)
       .notNullable()
-      .unsigned()
 
     // Timestamps
     table.timestamps()
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `image` }
-
-  get hasTimestamps() { return true }
 
   language = () => this.hasOne(Language, `language`)
 }

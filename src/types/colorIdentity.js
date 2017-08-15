@@ -1,5 +1,5 @@
 import { GraphQLID, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { destroy, loadRelated, order, read } from './utilities'
+import { create, destroy, loadRelated, order, read, update } from './utilities'
 import Models from '../models'
 import { Color } from './'
 
@@ -9,7 +9,6 @@ export const Input = new GraphQLInputObjectType({
   fields: () => ({
     name:         { type: new GraphQLNonNull(GraphQLString) },
     alias:        { type: GraphQLString },
-    colors:       { type: new GraphQLList(GraphQLID) },
     multicolored: { type: GraphQLBoolean },
     devoid:       { type: GraphQLBoolean }
   })
@@ -91,35 +90,13 @@ export const Mutations = {
     type: Definition,
     description: `Creates a new ColorIdentity`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => {
-      let { colors, ...fields } = input
-      return Models.ColorIdentity
-        .findOrCreate(fields)
-        .then(model => {
-          let identity = model.toJSON()
-
-          if (!!colors) for (let color of colors) Models.Colors.findOrCreate({ coloridentity: identity.id, color })
-
-          return identity
-        })
-    }
+    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
   },
   updateColorIdentity: {
     type: Definition,
     description: `Updates an existing ColorIdentity, creates it if it does not already exist`,
     args: { input: { type: Input } },
-    resolve: (root, { input }) => {
-      let { name, colors, ...fields } = input
-      return Models.ColorIdentity
-        .upsert({ name }, fields)
-        .then(model => {
-          let identity = model.toJSON()
-
-          if (!!colors) for (let color of colors) Models.Colors.findOrCreate({ coloridentity: identity.id, color })
-
-          return identity
-        })
-    }
+    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `name`)
   },
   deleteColorIdentity: {
     type: Definition,

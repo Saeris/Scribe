@@ -1,18 +1,18 @@
 import db from '../../config/bookshelf.config'
+import { bookshelfOptions } from '../../utilities'
 
+@bookshelfOptions({ gid: false })
 export default class Rulings extends db.Model {
   // Knex Schema Definitions
   static fields(table) {
     // Fields
-    table.bigInteger(`card`)
+    table.string(`card`)
       .comment(`The card associated with this ruling.`)
       .notNullable()
-      .unsigned()
 
-    table.bigInteger(`ruling`)
+    table.string(`ruling`)
       .comment(`The ruling associated with this card.`)
       .notNullable()
-      .unsigned()
 
     // Timestamps
     table.timestamps()
@@ -20,9 +20,4 @@ export default class Rulings extends db.Model {
     // Keys
     table.primary([`card`, `ruling`])
   }
-
-  // Bookshelf Relation Definitions
-  get tableName() { return `rulings` }
-
-  get hasTimestamps() { return true }
 }

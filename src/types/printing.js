@@ -158,7 +158,7 @@ export const Mutations = {
       return Models.Printing
         .findOrCreate(fields)
         .then(model => {
-          let printing = model.toJSON()
+          const printing = model.toJSON()
 
           if (!!images) for (let image of images) Models.Images.findOrCreate({ printing: printing.id, image })
 
@@ -179,8 +179,8 @@ export const Mutations = {
       return Models.Printing
         .upsert({ card, set, number }, fields)
         .then(model => {
-          let printing = model.toJSON()
-          //console.log(model)
+          const printing = model.toJSON()
+          info(model)
           if (!!images) for (let image of images) Models.Images.findOrCreate({ printing: printing.id, image })
 
           Models.Printings.findOrCreate({ card: printing.card, printing: printing.id })
