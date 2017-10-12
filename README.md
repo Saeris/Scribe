@@ -1,4 +1,6 @@
 # Scribe
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/Saeris/Scribe.svg)](https://greenkeeper.io/)
 *A GraphQL Magic: The Gathering API Server*
 
 ## <a name="contents"></a> Table of Contents
