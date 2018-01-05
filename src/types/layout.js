@@ -1,73 +1,93 @@
-import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, loadRelated, order, read, update } from './utilities'
-import Models from '../models'
-import { Icon } from './'
+import {
+  nodeInterface,
+  DateRange,
+  createFilter,
+  createInput,
+  createOrder,
+  create,
+  read,
+  update,
+  destroy,
+  junction,
+  orderBy,
+  where
+} from "@/utilities"
+import { IconConnection, IconFilter, IconOrder } from "./icon"
 
-export const Input = new GraphQLInputObjectType({
-  name: `LayoutInput`,
-  description: `Required fields for a new Layout object`,
-  fields: () => ({
-    name:      { type: new GraphQLNonNull(GraphQLString) },
-    watermark: { type: GraphQLString },
-    icons:     { type: new GraphQLList(GraphQLID) }
-  })
-})
-
-const Filter = new GraphQLInputObjectType({
-  name: `LayoutFilter`,
-  description: `Queryable fields for Layout.`,
-  fields: () => ({
-    name:  { type: new GraphQLList(GraphQLString) },
-    icons: { type: new GraphQLList(GraphQLID) }
-  })
-})
-
-const Fields = new GraphQLEnumType({
-  name: `LayoutFields`,
-  description: `Field names for Layout.`,
-  values: {
-    name: { value: `name` }
-  }
-})
-
-export const Definition = new GraphQLObjectType({
+export const Definition = new GqlObject({
   name: `Layout`,
   description: `A Layout object`,
-  fields: () => ({
+  interfaces: [nodeInterface],
+  sqlTable: `layout`,
+  uniqueKey: `id`,
+  timestamps: table => table.timestamps(),
+  fields: disabled => ({
+    globalId: {
+      ...globalId(),
+      description: `The global ID for the Relay spec`,
+      sqlDeps: [`id`]
+    },
     id: {
-      type: GraphQLID,
-      description: `A unique id for this layout.`
+      type: new GqlNonNull(GqlID),
+      description: `The Layout ID`,
+      sqlColumn: `id`,
+      column: table => table.string(`id`).notNullable().primary().unique()
+    },
+    created: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `created`,
+      sortable: true,
+      filter: { type: DateRange }
+    },
+    updated: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `updated`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     name: {
-      type: GraphQLString,
-      description: `The name of the layout type.`
+      type: new GqlNonNull(GqlString),
+      description: `The name of the Layout.`,
+      sqlColumn: `name`,
+      column: table => table.string(`name`).notNullable().unique(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
     watermark: {
-      type: GraphQLString,
-      description: `Watermark that appears in this layout.`
+      type: GqlString,
+      description: `Watermark that appears in this layout.`,
+      sqlColumn: `watermark`,
+      column: table => table.string(`watermark`),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
     icons: {
-      type: new GraphQLList(Icon.Definition),
+      type: IconConnection,
       description: `A list of icons featured on this card.`,
-      resolve: type => loadRelated(type.id, Models.Layout, `icons`)
+      args: { ...connectionArgs, ...IconFilter, ...IconOrder },
+      junction: junction(`icons`),
+      where,
+      orderBy,
+      resolve: ({ icons }, args) => connectionFromArray(icons, args)
     }
   })
 })
 
+export const { connectionType: Connection } = connectionDefinitions({ nodeType: Definition })
+export const Filter = createFilter(Definition)
+export const Input = createInput(Definition)
+export const Order = createOrder(Definition)
+
 export const Queries = {
   layout: {
-    type: new GraphQLList(Definition),
+    type: new GqlList(Definition),
     description: `Returns a Layout.`,
-    args: {
-      id: { type: new GraphQLList(GraphQLID) },
-      filter: {
-        type: Filter
-      },
-      limit: { type: GraphQLInt },
-      offset: { type: GraphQLInt },
-      orderBy: { type: order(`layout`, Fields) }
-    },
-    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
+    args: { ...Filter, ...Order },
+    where,
+    orderBy,
+    resolve: read
   }
 }
 
@@ -75,19 +95,29 @@ export const Mutations = {
   createLayout: {
     type: Definition,
     description: `Creates a new Layout`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
+    args: { ...Input },
+    resolve: create
   },
   updateLayout: {
     type: Definition,
     description: `Updates an existing Layout, creates it if it does not already exist`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `name`)
+    args: { id: { type: new GqlNonNull(GqlID) }, ...Input },
+    resolve: update
   },
   deleteLayout: {
     type: Definition,
     description: `Deletes a Layout by id`,
-    args: { id: { type: GraphQLID } },
-    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) } },
+    resolve: destroy
   }
 }
+
+export {
+  Definition as Layout,
+  Connection as LayoutConnection,
+  Filter as LayoutFilter,
+  Input as LayoutInput,
+  Order as LayoutOrder
+}
+
+export default { Definition, Queries, Mutations }

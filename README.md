@@ -20,6 +20,13 @@
 
 Before you start, make sure you have a working [NodeJS](http://nodejs.org/) environment, with NPM 3. Preferably use [Yarn](https://yarnpkg.com/) instead of NPM for installation of packages to ensure that you'll use exactly the same dependencies as the project.
 
+https://github.com/JoshKaufman/ursa#windows-install
+https://slproweb.com/download/Win32OpenSSL-1_0_2n.exe
+https://slproweb.com/download/Win64OpenSSL-1_0_2n.exe
+
+https://github.com/felixrieseberg/windows-build-tools
+npm --add-python-to-path='true' --debug install --global windows-build-tools
+
 From the project folder, execute the following command:
 
 ```shell

@@ -53,7 +53,7 @@ export const updateName = async input => await client
   .catch(err => log(`Failed to update Name.`, input, err))
 
 export const fetchImage = async (url, set, num, language) => {
-  if (!!!minimist(process.argv.slice(2)).getImages) return url
+  if (!minimist(process.argv.slice(2)).getImages) return url
 
   const dir = `./src/images/sets/${set}`
   const image = `${dir}/${set}_${num}_${language}.jpg`

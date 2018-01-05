@@ -1,59 +1,73 @@
-import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, order, read, update } from './utilities'
+import {
+  nodeInterface,
+  DateRange,
+  createFilter,
+  createInput,
+  createOrder,
+  create,
+  read,
+  update,
+  destroy,
+  orderBy,
+  where
+} from "@/utilities"
 
-export const Input = new GraphQLInputObjectType({
-  name: `SupertypeInput`,
-  description: `Required fields for a new Supertype object`,
-  fields: () => ({
-    name: { type: new GraphQLNonNull(GraphQLString) }
-  })
-})
-
-const Filter = new GraphQLInputObjectType({
-  name: `SupertypeFilter`,
-  description: `Queryable fields for Supertype.`,
-  fields: () => ({
-    name: { type: new GraphQLList(GraphQLString) }
-  })
-})
-
-const Fields = new GraphQLEnumType({
-  name: `SupertypeFields`,
-  description: `Field names for Supertype.`,
-  values: {
-    name: { value: `name` }
-  }
-})
-
-export const Definition = new GraphQLObjectType({
+export const Definition = new GqlObject({
   name: `Supertype`,
   description: `A Supertype object`,
-  fields: () => ({
+  interfaces: [nodeInterface],
+  sqlTable: `supertype`,
+  uniqueKey: `id`,
+  timestamps: table => table.timestamps(),
+  fields: disabled => ({
+    globalId: {
+      ...globalId(),
+      description: `The global ID for the Relay spec`,
+      sqlDeps: [`id`]
+    },
     id: {
-      type: GraphQLID,
-      description: `A unique id for this supertype.`
+      type: new GqlNonNull(GqlID),
+      description: `The Supertype ID.`,
+      sqlColumn: `id`,
+      column: table => table.string(`id`).notNullable().primary().unique()
+    },
+    created: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `created`,
+      sortable: true,
+      filter: { type: DateRange }
+    },
+    updated: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `updated`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     name: {
-      type: GraphQLString,
-      description: `The supertype name.`
+      type: new GqlNonNull(GqlString),
+      description: `The name of the Supertype.`,
+      sqlColumn: `name`,
+      column: table => table.string(`name`).notNullable().unique(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     }
   })
 })
 
+export const { connectionType: Connection } = connectionDefinitions({ nodeType: Definition })
+export const Filter = createFilter(Definition)
+export const Input = createInput(Definition)
+export const Order = createOrder(Definition)
+
 export const Queries = {
-  supertype: {
-    type: new GraphQLList(Definition),
+  subtype: {
+    type: new GqlList(Definition),
     description: `Returns a Supertype.`,
-    args: {
-      id: { type: new GraphQLList(GraphQLID) },
-      filter: {
-        type: Filter
-      },
-      limit: { type: GraphQLInt },
-      offset: { type: GraphQLInt },
-      orderBy: { type: order(`supertype`, Fields) }
-    },
-    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
+    args: { ...Filter, ...Order },
+    where,
+    orderBy,
+    resolve: read
   }
 }
 
@@ -61,19 +75,29 @@ export const Mutations = {
   createSupertype: {
     type: Definition,
     description: `Creates a new Supertype`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
+    args: { ...Input },
+    resolve: create
   },
   updateSupertype: {
     type: Definition,
     description: `Updates an existing Supertype, creates it if it does not already exist`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `name`)
+    args: { id: { type: new GqlNonNull(GqlID) }, ...Input },
+    resolve: update
   },
   deleteSupertype: {
     type: Definition,
     description: `Deletes a Supertype by id`,
-    args: { id: { type: GraphQLID } },
-    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) } },
+    resolve: destroy
   }
 }
+
+export {
+  Definition as SuperType,
+  Connection as SuperTypeConnection,
+  Filter as SuperTypeFilter,
+  Input as SuperTypeInput,
+  Order as SuperTypeOrder
+}
+
+export default { Definition, Queries, Mutations }

@@ -1,81 +1,96 @@
-import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { destroy, order, read } from './utilities'
-import { info, error } from 'winston'
-import Models from '../models'
-import { ColorIdentity, Icon } from './'
+import {
+  nodeInterface,
+  DateRange,
+  createFilter,
+  createInput,
+  createOrder,
+  create,
+  read,
+  update,
+  destroy,
+  sqlJoin,
+  orderBy,
+  where
+} from "@/utilities"
+import { ColorIdentity, ColorIdentityFilter, ColorIdentityOrder } from "./colorIdentity"
+import { Icon, IconFilter, IconOrder } from "./icon"
 
-export const Input = new GraphQLInputObjectType({
-  name: `ColorInput`,
-  description: `Required fields for a new Color object`,
-  fields: () => ({
-    symbol:   { type: new GraphQLNonNull(GraphQLString) },
-    icon:     { type: GraphQLID },
-    identity: { type: GraphQLID }
-  })
-})
-
-const Filter = new GraphQLInputObjectType({
-  name: `ColorFilter`,
-  description: `Queryable fields for Color.`,
-  fields: () => ({
-    symbol:   { type: new GraphQLList(GraphQLString) },
-    icon:     { type: new GraphQLList(GraphQLID) },
-    identity: { type: new GraphQLList(GraphQLID) }
-  })
-})
-
-const Fields = new GraphQLEnumType({
-  name: `ColorFields`,
-  description: `Field names for Color.`,
-  values: {
-    symbol: { value: `symbol` },
-    icon:   { value: `icon` }
-  }
-})
-
-export const Definition = new GraphQLObjectType({
+export const Definition = new GqlObject({
   name: `Color`,
   description: `A Color object`,
-  fields: () => ({
+  interfaces: [nodeInterface],
+  sqlTable: `color`,
+  uniqueKey: `id`,
+  timestamps: table => table.timestamps(),
+  fields: disabled => ({
+    globalId: {
+      ...globalId(),
+      description: `The global ID for the Relay spec`,
+      sqlDeps: [`id`]
+    },
     id: {
-      type: GraphQLID,
-      description: `A unique id for this color.`
+      type: new GqlNonNull(GqlID),
+      description: `The Color ID`,
+      sqlColumn: `id`,
+      column: table => table.string(`id`).notNullable().primary().unique()
+    },
+    created: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `created`,
+      sortable: true,
+      filter: { type: DateRange }
+    },
+    updated: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `updated`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     symbol: {
-      type: GraphQLString,
-      description: `The color symbol code for this color.`
+      type: new GqlNonNull(GqlString),
+      description: `The color symbol code for this color.`,
+      sqlColumn: `symbol`,
+      column: table => table.string(`symbol`).notNullable().unique(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(new GqlNonNull(GqlString)) }
     },
     icon: {
-      type: Icon.Definition,
+      type: new GqlNonNull(Icon),
       description: `A CSS class used to display a mana symbol for this color.`,
-      resolve: (type) => Models.Color
-        .findById(type.id, { withRelated: [`icon`] })
-        .then(model => model.toJSON().icon)
+      column: table => table.string(`icon`).notNullable(),
+      input: { type: new GqlNonNull(GqlID) },
+      args: { ...IconFilter, ...IconOrder },
+      where,
+      orderBy,
+      sqlJoin: sqlJoin(`icon`)
     },
     identity: {
-      type: ColorIdentity.Definition,
+      type: new GqlNonNull(ColorIdentity),
       description: `The color identity of this color.`,
-      resolve: (type) => Models.Color
-        .findById(type.id, { withRelated: [`identity`] })
-        .then(model => model.toJSON().identity)
+      column: table => table.string(`identity`).notNullable(),
+      input: { type: new GqlNonNull(GqlID) },
+      args: { ...ColorIdentityFilter, ...ColorIdentityOrder },
+      where,
+      orderBy,
+      sqlJoin: sqlJoin(`identity`)
     }
   })
 })
 
+export const { connectionType: Connection } = connectionDefinitions({ nodeType: Definition })
+export const Filter = createFilter(Definition)
+export const Input = createInput(Definition)
+export const Order = createOrder(Definition)
+
 export const Queries = {
   color: {
-    type: new GraphQLList(Definition),
+    type: new GqlList(Definition),
     description: `Returns a Color.`,
-    args: {
-      id: { type: new GraphQLList(GraphQLID) },
-      filter: {
-        type: Filter
-      },
-      limit: { type: GraphQLInt },
-      offset: { type: GraphQLInt },
-      orderBy: { type: order(`color`, Fields) }
-    },
-    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
+    args: { ...Filter, ...Order },
+    where,
+    orderBy,
+    resolve: read
   }
 }
 
@@ -83,45 +98,29 @@ export const Mutations = {
   createColor: {
     type: Definition,
     description: `Creates a new Color`,
-    args: { input: { type: Input } },
-    resolve: (parent, { input }, context) => {
-      const { identity, ...fields } = input
-      return Models.Color
-        .findOrCreate({identity, ...fields})
-        .then(model => {
-          const color = model.toJSON()
-
-          if (!!identity) Models.Colors.findOrCreate({ colorIdentity: identity, color: color.id })
-
-          return color
-        })
-        .catch(err => error(`Failed to run Mutation: create${Definition.name}`, err))
-        .finally(info(`Resolved Mutation: create${Definition.name}`, { parent, input, context}))
-    }
+    args: { ...Input },
+    resolve: create
   },
   updateColor: {
     type: Definition,
     description: `Updates an existing Color, creates it if it does not already exist`,
-    args: { input: { type: Input } },
-    resolve: (parent, { input }, context) => {
-      const { symbol, identity, ...fields } = input
-      return Models.Color
-        .upsert({ symbol }, { identity, ...fields })
-        .then(model => {
-          const color = model.toJSON()
-
-          if (!!identity) Models.Colors.findOrCreate({ colorIdentity: identity, color: color.id })
-
-          return color
-        })
-        .catch(err => error(`Failed to run Mutation: update${Definition.name}`, err))
-        .finally(info(`Resolved Mutation: update${Definition.name}`, { parent, input, context}))
-    }
+    args: { id: { type: new GqlNonNull(GqlID) }, ...Input },
+    resolve: update
   },
   deleteColor: {
     type: Definition,
     description: `Deletes a Color by id`,
-    args: { id: { type: GraphQLID } },
-    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) } },
+    resolve: destroy
   }
 }
+
+export {
+  Definition as Color,
+  Connection as ColorConnection,
+  Filter as ColorFilter,
+  Input as ColorInput,
+  Order as ColorOrder
+}
+
+export default { Definition, Queries, Mutations }

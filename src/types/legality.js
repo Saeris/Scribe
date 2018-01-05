@@ -1,83 +1,105 @@
-import { GraphQLID, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, loadRelated, order, read, update } from './utilities'
-import Models from '../models'
-import { Card, Format } from './'
+import {
+  nodeInterface,
+  DateRange,
+  createFilter,
+  createInput,
+  createOrder,
+  create,
+  read,
+  update,
+  destroy,
+  sqlJoin,
+  junction,
+  orderBy,
+  where
+} from "@/utilities"
+import { CardConnection, CardFilter, CardOrder } from "./card"
+import { Format, FormatFilter, FormatOrder } from "./format"
 
-export const Input = new GraphQLInputObjectType({
-  name: `LegalityInput`,
-  description: `Required fields for a new Legality object`,
-  fields: () => ({
-    cards:      { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) },
-    format:     { type: new GraphQLNonNull(GraphQLID) },
-    legal:      { type: new GraphQLNonNull(GraphQLBoolean) },
-    restricted: { type: new GraphQLNonNull(GraphQLBoolean) }
-  })
-})
-
-const Filter = new GraphQLInputObjectType({
-  name: `LegalityFilter`,
-  description: `Queryable fields for Legality.`,
-  fields: () => ({
-    cards:      { type: new GraphQLList(GraphQLID) },
-    format:     { type: new GraphQLList(GraphQLID) },
-    legal:      { type: GraphQLBoolean },
-    restricted: { type: GraphQLBoolean }
-  })
-})
-
-const Fields = new GraphQLEnumType({
-  name: `LegalityFields`,
-  description: `Field names for Legality.`,
-  values: {
-    format:     { value: `format` },
-    legal:      { value: `legal` },
-    restricted: { value: `restricted` }
-  }
-})
-
-export const Definition = new GraphQLObjectType({
+export const Definition = new GqlObject({
   name: `Legality`,
   description: `A Legality object`,
-  fields: () => ({
+  interfaces: [nodeInterface],
+  sqlTable: `legality`,
+  uniqueKey: `id`,
+  timestamps: table => table.timestamps(),
+  fields: disabled => ({
+    globalId: {
+      ...globalId(),
+      description: `The global ID for the Relay spec`,
+      sqlDeps: [`id`]
+    },
     id: {
-      type: GraphQLID,
-      description: `A unique id for this name.`
+      type: new GqlNonNull(GqlID),
+      description: `The Legality ID`,
+      sqlColumn: `id`,
+      column: table => table.string(`id`).notNullable().primary().unique()
+    },
+    created: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `created`,
+      sortable: true,
+      filter: { type: DateRange }
+    },
+    updated: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `updated`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     cards: {
-      type: new GraphQLList(Card.Definition),
+      type: CardConnection,
       description: `The ID of the card.`,
-      resolve: type => loadRelated(type.id, Models.Legality, `cards`)
+      args: { ...connectionArgs, ...CardFilter, ...CardOrder },
+      junction: junction(`legalitycards`),
+      where,
+      orderBy,
+      resolve: ({ cards }, args) => connectionFromArray(cards, args)
     },
     format: {
-      type: Format.Definition,
+      type: Format,
       description: `The format the card is legal in.`,
-      resolve: type => loadRelated(type.id, Models.Legality, `format`)
+      column: table => table.string(`format`).notNullable(),
+      input: { type: new GqlNonNull(GqlID) },
+      args: { ...FormatFilter, ...FormatOrder },
+      where,
+      orderBy,
+      sqlJoin: sqlJoin(`format`)
     },
     legal: {
-      type: GraphQLBoolean,
-      description: `Set to True if the card is Legal to play in the given format.`
+      type: new GqlNonNull(GqlBool),
+      description: `Set to True if the card is Legal to play in the given format.`,
+      sqlColumn: `legal`,
+      column: table => table.boolean(`legal`).notNullable(),
+      input: true,
+      sortable: true,
+      filter: { type: GqlBool }
     },
     restricted: {
-      type: GraphQLBoolean,
-      description: `Set to True if the card is restricted in the given format.`
+      type: new GqlNonNull(GqlBool),
+      description: `Set to True if the card is restricted in the given format.`,
+      sqlColumn: `legal`,
+      column: table => table.boolean(`legal`).notNullable(),
+      input: true,
+      sortable: true,
+      filter: { type: GqlBool }
     }
   })
 })
 
+export const { connectionType: Connection } = connectionDefinitions({ nodeType: Definition })
+export const Filter = createFilter(Definition)
+export const Input = createInput(Definition)
+export const Order = createOrder(Definition)
+
 export const Queries = {
   legality: {
-    type: new GraphQLList(Definition),
+    type: new GqlList(Definition),
     description: `Returns a Legality.`,
-    args: {
-      id: { type: new GraphQLList(GraphQLID) },
-      filter: {
-        type: Filter
-      },
-      limit: { type: GraphQLInt },
-      offset: { type: GraphQLInt },
-      orderBy: { type: order(`legality`, Fields) }
-    },
-    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
+    args: { ...Filter, ...Order },
+    where,
+    orderBy,
+    resolve: read
   }
 }
 
@@ -85,19 +107,29 @@ export const Mutations = {
   createLegality: {
     type: Definition,
     description: `Creates a new Legality`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
+    args: { ...Input },
+    resolve: create
   },
   updateLegality: {
     type: Definition,
     description: `Updates an existing Legality, creates it if it does not already exist`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => update(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) }, ...Input },
+    resolve: update
   },
   deleteLegality: {
     type: Definition,
     description: `Deletes a Legality by id`,
-    args: { id: { type: GraphQLID } },
-    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) } },
+    resolve: destroy
   }
 }
+
+export {
+  Definition as Legality,
+  Connection as LegalityConnection,
+  Filter as LegalityFilter,
+  Input as LegalityInput,
+  Order as LegalityOrder
+}
+
+export default { Definition, Queries, Mutations }

@@ -1,0 +1,25 @@
+{
+  "apiKey": "service:Saeris-Flickr:8wxzj_NNfMsPv_ZQ5_tfbg",
+  "logcfg": {
+    "level": "INFO"
+  },
+  "origins": [
+    {
+      "url":"arn:aws:lambda:xxxxxxxxxxx:xxxxxxxxxxxx:function:xxxxxxxxxxxxxxxxxxx",
+      "awsAccessKeyId":"xxxxxxxxxxxxxxxxxxxx",
+      "awsSecretAccessKey":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "originType": "Lambda"
+    }
+  ],"origins": [
+    {
+      "url": "http://localhost:3000/graphql"
+    }
+  ],
+  "frontends": [
+    {
+      "host": "127.0.0.1",
+      "port": 3001,
+      "endpoint": "/graphql"
+    }
+  ]
+}

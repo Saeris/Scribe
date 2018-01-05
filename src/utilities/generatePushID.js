@@ -1,4 +1,4 @@
-import { invariant } from './invariant'
+import { invariant } from './validation'
 /**
  * Fancy ID generator that creates 20-character string identifiers with the
  * following properties:
@@ -18,7 +18,7 @@ import { invariant } from './invariant'
 
 export const generatePushID = (() => {
   const PUSH_CHARS = `-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz`
-  let   lastPushTime = 0
+  let lastPushTime = 0
   const lastRandChars = []
 
   return () => {
@@ -35,12 +35,12 @@ export const generatePushID = (() => {
 
     let id = timeStampChars.join(``)
 
-    if (!duplicateTime) {
-      for (let i = 0; i < 12; i++) lastRandChars[i] = Math.floor(Math.random() * 64)
-    } else {
+    if (duplicateTime) {
       let i
       for (i = 11; i >= 0 && lastRandChars[i] === 63; i--) lastRandChars[i] = 0
       lastRandChars[i]++
+    } else {
+      for (let i = 0; i < 12; i++) lastRandChars[i] = Math.floor(Math.random() * 64)
     }
     for (let i = 0; i < 12; i++) id += PUSH_CHARS.charAt(lastRandChars[i])
     invariant(id.length === 20, `Length should be 20.`)

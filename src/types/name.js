@@ -1,75 +1,96 @@
-import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, load, loadRelated, order, read, update } from './utilities'
-import Models from '../models'
-import { Card, Language } from './'
+import {
+  nodeInterface,
+  DateRange,
+  createFilter,
+  createInput,
+  createOrder,
+  create,
+  read,
+  update,
+  destroy,
+  sqlJoin,
+  orderBy,
+  where
+} from "@/utilities"
+import { Card, CardFilter, CardOrder } from "./card"
+import { Language, LanguageFilter, LanguageOrder } from "./language"
 
-export const Input = new GraphQLInputObjectType({
-  name: `NameInput`,
-  description: `Required fields for a new Name object`,
-  fields: () => ({
-    name:         { type: new GraphQLNonNull(GraphQLString) },
-    language:     { type: new GraphQLNonNull(GraphQLID) }
-  })
-})
-
-const Filter = new GraphQLInputObjectType({
-  name: `NameFilter`,
-  description: `Queryable fields for Name.`,
-  fields: () => ({
-    name:         { type: new GraphQLList(GraphQLString) },
-    language:     { type: new GraphQLList(GraphQLID) },
-    cards:        { type: new GraphQLList(GraphQLID) }
-  })
-})
-
-const Fields = new GraphQLEnumType({
-  name: `NameFields`,
-  description: `Field names for Name.`,
-  values: {
-    name:         { value: `name` },
-    language:     { value: `language` }
-  }
-})
-
-export const Definition = new GraphQLObjectType({
+export const Definition = new GqlObject({
   name: `Name`,
   description: `A Name object`,
-  fields: () => ({
+  interfaces: [nodeInterface],
+  sqlTable: `name`,
+  uniqueKey: `id`,
+  timestamps: table => table.timestamps(),
+  fields: disabled => ({
+    globalId: {
+      ...globalId(),
+      description: `The global ID for the Relay spec`,
+      sqlDeps: [`id`]
+    },
     id: {
-      type: GraphQLID,
-      description: `A unique id for this name.`
+      type: new GqlNonNull(GqlID),
+      description: `The Name ID`,
+      sqlColumn: `id`,
+      column: table => table.string(`id`).notNullable().primary().unique()
+    },
+    created: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `created`,
+      sortable: true,
+      filter: { type: DateRange }
+    },
+    updated: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `updated`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     name: {
-      type: GraphQLString,
-      description: `The localized name of a card.`
+      type: new GqlNonNull(GqlString),
+      description: `The localized Name of a Card.`,
+      sqlColumn: `name`,
+      column: table => table.string(`name`).notNullable().unique(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
     language: {
-      type: Language.Definition,
-      description: `The language name.`,
-      resolve: type => load(type.language, Models.Language)
+      type: Language,
+      description: `The Language for this Name.`,
+      column: table => table.string(`language`).notNullable(),
+      input: { type: new GqlNonNull(GqlID) },
+      args: { ...LanguageFilter, ...LanguageOrder },
+      where,
+      orderBy,
+      sqlJoin: sqlJoin(`language`)
     },
-    cards: {
-      type: new GraphQLList(Card.Definition),
-      description: `A list of cards featuring art from this artist.`,
-      resolve: type => loadRelated(type.id, Models.Name, `cards`)
+    card: {
+      type: Card,
+      description: `The Card with this Name.`,
+      column: table => table.string(`card`).notNullable(),
+      input: { type: new GqlNonNull(GqlID) },
+      args: { ...CardFilter, ...CardOrder },
+      where,
+      orderBy,
+      sqlJoin: sqlJoin(`card`)
     }
   })
 })
 
+export const { connectionType: Connection } = connectionDefinitions({ nodeType: Definition })
+export const Filter = createFilter(Definition)
+export const Input = createInput(Definition)
+export const Order = createOrder(Definition)
+
 export const Queries = {
   name: {
-    type: new GraphQLList(Definition),
+    type: new GqlList(Definition),
     description: `Returns a Name.`,
-    args: {
-      id: { type: new GraphQLList(GraphQLID) },
-      filter: {
-        type: Filter
-      },
-      limit: { type: GraphQLInt },
-      offset: { type: GraphQLInt },
-      orderBy: { type: order(`name`, Fields) }
-    },
-    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
+    args: { ...Filter, ...Order },
+    where,
+    orderBy,
+    resolve: read
   }
 }
 
@@ -77,19 +98,29 @@ export const Mutations = {
   createName: {
     type: Definition,
     description: `Creates a new Name`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
+    args: { ...Input },
+    resolve: create
   },
   updateName: {
     type: Definition,
     description: `Updates an existing Name, creates it if it does not already exist`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `name`)
+    args: { id: { type: new GqlNonNull(GqlID) }, ...Input },
+    resolve: update
   },
   deleteName: {
     type: Definition,
     description: `Deletes a Name by id`,
-    args: { id: { type: GraphQLID } },
-    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) } },
+    resolve: destroy
   }
 }
+
+export {
+  Definition as Name,
+  Connection as NameConnection,
+  Filter as NameFilter,
+  Input as NameInput,
+  Order as NameOrder
+}
+
+export default { Definition, Queries, Mutations }

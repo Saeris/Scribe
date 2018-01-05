@@ -1,87 +1,112 @@
-import { GraphQLID, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, loadRelated, order, read, update } from './utilities'
-import Models from '../models'
-import { Color } from './'
+import {
+  nodeInterface,
+  DateRange,
+  createFilter,
+  createInput,
+  createOrder,
+  read,
+  update,
+  destroy,
+  junction,
+  orderBy,
+  where
+} from "@/utilities"
+import { createColorIdentity } from "@/resolvers"
+import { ColorConnection, ColorFilter, ColorOrder } from './color'
 
-export const Input = new GraphQLInputObjectType({
-  name: `ColorIdentityInput`,
-  description: `Required fields for a new Color Identity object`,
-  fields: () => ({
-    name:         { type: new GraphQLNonNull(GraphQLString) },
-    alias:        { type: GraphQLString },
-    multicolored: { type: GraphQLBoolean },
-    devoid:       { type: GraphQLBoolean }
-  })
-})
-
-const Filter = new GraphQLInputObjectType({
-  name: `ColorIdentityFilter`,
-  description: `Queryable fields for ColorIdentity.`,
-  fields: () => ({
-    name:         { type: new GraphQLList(GraphQLString) },
-    alias:        { type: new GraphQLList(GraphQLString) },
-    multicolored: { type: GraphQLBoolean },
-    devoid:       { type: GraphQLBoolean }
-  })
-})
-
-const Fields = new GraphQLEnumType({
-  name: `ColorIdentityFields`,
-  description: `Field names for ColorIdentity.`,
-  values: {
-    name:         { value: `name` },
-    alias:        { value: `alias` },
-    multicolored: { value: `multicolored` },
-    devoid:       { value: `devoid` }
-  }
-})
-
-export const Definition = new GraphQLObjectType({
+export const Definition = new GqlObject({
   name: `ColorIdentity`,
   description: `A Color Identity object`,
-  fields: () => ({
+  interfaces: [nodeInterface],
+  sqlTable: `color`,
+  uniqueKey: `id`,
+  timestamps: table => table.timestamps(),
+  fields: disabled => ({
+    globalId: {
+      ...globalId(),
+      description: `The global ID for the Relay spec`,
+      sqlDeps: [`id`]
+    },
     id: {
-      type: GraphQLID,
-      description: `A unique id for this color identity.`
+      type: new GqlNonNull(GqlID),
+      description: `The Color Identity ID`,
+      sqlColumn: `id`,
+      column: table => table.string(`id`).notNullable().primary().unique()
+    },
+    created: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `created`,
+      sortable: true,
+      filter: { type: DateRange }
+    },
+    updated: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `updated`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     name: {
-      type: GraphQLString,
-      description: `The color identity name.`
+      type: new GqlNonNull(GqlString),
+      description: `The name of the Color Identity.`,
+      sqlColumn: `name`,
+      column: table => table.string(`name`).notNullable().unique(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
     alias: {
-      type: GraphQLString,
-      description: `The alias of the color identity. Examples: Bant, Jeskai`
+      type: GqlString,
+      description: `The alias of the color identity. Examples: Bant, Jeskai`,
+      sqlColumn: `alias`,
+      column: table => table.string(`alias`),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
     colors: {
-      type: new GraphQLList(Color.Definition),
+      type: ColorConnection,
       description: `A list of colors included in this color identity.`,
-      resolve: type => loadRelated(type.id, Models.ColorIdentity, `colors`)
+      input: { type: new GqlNonNull(new GqlList(new GqlNonNull(GqlID))) },
+      args: { ...connectionArgs, ...ColorFilter, ...ColorOrder },
+      junction: junction(`colors`),
+      where,
+      orderBy,
+      resolve: ({ colors }, args) => connectionFromArray(colors, args)
     },
     multicolored: {
-      type: GraphQLBoolean,
-      description: `Set to True if the color identity counts as multicolored.`
+      type: new GqlNonNull(GqlBool),
+      description: `Set to True if the color identity counts as multicolored.`,
+      sqlColumn: `multicolored`,
+      column: table => table.boolean(`multicolored`).notNullable(),
+      input: true,
+      sortable: true,
+      filter: { type: GqlBool }
     },
     devoid: {
-      type: GraphQLBoolean,
-      description: `Set to True if the color identity counts as devoid.`
+      type: new GqlNonNull(GqlBool),
+      description: `Set to True if the color identity counts as devoid.`,
+      sqlColumn: `devoid`,
+      column: table => table.boolean(`devoid`).notNullable(),
+      input: true,
+      sortable: true,
+      filter: { type: GqlBool }
     }
   })
 })
 
+export const { connectionType: Connection } = connectionDefinitions({ nodeType: Definition })
+export const Filter = createFilter(Definition)
+export const Input = createInput(Definition)
+export const Order = createOrder(Definition)
+
 export const Queries = {
   colorIdentity: {
-    type: new GraphQLList(Definition),
+    type: new GqlList(Definition),
     description: `Returns a ColorIdentity.`,
-    args: {
-      id: { type: new GraphQLList(GraphQLID) },
-      filter: {
-        type: Filter
-      },
-      limit: { type: GraphQLInt },
-      offset: { type: GraphQLInt },
-      orderBy: { type: order(`colorIdentity`, Fields) }
-    },
-    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
+    args: { ...Filter, ...Order },
+    where,
+    orderBy,
+    resolve: read
   }
 }
 
@@ -89,19 +114,29 @@ export const Mutations = {
   createColorIdentity: {
     type: Definition,
     description: `Creates a new ColorIdentity`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
+    args: { ...Input },
+    resolve: createColorIdentity
   },
   updateColorIdentity: {
     type: Definition,
     description: `Updates an existing ColorIdentity, creates it if it does not already exist`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `name`)
+    args: { id: { type: new GqlNonNull(GqlID) }, ...Input },
+    resolve: update
   },
   deleteColorIdentity: {
     type: Definition,
     description: `Deletes a ColorIdentity by id`,
-    args: { id: { type: GraphQLID } },
-    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) } },
+    resolve: destroy
   }
 }
+
+export {
+  Definition as ColorIdentity,
+  Connection as ColorIdentityConnection,
+  Filter as ColorIdentityFilter,
+  Input as ColorIdentityInput,
+  Order as ColorIdentityOrder
+}
+
+export default { Definition, Queries, Mutations }

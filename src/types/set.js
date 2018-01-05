@@ -1,112 +1,142 @@
-import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { GraphQLDate } from 'graphql-iso-date'
-import { destroy, load, loadRelated, order, read } from './utilities'
-import { info, error } from 'winston'
-import Models from '../models'
-import { Block, SetType, Icon, Booster } from './'
+import {
+  nodeInterface,
+  DateRange,
+  createFilter,
+  createInput,
+  createOrder,
+  //create,
+  read,
+  //update,
+  destroy,
+  sqlJoin,
+  orderBy,
+  where
+} from "@/utilities"
+import { Block, BlockFilter, BlockOrder } from "./block"
+import { SetType, SetTypeFilter, SetTypeOrder } from "./setType"
+import { Icon, IconFilter, IconOrder } from "./icon"
+import { Booster, BoosterFilter, BoosterOrder } from "./booster"
 
-export const Input = new GraphQLInputObjectType({
-  name: `SetInput`,
-  description: `Required fields for a new Set object`,
-  fields: () => ({
-    name:        { type: new GraphQLNonNull(GraphQLString) },
-    code:        { type: new GraphQLNonNull(GraphQLString) },
-    block:       { type: GraphQLID },
-    type:        { type: new GraphQLNonNull(GraphQLID)},
-    icon:        { type: new GraphQLNonNull(GraphQLID) },
-    border:      { type: new GraphQLNonNull(GraphQLString) },
-    releaseDate: { type: new GraphQLNonNull(GraphQLDate) },
-    booster:     { type: GraphQLID }
-  })
-})
-
-const Filter = new GraphQLInputObjectType({
-  name: `SetFilter`,
-  description: `Queryable fields for Set.`,
-  fields: () => ({
-    name:        { type: new GraphQLList(GraphQLString) },
-    code:        { type: new GraphQLList(GraphQLString) },
-    block:       { type: new GraphQLList(GraphQLID) },
-    type:        { type: new GraphQLList(GraphQLID) },
-    border:      { type: new GraphQLList(GraphQLString) },
-    releaseDate: { type: new GraphQLList(GraphQLDate) }
-  })
-})
-
-const Fields = new GraphQLEnumType({
-  name: `SetFields`,
-  description: `Field names for Set.`,
-  values: {
-    name:        { value: `name` },
-    code:        { value: `code` },
-    block:       { value: `block` },
-    type:        { value: `type` },
-    border:      { value: `border` },
-    releaseDate: { value: `releaseDate` }
-  }
-})
-
-export const Definition = new GraphQLObjectType({
+export const Definition = new GqlObject({
   name: `Set`,
   description: `A Set object`,
-  fields: () => ({
+  interfaces: [nodeInterface],
+  sqlTable: `set`,
+  uniqueKey: `id`,
+  timestamps: table => table.timestamps(),
+  fields: disabled => ({
+    globalId: {
+      ...globalId(),
+      description: `The global ID for the Relay spec`,
+      sqlDeps: [`id`]
+    },
     id: {
-      type: GraphQLID,
-      description: `A unique id for this set.`
+      type: new GqlNonNull(GqlID),
+      description: `The Set ID.`,
+      sqlColumn: `id`,
+      column: table => table.string(`id`).notNullable().primary().unique()
+    },
+    created: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `created`,
+      sortable: true,
+      filter: { type: DateRange }
+    },
+    updated: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `updated`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     name: {
-      type: GraphQLString,
-      description: `The set name.`
+      type: new GqlNonNull(GqlString),
+      description: `The name of the Set.`,
+      sqlColumn: `name`,
+      column: table => table.string(`name`).notNullable().unique(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
     code: {
-      type: GraphQLString,
-      description: `The set code for this set.`
+      type: new GqlNonNull(GqlString),
+      description: `The set code for this Set.`,
+      sqlColumn: `code`,
+      column: table => table.string(`code`).notNullable().unique(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
     block: {
-      type: Block.Definition,
-      description: `The block the set belongs to.`,
-      resolve: type => loadRelated(type.id, Models.Set, `block`)
+      type: Block,
+      description: `The Block the Set belongs to.`,
+      column: table => table.string(`block`).notNullable(),
+      input: { type: new GqlNonNull(GqlID) },
+      args: { ...BlockFilter, ...BlockOrder },
+      where,
+      orderBy,
+      sqlJoin: sqlJoin(`block`)
     },
     type: {
-      type: SetType.Definition,
-      description: `The set type.`,
-      resolve: type => load(type.type, Models.SetType)
+      type: SetType,
+      description: `The Set type.`,
+      column: table => table.string(`type`).notNullable(),
+      input: { type: new GqlNonNull(GqlID) },
+      args: { ...SetTypeFilter, ...SetTypeOrder },
+      where,
+      orderBy,
+      sqlJoin: sqlJoin(`type`)
     },
     icon: {
-      type: Icon.Definition,
-      description: `The icon associated with the set.`,
-      resolve: type => load(type.icon, Models.Icon)
+      type: Icon,
+      description: `The Icon associated with the Set.`,
+      column: table => table.string(`icon`).notNullable(),
+      input: { type: new GqlNonNull(GqlID) },
+      args: { ...IconFilter, ...IconOrder },
+      where,
+      orderBy,
+      sqlJoin: sqlJoin(`icon`)
     },
     border: {
-      type: GraphQLString,
-      description: `The card border color for this set.`
+      type: new GqlNonNull(GqlString),
+      description: `The card border color for this Set.`,
+      sqlColumn: `border`,
+      column: table => table.string(`border`).notNullable(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
     releaseDate: {
-      type: GraphQLDate,
-      description: `The date this card was released. This is only set for promo cards. The date may not be accurate to an exact day and month, thus only a partial date may be set (YYYY-MM-DD or YYYY-MM or YYYY). Some promo cards do not have a known release date.`
+      type: new GqlNonNull(GqlDateTime),
+      description: `The date this card was released. This is only set for promo cards. The date may not be accurate to an exact day and month, thus only a partial date may be set (YYYY-MM-DD or YYYY-MM or YYYY). Some promo cards do not have a known release date.`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     booster: {
-      type: Booster.Definition,
+      type: Booster,
       description: `A booster pack for this set`,
-      resolve: type => load(type.booster, Models.Booster)
+      column: table => table.string(`booster`).notNullable(),
+      input: { type: new GqlNonNull(GqlID) },
+      args: { ...BoosterFilter, ...BoosterOrder },
+      where,
+      orderBy,
+      sqlJoin: sqlJoin(`booster`)
     }
   })
 })
 
+export const { connectionType: Connection } = connectionDefinitions({ nodeType: Definition })
+export const Filter = createFilter(Definition)
+export const Input = createInput(Definition)
+export const Order = createOrder(Definition)
+
 export const Queries = {
   set: {
-    type: new GraphQLList(Definition),
+    type: new GqlList(Definition),
     description: `Returns a Set.`,
-    args: {
-      id: { type: new GraphQLList(GraphQLID) },
-      filter: {
-        type: Filter
-      },
-      limit: { type: GraphQLInt },
-      offset: { type: GraphQLInt },
-      orderBy: { type: order(`set`, Fields) }
-    },
-    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
+    args: { ...Filter, ...Order },
+    where,
+    orderBy,
+    resolve: read
   }
 }
 
@@ -114,7 +144,8 @@ export const Mutations = {
   createSet: {
     type: Definition,
     description: `Creates a new Set`,
-    args: { input: { type: Input } },
+    args: { ...Input }
+    /*
     resolve: (parent, { input }, context) => Models.Set
       .findOrCreate(input)
       .then(model => {
@@ -125,13 +156,15 @@ export const Mutations = {
         return set
       })
       .catch(err => error(`Failed to run Mutation: create${Definition.name}`, err))
-      .finally(info(`Resolved Mutation: create${Definition.name}`, { parent, input, context}))
+      .finally(info(`Resolved Mutation: create${Definition.name}`, { parent, input, context }))
+      */
   },
   updateSet: {
     type: Definition,
     description: `Updates an existing Set, creates it if it does not already exist`,
-    args: { input: { type: Input } },
+    args: { id: { type: new GqlNonNull(GqlID) }, ...Input },
     resolve: (parent, { input }, context) => {
+      /*
       const { name, ...fields } = input
       return Models.Set
         .upsert({ name }, { ...fields })
@@ -144,12 +177,23 @@ export const Mutations = {
         })
         .catch(err => error(`Failed to run Mutation: update${Definition.name}`, err))
         .finally(info(`Resolved Mutation: update${Definition.name}`, { parent, input, context}))
+      */
     }
   },
   deleteSet: {
     type: Definition,
     description: `Deletes a Set by id`,
-    args: { id: { type: GraphQLID } },
-    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) } },
+    resolve: destroy
   }
 }
+
+export {
+  Definition as CardSet,
+  Connection as CardSetConnection,
+  Filter as CardSetFilter,
+  Input as CardSetInput,
+  Order as CardSetOrder
+}
+
+export default { Definition, Queries, Mutations }

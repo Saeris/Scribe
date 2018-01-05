@@ -1,83 +1,105 @@
-import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { GraphQLDate } from 'graphql-iso-date'
-import { create, destroy, loadRelated, order, read, update } from './utilities'
-import Models from '../models'
-import { Card, Language } from './'
+import {
+  nodeInterface,
+  DateRange,
+  createFilter,
+  createInput,
+  createOrder,
+  create,
+  read,
+  update,
+  destroy,
+  sqlJoin,
+  junction,
+  orderBy,
+  where
+} from "@/utilities"
+import { CardConnection, CardFilter, CardOrder } from "./card"
+import { Language, LanguageFilter, LanguageOrder } from "./language"
 
-export const Input = new GraphQLInputObjectType({
-  name: `RulingInput`,
-  description: `Required fields for a new Ruling object`,
-  fields: () => ({
-    text:     { type: new GraphQLNonNull(GraphQLString) },
-    date:     { type: new GraphQLNonNull(GraphQLDate) },
-    language: { type: new GraphQLNonNull(GraphQLID) },
-    cards:    { type: new GraphQLNonNull(new GraphQLList(GraphQLID)) }
-  })
-})
-
-const Filter = new GraphQLInputObjectType({
-  name: `RulingFilter`,
-  description: `Queryable fields for Ruling.`,
-  fields: () => ({
-    text:     { type: GraphQLString },
-    date:     { type: new GraphQLList(GraphQLDate) },
-    language: { type: new GraphQLList(GraphQLID) },
-    cards:    { type: new GraphQLList(GraphQLID) }
-  })
-})
-
-const Fields = new GraphQLEnumType({
-  name: `RulingFields`,
-  description: `Field names for Ruling.`,
-  values: {
-    date:     { value: `date` },
-    language: { value: `language` }
-  }
-})
-
-export const Definition = new GraphQLObjectType({
+export const Definition = new GqlObject({
   name: `Ruling`,
   description: `A Ruling object`,
-  fields: () => ({
+  interfaces: [nodeInterface],
+  sqlTable: `ruling`,
+  uniqueKey: `id`,
+  timestamps: table => table.timestamps(),
+  fields: disabled => ({
+    globalId: {
+      ...globalId(),
+      description: `The global ID for the Relay spec`,
+      sqlDeps: [`id`]
+    },
     id: {
-      type: GraphQLID,
-      description: `A unique id for this ruling.`
+      type: new GqlNonNull(GqlID),
+      description: `The Ruling ID.`,
+      sqlColumn: `id`,
+      column: table => table.string(`id`).notNullable().primary().unique()
+    },
+    created: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `created`,
+      sortable: true,
+      filter: { type: DateRange }
+    },
+    updated: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `updated`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     text: {
-      type: GraphQLString,
-      description: `The text of the ruling.`
+      type: new GqlNonNull(GqlString),
+      description: `The text of the Ruling.`,
+      sqlColumn: `text`,
+      column: table => table.string(`text`).notNullable(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
     date: {
-      type: GraphQLDate,
-      description: `The date this ruling was issued.`
+      type: new GqlNonNull(GqlDateTime),
+      description: `The date this Ruling was issued.`,
+      sqlColumn: `date`,
+      column: table => table.string(`date`).notNullable(),
+      input: true,
+      sortable: true,
+      filter: { type: DateRange }
     },
     language: {
-      type: Language.Definition,
-      description: `The language code of this ruling.`,
-      resolve: type => loadRelated(type.id, Models.Ruling, `language`)
+      type: Language,
+      description: `The Language for this Ruling.`,
+      column: table => table.string(`language`).notNullable(),
+      input: { type: new GqlNonNull(GqlID) },
+      args: { ...LanguageFilter, ...LanguageOrder },
+      where,
+      orderBy,
+      sqlJoin: sqlJoin(`language`)
     },
     cards: {
-      type: new GraphQLList(Card.Definition),
-      description: `List of cards that have this ruling.`,
-      resolve: type => loadRelated(type.id, Models.Ruling, `cards`)
+      type: CardConnection,
+      description: `The Cards associated with this Ruling.`,
+      args: { ...connectionArgs, ...CardFilter, ...CardOrder },
+      junction: junction(`rulingcards`),
+      where,
+      orderBy,
+      resolve: ({ cards }, args) => connectionFromArray(cards, args)
     }
   })
 })
 
+export const { connectionType: Connection } = connectionDefinitions({ nodeType: Definition })
+export const Filter = createFilter(Definition)
+export const Input = createInput(Definition)
+export const Order = createOrder(Definition)
+
 export const Queries = {
   ruling: {
-    type: new GraphQLList(Definition),
+    type: new GqlList(Definition),
     description: `Returns a Ruling.`,
-    args: {
-      id: { type: new GraphQLList(GraphQLID) },
-      filter: {
-        type: Filter
-      },
-      limit: { type: GraphQLInt },
-      offset: { type: GraphQLInt },
-      orderBy: { type: order(`ruling`, Fields) }
-    },
-    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
+    args: { ...Filter, ...Order },
+    where,
+    orderBy,
+    resolve: read
   }
 }
 
@@ -85,19 +107,29 @@ export const Mutations = {
   createRuling: {
     type: Definition,
     description: `Creates a new Ruling`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
+    args: { ...Input },
+    resolve: create
   },
   updateRuling: {
     type: Definition,
     description: `Updates an existing Ruling, creates it if it does not already exist`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => update(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) }, ...Input },
+    resolve: update
   },
   deleteRuling: {
     type: Definition,
     description: `Deletes a Ruling by id`,
-    args: { id: { type: GraphQLID } },
-    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) } },
+    resolve: destroy
   }
 }
+
+export {
+  Definition as Ruling,
+  Connection as RulingConnection,
+  Filter as RulingFilter,
+  Input as RulingInput,
+  Order as RulingOrder
+}
+
+export default { Definition, Queries, Mutations }

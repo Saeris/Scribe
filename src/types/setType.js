@@ -1,64 +1,82 @@
-import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, order, read, update } from './utilities'
+import {
+  nodeInterface,
+  DateRange,
+  createFilter,
+  createInput,
+  createOrder,
+  create,
+  read,
+  update,
+  destroy,
+  orderBy,
+  where
+} from "@/utilities"
 
-export const Input = new GraphQLInputObjectType({
-  name: `SetTypeInput`,
-  description: `Required fields for a new Set Type object`,
-  fields: () => ({
-    name: { type: new GraphQLNonNull(GraphQLString) },
-    description:  { type: GraphQLString }
-  })
-})
-
-const Filter = new GraphQLInputObjectType({
-  name: `SetTypeFilter`,
-  description: `Queryable fields for SetType.`,
-  fields: () => ({
-    name: { type: new GraphQLList(GraphQLString) }
-  })
-})
-
-const Fields = new GraphQLEnumType({
-  name: `SetTypeFields`,
-  description: `Field names for SetType.`,
-  values: {
-    name: { value: `name` }
-  }
-})
-
-export const Definition = new GraphQLObjectType({
+export const Definition = new GqlObject({
   name: `SetType`,
   description: `A Set Type object`,
-  fields: () => ({
+  interfaces: [nodeInterface],
+  sqlTable: `settype`,
+  uniqueKey: `id`,
+  timestamps: table => table.timestamps(),
+  fields: disabled => ({
+    globalId: {
+      ...globalId(),
+      description: `The global ID for the Relay spec`,
+      sqlDeps: [`id`]
+    },
     id: {
-      type: GraphQLID,
-      description: `A unique id for this Set Type.`
+      type: new GqlNonNull(GqlID),
+      description: `The Set Type ID.`,
+      sqlColumn: `id`,
+      column: table => table.string(`id`).notNullable().primary().unique()
+    },
+    created: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `created`,
+      sortable: true,
+      filter: { type: DateRange }
+    },
+    updated: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `updated`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     name: {
-      type: GraphQLString,
-      description: `The Set Type name.`
+      type: new GqlNonNull(GqlString),
+      description: `The name of the Set Type.`,
+      sqlColumn: `name`,
+      column: table => table.string(`name`).notNullable().unique(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
     description: {
-      type: GraphQLString,
-      description: `The description of the Set Type.`
+      type: new GqlNonNull(GqlString),
+      description: `The description of the Set Type.`,
+      sqlColumn: `description`,
+      column: table => table.string(`description`).notNullable(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     }
   })
 })
 
+export const { connectionType: Connection } = connectionDefinitions({ nodeType: Definition })
+export const Filter = createFilter(Definition)
+export const Input = createInput(Definition)
+export const Order = createOrder(Definition)
+
 export const Queries = {
   setType: {
-    type: new GraphQLList(Definition),
+    type: new GqlList(Definition),
     description: `Returns a Set Type.`,
-    args: {
-      id: { type: new GraphQLList(GraphQLID) },
-      filter: {
-        type: Filter
-      },
-      limit: { type: GraphQLInt },
-      offset: { type: GraphQLInt },
-      orderBy: { type: order(`setType`, Fields) }
-    },
-    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
+    args: { ...Filter, ...Order },
+    where,
+    orderBy,
+    resolve: read
   }
 }
 
@@ -66,19 +84,29 @@ export const Mutations = {
   createSetType: {
     type: Definition,
     description: `Creates a new SetType`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
+    args: { ...Input },
+    resolve: create
   },
   updateSetType: {
     type: Definition,
     description: `Updates an existing SetType, creates it if it does not already exist`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `name`)
+    args: { id: { type: new GqlNonNull(GqlID) }, ...Input },
+    resolve: update
   },
   deleteSetType: {
     type: Definition,
     description: `Deletes a SetType by id`,
-    args: { id: { type: GraphQLID } },
-    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) } },
+    resolve: destroy
   }
 }
+
+export {
+  Definition as SetType,
+  Connection as SetTypeConnection,
+  Filter as SetTypeFilter,
+  Input as SetTypeInput,
+  Order as SetTypeOrder
+}
+
+export default { Definition, Queries, Mutations }

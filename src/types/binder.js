@@ -1,85 +1,108 @@
-import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, loadRelated, order, read, update } from './utilities'
-import Models from '../models'
-import { OwnedCard, Tag } from './'
+import {
+  nodeInterface,
+  DateRange,
+  createFilter,
+  createInput,
+  createOrder,
+  create,
+  read,
+  update,
+  destroy,
+  junction,
+  orderBy,
+  where
+} from "@/utilities"
+import { TagConnection, TagFilter, TagOrder } from './tag'
+import { OwnedCardConnection, OwnedCardFilter, OwnedCardOrder } from './ownedCard'
 
-export const Input = new GraphQLInputObjectType({
-  name: `BinderInput`,
-  description: `Required fields for a new Binder object`,
-  fields: () => ({
-    name:        { type: new GraphQLNonNull(GraphQLString) },
-    description: { type: new GraphQLNonNull(GraphQLString) },
-    privacy:     { type: new GraphQLNonNull(GraphQLInt) }
-  })
-})
-
-const Filter = new GraphQLInputObjectType({
-  name: `BinderFilter`,
-  description: `Queryable fields for Binder.`,
-  fields: () => ({
-    name:    { type: new GraphQLList(GraphQLString) },
-    privacy: { type: new GraphQLList(GraphQLInt) },
-    tags:    { type: new GraphQLList(GraphQLID) },
-    cards:   { type: new GraphQLList(GraphQLID) }
-  })
-})
-
-const Fields = new GraphQLEnumType({
-  name: `BinderFields`,
-  description: `Field names for Binder.`,
-  values: {
-    name:    { value: `name` },
-    privacy: { value: `privacy` }
-  }
-})
-
-export const Definition = new GraphQLObjectType({
+export const Definition = new GqlObject({
   name: `Binder`,
   description: `A Binder object`,
-  fields: () => ({
+  interfaces: [nodeInterface],
+  sqlTable: `binder`,
+  uniqueKey: `id`,
+  timestamps: table => table.timestamps(),
+  fields: disabled => ({
+    globalId: {
+      ...globalId(),
+      description: `The global ID for the Relay spec`,
+      sqlDeps: [`id`]
+    },
     id: {
-      type: GraphQLID,
-      description: `A unique id for this binder.`
+      type: new GqlNonNull(GqlID),
+      description: `The Binder ID.`,
+      sqlColumn: `id`,
+      column: table => table.string(`id`).notNullable().primary().unique()
+    },
+    created: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `created`,
+      sortable: true,
+      filter: { type: DateRange }
+    },
+    updated: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `updated`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     name: {
-      type: GraphQLString,
-      description: `The binder name.`
+      type: new GqlNonNull(GqlString),
+      description: `The Binder name.`,
+      sqlColumn: `name`,
+      column: table => table.string(`name`).notNullable().unique(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
     description: {
-      type: GraphQLString,
-      description: `The description of the binder.`
+      type: new GqlNonNull(GqlString),
+      description: `The description of the binder.`,
+      sqlColumn: `description`,
+      column: table => table.string(`description`).notNullable(),
+      input: true
     },
     privacy: {
-      type: GraphQLInt,
-      description: `The binder's privacy setting.`
+      type: new GqlNonNull(GqlInt),
+      description: `The Binder's privacy setting.`,
+      sqlColumn: `description`,
+      column: table => table.integer(`privacy`).notNullable(),
+      input: true
     },
     tags: {
-      type: new GraphQLList(Tag.Definition),
-      description: `A list of tags associated with this binder.`,
-      resolve: type => loadRelated(type.id, Models.Binder, `tags`)
+      type: TagConnection,
+      description: `A list of Tags associated with this Binder.`,
+      args: { ...connectionArgs, ...TagFilter, ...TagOrder },
+      junction: junction(`tags`),
+      where,
+      orderBy,
+      resolve: ({ tags }, args) => connectionFromArray(tags, args)
     },
     cards: {
-      type: new GraphQLList(OwnedCard.Definition),
-      description: `A list of cards that belong to this binder.`,
-      resolve: type => loadRelated(type.id, Models.Binder, `cards`)
+      type: OwnedCardConnection,
+      description: `A list of Cards that belong to this Binder.`,
+      args: { ...connectionArgs, ...OwnedCardFilter, ...OwnedCardOrder },
+      junction: junction(`bindercards`),
+      where,
+      orderBy,
+      resolve: ({ cards }, args) => connectionFromArray(cards, args)
     }
   })
 })
 
+export const { connectionType: Connection } = connectionDefinitions({ nodeType: Definition })
+export const Filter = createFilter(Definition)
+export const Input = createInput(Definition)
+export const Order = createOrder(Definition)
+
 export const Queries = {
   binder: {
-    type: new GraphQLList(Definition),
+    type: new GqlList(Definition),
     description: `Returns a Binder.`,
-    args: {
-      id: { type: new GraphQLList(GraphQLID) },
-      filter: {
-        type: Filter
-      },
-      limit: { type: GraphQLInt },
-      offset: { type: GraphQLInt },
-      orderBy: { type: order(`binder`, Fields) }
-    },
-    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
+    args: { ...Filter, ...Order },
+    where,
+    orderBy,
+    resolve: read
   }
 }
 
@@ -87,19 +110,29 @@ export const Mutations = {
   createBinder: {
     type: Definition,
     description: `Creates a new Binder`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
+    args: { ...Input },
+    resolve: create
   },
   updateBinder: {
     type: Definition,
     description: `Updates an existing Binder, creates it if it does not already exist`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `name`)
+    args: { id: { type: new GqlNonNull(GqlID) }, ...Input },
+    resolve: update
   },
   deleteBinder: {
     type: Definition,
     description: `Deletes a Binder by id`,
-    args: { id: { type: GraphQLID } },
-    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) } },
+    resolve: destroy
   }
 }
+
+export {
+  Definition as Binder,
+  Connection as BinderConnection,
+  Filter as BinderFilter,
+  Input as BinderInput,
+  Order as BinderOrder
+}
+
+export default { Definition, Queries, Mutations }

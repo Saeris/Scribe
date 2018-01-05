@@ -1,73 +1,91 @@
-import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, loadRelated, order, read, update } from './utilities'
-import Models from '../models'
-import { Card } from './'
+import {
+  nodeInterface,
+  DateRange,
+  createFilter,
+  createInput,
+  createOrder,
+  create,
+  read,
+  update,
+  destroy,
+  junction,
+  orderBy,
+  where
+} from "@/utilities"
+import { CardConnection, CardFilter, CardOrder } from "./card"
 
-export const Input = new GraphQLInputObjectType({
-  name: `CategoryInput`,
-  description: `Required fields for a new Category object`,
-  fields: () => ({
-    name:        { type: new GraphQLNonNull(GraphQLString) },
-    description: { type: new GraphQLNonNull(GraphQLString) },
-    cards:       { type: new GraphQLList(GraphQLID) }
-  })
-})
-
-const Filter = new GraphQLInputObjectType({
-  name: `CategoryFilter`,
-  description: `Queryable fields for Category.`,
-  fields: () => ({
-    name:  { type: new GraphQLList(GraphQLString) },
-    cards: { type: new GraphQLList(GraphQLID) }
-  })
-})
-
-const Fields = new GraphQLEnumType({
-  name: `CategoryFields`,
-  description: `Field names for Category.`,
-  values: {
-    name: { value: `name` }
-  }
-})
-
-export const Definition = new GraphQLObjectType({
+export const Definition = new GqlObject({
   name: `Category`,
   description: `A Category object`,
-  fields: () => ({
+  interfaces: [nodeInterface],
+  sqlTable: `category`,
+  uniqueKey: `id`,
+  timestamps: table => table.timestamps(),
+  fields: disabled => ({
+    globalId: {
+      ...globalId(),
+      description: `The global ID for the Relay spec`,
+      sqlDeps: [`id`]
+    },
     id: {
-      type: GraphQLID,
-      description: `A unique id for this category.`
+      type: new GqlNonNull(GqlID),
+      description: `The Category ID.`,
+      sqlColumn: `id`,
+      column: table => table.string(`id`).notNullable().primary().unique()
+    },
+    created: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `created`,
+      sortable: true,
+      filter: { type: DateRange }
+    },
+    updated: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `updated`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     name: {
-      type: GraphQLString,
-      description: `The category name.`
+      type: new GqlNonNull(GqlString),
+      description: `The Category name.`,
+      sqlColumn: `name`,
+      column: table => table.string(`name`).notNullable().unique(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(new GqlNonNull(GqlString)) }
     },
     description: {
-      type: GraphQLString,
-      description: `The description of the category.`
+      type: new GqlNonNull(GqlString),
+      description: `Description of the Category.`,
+      sqlColumn: `description`,
+      column: table => table.string(`description`).notNullable(),
+      input: true
     },
     cards: {
-      type: new GraphQLList(Card.Definition),
-      description: `A list of cards that have this category.`,
-      resolve: type => loadRelated(type.id, Models.Category, `cards`)
+      type: CardConnection,
+      description: `A list of cards that have this Category.`,
+      args: { ...connectionArgs, ...CardFilter, ...CardOrder },
+      junction: junction(`categorycards`),
+      where,
+      orderBy,
+      resolve: ({ cards }, args) => connectionFromArray(cards, args)
     }
   })
 })
 
+export const { connectionType: Connection } = connectionDefinitions({ nodeType: Definition })
+export const Filter = createFilter(Definition)
+export const Input = createInput(Definition)
+export const Order = createOrder(Definition)
+
 export const Queries = {
   category: {
-    type: new GraphQLList(Definition),
+    type: new GqlList(Definition),
     description: `Returns a Category.`,
-    args: {
-      id: { type: new GraphQLList(GraphQLID) },
-      filter: {
-        type: Filter
-      },
-      limit: { type: GraphQLInt },
-      offset: { type: GraphQLInt },
-      orderBy: { type: order(`category`, Fields) }
-    },
-    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
+    args: { ...Filter, ...Order },
+    where,
+    orderBy,
+    resolve: read
   }
 }
 
@@ -75,19 +93,29 @@ export const Mutations = {
   createCategory: {
     type: Definition,
     description: `Creates a new Category`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
+    args: { ...Input },
+    resolve: create
   },
   updateCategory: {
     type: Definition,
     description: `Updates an existing Category, creates it if it does not already exist`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `name`)
+    args: { id: { type: new GqlNonNull(GqlID) }, ...Input },
+    resolve: update
   },
   deleteCategory: {
     type: Definition,
     description: `Deletes a Category by id`,
-    args: { id: { type: GraphQLID } },
-    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) } },
+    resolve: destroy
   }
 }
+
+export {
+  Definition as Category,
+  Connection as CategoryConnection,
+  Filter as CategoryFilter,
+  Input as CategoryInput,
+  Order as CategoryOrder
+}
+
+export default { Definition, Queries, Mutations }

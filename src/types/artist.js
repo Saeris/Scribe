@@ -1,73 +1,93 @@
-import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, loadRelated, order, read, update } from './utilities'
-import Models from '../models'
-import { Card } from './'
+import {
+  nodeInterface,
+  DateRange,
+  createFilter,
+  createInput,
+  createOrder,
+  create,
+  read,
+  update,
+  destroy,
+  junction,
+  orderBy,
+  where
+} from "@/utilities"
+import { CardConnection, CardFilter, CardOrder } from "./card"
 
-export const Input = new GraphQLInputObjectType({
-  name: `ArtistInput`,
-  description: `Required fields for a new Artist object`,
-  fields: () => ({
-    name:    { type: new GraphQLNonNull(GraphQLString) },
-    website: { type: GraphQLString },
-    cards:   { type: new GraphQLList(GraphQLID) }
-  })
-})
-
-const Filter = new GraphQLInputObjectType({
-  name: `ArtistFilter`,
-  description: `Queryable fields for Artist.`,
-  fields: () => ({
-    name:  { type: new GraphQLList(GraphQLString) },
-    cards: { type: new GraphQLList(GraphQLID) }
-  })
-})
-
-const Fields = new GraphQLEnumType({
-  name: `ArtistFields`,
-  description: `Field names for Artist.`,
-  values: {
-    name: { value: `name` }
-  }
-})
-
-export const Definition = new GraphQLObjectType({
+export const Definition = new GqlObject({
   name: `Artist`,
   description: `An Artist object`,
-  fields: () => ({
+  interfaces: [nodeInterface],
+  sqlTable: `artist`,
+  uniqueKey: `id`,
+  timestamps: table => table.timestamps(),
+  fields: disabled => ({
+    globalId: {
+      ...globalId(),
+      description: `The global ID for the Relay spec`,
+      sqlDeps: [`id`]
+    },
     id: {
-      type: GraphQLID,
-      description: `A unique id for this artist.`
+      type: new GqlNonNull(GqlID),
+      description: `The Artist ID.`,
+      sqlColumn: `id`,
+      column: table => table.string(`id`).notNullable().primary().unique()
+    },
+    created: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `created`,
+      sortable: true,
+      filter: { type: DateRange }
+    },
+    updated: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `updated`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     name: {
-      type: GraphQLString,
-      description: `The name of the artist.`
+      type: new GqlNonNull(GqlString),
+      description: `The name of the Artist.`,
+      sqlColumn: `name`,
+      column: table => table.string(`name`).notNullable().unique(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
     website: {
-      type: GraphQLString,
-      description: `A URL to the artist's website, if they have one.`
+      type: GqlString,
+      description: `A URL to the Artist's website, if they have one.`,
+      sqlColumn: `website`,
+      column: table => table.string(`website`),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
     cards: {
-      type: new GraphQLList(Card.Definition),
-      description: `A list of cards featuring art from this artist.`,
-      resolve: type => loadRelated(type.id, Models.Artist, `cards`)
+      type: CardConnection,
+      description: `A list of cards featuring art from this Artist.`,
+      args: { ...connectionArgs, ...CardFilter, ...CardOrder },
+      junction: junction(`abilitytypecards`),
+      where,
+      orderBy,
+      resolve: ({ cards }, args) => connectionFromArray(cards, args)
     }
   })
 })
 
+export const { connectionType: Connection } = connectionDefinitions({ nodeType: Definition })
+export const Filter = createFilter(Definition)
+export const Input = createInput(Definition)
+export const Order = createOrder(Definition)
+
 export const Queries = {
   artist: {
-    type: new GraphQLList(Definition),
+    type: new GqlList(Definition),
     description: `Returns a Artist.`,
-    args: {
-      id: { type: new GraphQLList(GraphQLID) },
-      filter: {
-        type: Filter
-      },
-      limit: { type: GraphQLInt },
-      offset: { type: GraphQLInt },
-      orderBy: { type: order(`artist`, Fields) }
-    },
-    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
+    args: { ...Filter, ...Order },
+    where,
+    orderBy,
+    resolve: read
   }
 }
 
@@ -75,19 +95,29 @@ export const Mutations = {
   createArtist: {
     type: Definition,
     description: `Creates a new Artist`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
+    args: { ...Input },
+    resolve: create
   },
   updateArtist: {
     type: Definition,
     description: `Updates an existing Artist, creates it if it does not already exist`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `name`)
+    args: { id: { type: new GqlNonNull(GqlID) }, ...Input },
+    resolve: update
   },
   deleteArtist: {
     type: Definition,
     description: `Deletes a Rarity by id`,
-    args: { id: { type: GraphQLID } },
-    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) } },
+    resolve: destroy
   }
 }
+
+export {
+  Definition as Artist,
+  Connection as ArtistConnection,
+  Filter as ArtistFilter,
+  Input as ArtistInput,
+  Order as ArtistOrder
+}
+
+export default { Definition, Queries, Mutations }

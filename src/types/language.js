@@ -1,66 +1,82 @@
-import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, order, read, update } from './utilities'
+import {
+  nodeInterface,
+  DateRange,
+  createFilter,
+  createInput,
+  createOrder,
+  create,
+  read,
+  update,
+  destroy,
+  orderBy,
+  where
+} from "@/utilities"
 
-export const Input = new GraphQLInputObjectType({
-  name: `LanguageInput`,
-  description: `Required fields for a new language object`,
-  fields: () => ({
-    name: { type: new GraphQLNonNull(GraphQLString) },
-    code: { type: new GraphQLNonNull(GraphQLString) }
-  })
-})
-
-const Filter = new GraphQLInputObjectType({
-  name: `LanguageFilter`,
-  description: `Queryable fields for Language.`,
-  fields: () => ({
-    name: { type: new GraphQLList(GraphQLString) },
-    code: { type: new GraphQLList(GraphQLString) }
-  })
-})
-
-const Fields = new GraphQLEnumType({
-  name: `LanguageFields`,
-  description: `Field names for Language.`,
-  values: {
-    name: { value: `name` },
-    code: { value: `code` }
-  }
-})
-
-export const Definition = new GraphQLObjectType({
+export const Definition = new GqlObject({
   name: `Language`,
   description: `A language object`,
-  fields: () => ({
+  interfaces: [nodeInterface],
+  sqlTable: `language`,
+  uniqueKey: `id`,
+  timestamps: table => table.timestamps(),
+  fields: disabled => ({
+    globalId: {
+      ...globalId(),
+      description: `The global ID for the Relay spec`,
+      sqlDeps: [`id`]
+    },
     id: {
-      type: GraphQLID,
-      description: `A unique id for this language.`
+      type: new GqlNonNull(GqlID),
+      description: `The Language ID`,
+      sqlColumn: `id`,
+      column: table => table.string(`id`).notNullable().primary().unique()
+    },
+    created: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `created`,
+      sortable: true,
+      filter: { type: DateRange }
+    },
+    updated: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `updated`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     name: {
-      type: GraphQLString,
-      description: `The name of the language.`
+      type: new GqlNonNull(GqlString),
+      description: `The name of the Language.`,
+      sqlColumn: `name`,
+      column: table => table.string(`name`).notNullable().unique(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
     code: {
-      type: GraphQLString,
-      description: `The language code.`
+      type: new GqlNonNull(GqlString),
+      description: `The language code.`,
+      sqlColumn: `language`,
+      column: table => table.string(`language`).notNullable().unique(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     }
   })
 })
 
+export const { connectionType: Connection } = connectionDefinitions({ nodeType: Definition })
+export const Filter = createFilter(Definition)
+export const Input = createInput(Definition)
+export const Order = createOrder(Definition)
+
 export const Queries = {
   language: {
-    type: new GraphQLList(Definition),
+    type: new GqlList(Definition),
     description: `Returns a Language.`,
-    args: {
-      id: { type: new GraphQLList(GraphQLID) },
-      filter: {
-        type: Filter
-      },
-      limit: { type: GraphQLInt },
-      offset: { type: GraphQLInt },
-      orderBy: { type: order(`language`, Fields) }
-    },
-    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
+    args: { ...Filter, ...Order },
+    where,
+    orderBy,
+    resolve: read
   }
 }
 
@@ -68,19 +84,29 @@ export const Mutations = {
   createLanguage: {
     type: Definition,
     description: `Creates a new Language`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
+    args: { ...Input },
+    resolve: create
   },
   updateLanguage: {
     type: Definition,
     description: `Updates an existing Language, creates it if it does not already exist`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `name`)
+    args: { id: { type: new GqlNonNull(GqlID) }, ...Input },
+    resolve: update
   },
   deleteLanguage: {
     type: Definition,
     description: `Deletes a Language by id`,
-    args: { id: { type: GraphQLID } },
-    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) } },
+    resolve: destroy
   }
 }
+
+export {
+  Definition as Language,
+  Connection as LanguageConnection,
+  Filter as LanguageFilter,
+  Input as LanguageInput,
+  Order as LanguageOrder
+}
+
+export default { Definition, Queries, Mutations }

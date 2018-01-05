@@ -1,59 +1,76 @@
-import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, order, read, update } from './utilities'
+import {
+  nodeInterface,
+  DateRange,
+  createFilter,
+  createInput,
+  createOrder,
+  create,
+  read,
+  update,
+  destroy,
+  sqlJoin,
+  orderBy,
+  where
+} from "@/utilities"
+import { Card, CardFilter, CardOrder } from "./card"
 
-export const Input = new GraphQLInputObjectType({
-  name: `OwnedCardInput`,
-  description: `Required fields for a new OwnedCard object`,
-  fields: () => ({
-    card: { type: new GraphQLNonNull(GraphQLID) }
-  })
-})
-
-const Filter = new GraphQLInputObjectType({
-  name: `OwnedCardFilter`,
-  description: `Queryable fields for OwnedCard.`,
-  fields: () => ({
-    card: { type: new GraphQLList(GraphQLID) }
-  })
-})
-
-const Fields = new GraphQLEnumType({
-  name: `OwnedCardFields`,
-  description: `Field names for OwnedCard.`,
-  values: {
-    card: { value: `card` }
-  }
-})
-
-export const Definition = new GraphQLObjectType({
+export const Definition = new GqlObject({
   name: `OwnedCard`,
   description: `A OwnedCard object`,
-  fields: () => ({
+  interfaces: [nodeInterface],
+  sqlTable: `ownedCard`,
+  uniqueKey: `id`,
+  timestamps: table => table.timestamps(),
+  fields: disabled => ({
+    globalId: {
+      ...globalId(),
+      description: `The global ID for the Relay spec`,
+      sqlDeps: [`id`]
+    },
     id: {
-      type: GraphQLID,
-      description: `A unique id for this owned card.`
+      type: new GqlNonNull(GqlID),
+      description: `The OwnedCard ID`,
+      sqlColumn: `id`,
+      column: table => table.string(`id`).notNullable().primary().unique()
+    },
+    created: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `created`,
+      sortable: true,
+      filter: { type: DateRange }
+    },
+    updated: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `updated`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     card: {
-      type: GraphQLID,
-      description: `The card which this is an instance of.`
+      type: Card,
+      description: `The Card for which this is an Instance of.`,
+      column: table => table.string(`card`).notNullable(),
+      input: { type: new GqlNonNull(GqlID) },
+      args: { ...CardFilter, ...CardOrder },
+      where,
+      orderBy,
+      sqlJoin: sqlJoin(`card`)
     }
   })
 })
 
+export const { connectionType: Connection } = connectionDefinitions({ nodeType: Definition })
+export const Filter = createFilter(Definition)
+export const Input = createInput(Definition)
+export const Order = createOrder(Definition)
+
 export const Queries = {
   ownedCard: {
-    type: new GraphQLList(Definition),
+    type: new GqlList(Definition),
     description: `Returns a OwnedCard.`,
-    args: {
-      id: { type: new GraphQLList(GraphQLID) },
-      filter: {
-        type: Filter
-      },
-      limit: { type: GraphQLInt },
-      offset: { type: GraphQLInt },
-      orderBy: { type: order(`ownedCard`, Fields) }
-    },
-    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
+    args: { ...Filter, ...Order },
+    where,
+    orderBy,
+    resolve: read
   }
 }
 
@@ -61,19 +78,29 @@ export const Mutations = {
   createOwnedCard: {
     type: Definition,
     description: `Creates a new OwnedCard`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
+    args: { ...Input },
+    resolve: create
   },
   updateOwnedCard: {
     type: Definition,
     description: `Updates an existing OwnedCard, creates it if it does not already exist`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => update(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) }, ...Input },
+    resolve: update
   },
   deleteOwnedCard: {
     type: Definition,
     description: `Deletes a OwnedCard by id`,
-    args: { id: { type: GraphQLID } },
-    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) } },
+    resolve: destroy
   }
 }
+
+export {
+  Definition as OwnedCard,
+  Connection as OwnedCardConnection,
+  Filter as OwnedCardFilter,
+  Input as OwnedCardInput,
+  Order as OwnedCardOrder
+}
+
+export default { Definition, Queries, Mutations }

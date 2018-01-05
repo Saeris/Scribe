@@ -1,76 +1,95 @@
-import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, order, read, update } from './utilities'
-import Models from '../models'
-import { Language } from './'
+import {
+  nodeInterface,
+  DateRange,
+  createFilter,
+  createInput,
+  createOrder,
+  create,
+  read,
+  update,
+  destroy,
+  sqlJoin,
+  orderBy,
+  where
+} from "@/utilities"
+import { Language, LanguageFilter, LanguageOrder } from "./language"
 
-export const Input = new GraphQLInputObjectType({
-  name: `ImageInput`,
-  description: `Required fields for a new Name object`,
-  fields: () => ({
-    multiverseid: { type: GraphQLString },
-    url:          { type: new GraphQLNonNull(GraphQLString) },
-    language:     { type: new GraphQLNonNull(GraphQLID) }
-  })
-})
-
-const Filter = new GraphQLInputObjectType({
-  name: `ImageFilter`,
-  description: `Queryable fields for Image.`,
-  fields: () => ({
-    multiverseid: { type: new GraphQLList(GraphQLString) },
-    language:     { type: new GraphQLList(GraphQLID) }
-  })
-})
-
-const Fields = new GraphQLEnumType({
-  name: `ImageFields`,
-  description: `Field names for Image.`,
-  values: {
-    multiverseid: { value: `multiverseid` },
-    language:     { value: `language` }
-  }
-})
-
-export const Definition = new GraphQLObjectType({
+export const Definition = new GqlObject({
   name: `Image`,
   description: `An Image object`,
-  fields: () => ({
+  interfaces: [nodeInterface],
+  sqlTable: `image`,
+  uniqueKey: `id`,
+  timestamps: table => table.timestamps(),
+  fields: disabled => ({
+    globalId: {
+      ...globalId(),
+      description: `The global ID for the Relay spec`,
+      sqlDeps: [`id`]
+    },
     id: {
-      type: GraphQLID,
-      description: `A unique id for this image.`
+      type: new GqlNonNull(GqlID),
+      description: `The Image ID`,
+      sqlColumn: `id`,
+      column: table => table.string(`id`).notNullable().primary().unique()
+    },
+    created: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `created`,
+      sortable: true,
+      filter: { type: DateRange }
+    },
+    updated: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `updated`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     multiverseid: {
-      type: GraphQLString,
-      description: `The multiverseid of the card on Wizard’s Gatherer web page.`
+      type: GqlString,
+      description: `The multiverseid of the card on Wizard’s Gatherer web page.`,
+      sqlColumn: `multiverseid`,
+      column: table => table.string(`multiverseid`).unique(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
     url: {
-      type: GraphQLString,
-      description: `The localized image of a card.`
+      type: new GqlNonNull(GqlString),
+      description: `The localized image of a card.`,
+      sqlColumn: `url`,
+      column: table => table.string(`url`).notNullable().unique(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
     language: {
-      type: Language.Definition,
+      type: Language,
       description: `The language image.`,
-      resolve: (type) => Models.Language
-        .findById(type.language)
-        .then(model => model.toJSON())
+      sqlColumn: `language`,
+      column: table => table.string(`language`).notNullable(),
+      input: { type: new GqlNonNull(GqlID) },
+      args: { ...LanguageFilter, ...LanguageOrder },
+      where,
+      orderBy,
+      sqlJoin: sqlJoin(`language`)
     }
   })
 })
 
+export const { connectionType: Connection } = connectionDefinitions({ nodeType: Definition })
+export const Filter = createFilter(Definition)
+export const Input = createInput(Definition)
+export const Order = createOrder(Definition)
+
 export const Queries = {
   image: {
-    type: new GraphQLList(Definition),
+    type: new GqlList(Definition),
     description: `Returns an Image.`,
-    args: {
-      id: { type: new GraphQLList(GraphQLID) },
-      filter: {
-        type: Filter
-      },
-      limit: { type: GraphQLInt },
-      offset: { type: GraphQLInt },
-      orderBy: { type: order(`image`, Fields) }
-    },
-    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
+    args: { ...Filter, ...Order },
+    where,
+    orderBy,
+    resolve: read
   }
 }
 
@@ -78,19 +97,29 @@ export const Mutations = {
   createImage: {
     type: Definition,
     description: `Creates a new Image`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
+    args: { ...Input },
+    resolve: create
   },
   updateImage: {
     type: Definition,
     description: `Updates an existing Image, creates it if it does not already exist`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `multiverseid`)
+    args: { id: { type: new GqlNonNull(GqlID) }, ...Input },
+    resolve: update
   },
   deleteImage: {
     type: Definition,
     description: `Deletes a Image by id`,
-    args: { id: { type: GraphQLID } },
-    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) } },
+    resolve: destroy
   }
 }
+
+export {
+  Definition as Image,
+  Connection as ImageConnection,
+  Filter as ImageFilter,
+  Input as ImageInput,
+  Order as ImageOrder
+}
+
+export default { Definition, Queries, Mutations }

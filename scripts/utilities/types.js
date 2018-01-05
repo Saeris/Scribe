@@ -123,7 +123,7 @@ export const insertTypes = async data => {
       .then(info(`${prefix}Finished adding Types`))
       .catch(err => error(`${prefix}Failed to add Types.`, { err }))
 
-    results.types = await Promise
+    results.subtypes = await Promise
       .all(types.subtypes.map(subtype => {
         info(`${prefix}Adding Subtype ${chalk.green(subtype)}`)
         return updateSubtype({ name: subtype })

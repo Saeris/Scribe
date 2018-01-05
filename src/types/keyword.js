@@ -1,83 +1,106 @@
-import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, loadRelated, order, read, update } from './utilities'
-import Models from '../models'
-import { Card, Language } from './'
+import {
+  nodeInterface,
+  DateRange,
+  createFilter,
+  createInput,
+  createOrder,
+  create,
+  read,
+  update,
+  destroy,
+  sqlJoin,
+  junction,
+  orderBy,
+  where
+} from "@/utilities"
+import { CardConnection, CardFilter, CardOrder } from "./card"
+import { Language, LanguageFilter, LanguageOrder } from "./language"
 
-export const Input = new GraphQLInputObjectType({
-  name: `KeywordInput`,
-  description: `Required fields for a new Keyword object`,
-  fields: () => ({
-    name:         { type: new GraphQLNonNull(GraphQLString) },
-    reminderText: { type: GraphQLString },
-    languageCode: { type: new GraphQLNonNull(GraphQLID) },
-    cards:        { type: new GraphQLList(GraphQLID) }
-  })
-})
-
-const Filter = new GraphQLInputObjectType({
-  name: `KeywordFilter`,
-  description: `Queryable fields for Keyword.`,
-  fields: () => ({
-    name:         { type: new GraphQLList(GraphQLString) },
-    reminderText: { type: GraphQLString },
-    languageCode: { type: new GraphQLList(GraphQLID) },
-    cards:        { type: new GraphQLList(GraphQLID) }
-  })
-})
-
-const Fields = new GraphQLEnumType({
-  name: `KeywordFields`,
-  description: `Field names for Keyword.`,
-  values: {
-    name:         { value: `name` },
-    reminderText: { value: `reminderText` },
-    languageCode: { value: `languageCode` }
-  }
-})
-
-export const Definition = new GraphQLObjectType({
+export const Definition = new GqlObject({
   name: `Keyword`,
   description: `A Keyword object`,
-  fields: () => ({
+  interfaces: [nodeInterface],
+  sqlTable: `image`,
+  uniqueKey: `id`,
+  timestamps: table => table.timestamps(),
+  fields: disabled => ({
+    globalId: {
+      ...globalId(),
+      description: `The global ID for the Relay spec`,
+      sqlDeps: [`id`]
+    },
     id: {
-      type: GraphQLID,
-      description: `A unique id for this keyword.`
+      type: new GqlNonNull(GqlID),
+      description: `The Keyword ID`,
+      sqlColumn: `id`,
+      column: table => table.string(`id`).notNullable().primary().unique()
+    },
+    created: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `created`,
+      sortable: true,
+      filter: { type: DateRange }
+    },
+    updated: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `updated`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     name: {
-      type: GraphQLString,
-      description: `The name of the keyword.`
+      type: new GqlNonNull(GqlString),
+      description: `The name of the keyword.`,
+      sqlColumn: `name`,
+      column: table => table.string(`name`).notNullable().unique(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
     reminderText: {
-      type: GraphQLString,
-      description: `A short description of the keyword ability's rules.`
+      type: new GqlNonNull(GqlString),
+      description: `A short description of the keyword ability's rules.`,
+      sqlColumn: `reminderText`,
+      column: table => table.string(`reminderText`).notNullable(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
-    languageCode: {
-      type: Language.Definition,
+    language: {
+      type: Language,
       description: `The language code the reminder text of keyword is localized in.`,
-      resolve: type => loadRelated(type.id, Models.Keyword, `language`)
+      sqlColumn: `language`,
+      column: table => table.string(`language`).notNullable(),
+      input: { type: new GqlNonNull(GqlID) },
+      args: { ...LanguageFilter, ...LanguageOrder },
+      where,
+      orderBy,
+      sqlJoin: sqlJoin(`language`)
     },
     cards: {
-      type: new GraphQLList(Card.Definition),
+      type: CardConnection,
       description: `A list of cards featuring art from this artist.`,
-      resolve: type => loadRelated(type.id, Models.Keyword, `cards`)
+      args: { ...connectionArgs, ...CardFilter, ...CardOrder },
+      junction: junction(`abilitytypecards`),
+      where,
+      orderBy,
+      resolve: ({ cards }, args) => connectionFromArray(cards, args)
     }
   })
 })
 
+export const { connectionType: Connection } = connectionDefinitions({ nodeType: Definition })
+export const Filter = createFilter(Definition)
+export const Input = createInput(Definition)
+export const Order = createOrder(Definition)
+
 export const Queries = {
   keyword: {
-    type: new GraphQLList(Definition),
+    type: new GqlList(Definition),
     description: `Returns a Keyword.`,
-    args: {
-      id: { type: new GraphQLList(GraphQLID) },
-      filter: {
-        type: Filter
-      },
-      limit: { type: GraphQLInt },
-      offset: { type: GraphQLInt },
-      orderBy: { type: order(`keyword`, Fields) }
-    },
-    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
+    args: { ...Filter, ...Order },
+    where,
+    orderBy,
+    resolve: read
   }
 }
 
@@ -85,19 +108,29 @@ export const Mutations = {
   createKeyword: {
     type: Definition,
     description: `Creates a new Keyword`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
+    args: { ...Input },
+    resolve: create
   },
   updateKeyword: {
     type: Definition,
     description: `Updates an existing Keyword, creates it if it does not already exist`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `name`)
+    args: { id: { type: new GqlNonNull(GqlID) }, ...Input },
+    resolve: update
   },
   deleteKeyword: {
     type: Definition,
     description: `Deletes a Keyword by id`,
-    args: { id: { type: GraphQLID } },
-    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) } },
+    resolve: destroy
   }
 }
+
+export {
+  Definition as Keyword,
+  Connection as KeywordConnection,
+  Filter as KeywordFilter,
+  Input as KeywordInput,
+  Order as KeywordOrder
+}
+
+export default { Definition, Queries, Mutations }

@@ -1,91 +1,119 @@
-import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLString, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, loadRelated, order, read, update } from './utilities'
-import Models from '../models'
-import { OwnedCard, Tag } from './'
+import {
+  nodeInterface,
+  DateRange,
+  createFilter,
+  createInput,
+  createOrder,
+  create,
+  read,
+  update,
+  destroy,
+  junction,
+  orderBy,
+  where
+} from "@/utilities"
+import { OwnedCardConnection, OwnedCardFilter, OwnedCardOrder } from "./ownedCard"
+import { TagConnection, TagFilter, TagOrder } from "./tag"
 
-export const Input = new GraphQLInputObjectType({
-  name: `DeckInput`,
-  description: `Required fields for a new Deck object`,
-  fields: () => ({
-    name:        { type: new GraphQLNonNull(GraphQLString) },
-    description: { type: new GraphQLNonNull(GraphQLString) },
-    privacy:     { type: new GraphQLNonNull(GraphQLInt) }
-  })
-})
-
-const Filter = new GraphQLInputObjectType({
-  name: `DeckFilter`,
-  description: `Queryable fields for Deck.`,
-  fields: () => ({
-    name:      { type: new GraphQLList(GraphQLString) },
-    privacy:   { type: new GraphQLList(GraphQLInt) },
-    tags:      { type: new GraphQLList(GraphQLID) },
-    decklist:  { type: new GraphQLList(GraphQLID) },
-    sideboard: { type: new GraphQLList(GraphQLID) }
-  })
-})
-
-const Fields = new GraphQLEnumType({
-  name: `DeckFields`,
-  description: `Field names for Deck.`,
-  values: {
-    name:    { value: `name` },
-    privacy: { value: `privacy` }
-  }
-})
-
-export const Definition = new GraphQLObjectType({
+export const Definition = new GqlObject({
   name: `Deck`,
   description: `A Deck object`,
-  fields: () => ({
+  interfaces: [nodeInterface],
+  sqlTable: `deck`,
+  uniqueKey: `id`,
+  timestamps: table => table.timestamps(),
+  fields: disabled => ({
+    globalId: {
+      ...globalId(),
+      description: `The global ID for the Relay spec`,
+      sqlDeps: [`id`]
+    },
     id: {
-      type: GraphQLID,
-      description: `A unique id for this deck.`
+      type: new GqlNonNull(GqlID),
+      description: `The Deck ID`,
+      sqlColumn: `id`,
+      column: table => table.string(`id`).notNullable().primary().unique()
+    },
+    created: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `created`,
+      sortable: true,
+      filter: { type: DateRange }
+    },
+    updated: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `updated`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     name: {
-      type: GraphQLString,
-      description: `The deck name.`
+      type: new GqlNonNull(GqlString),
+      description: `The name of the Deck.`,
+      sqlColumn: `name`,
+      column: table => table.string(`name`).notNullable().unique(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlString) }
     },
     description: {
-      type: GraphQLString,
-      description: `The description of the deck.`
+      type: GqlString,
+      description: `Description of the Deck.`,
+      sqlColumn: `description`,
+      column: table => table.string(`description`),
+      input: true
     },
     privacy: {
-      type: GraphQLInt,
-      description: `The deck's privacy setting.`
+      type: new GqlNonNull(GqlInt),
+      description: `The deck's privacy setting.`,
+      sqlColumn: `description`,
+      column: table => table.integer(`description`).notNullable(),
+      input: true,
+      sortable: true,
+      filter: { type: new GqlList(GqlInt) }
     },
     tags: {
-      type: new GraphQLList(Tag.Definition),
+      type: TagConnection,
       description: `A list of tags associated with this deck.`,
-      resolve: type => loadRelated(type.id, Models.Deck, `tags`)
+      args: { ...connectionArgs, ...TagFilter, ...TagOrder },
+      junction: junction(`tags`),
+      where,
+      orderBy,
+      resolve: ({ tags }, args) => connectionFromArray(tags, args)
     },
     decklist: {
-      type: new GraphQLList(OwnedCard.Definition),
+      type: OwnedCardConnection,
       description: `The main list of owned cards used in this deck.`,
-      resolve: type => loadRelated(type.id, Models.Deck, `decklist`)
+      args: { ...connectionArgs, ...OwnedCardFilter, ...OwnedCardOrder },
+      junction: junction(`decklist`),
+      where,
+      orderBy,
+      resolve: ({ decklist }, args) => connectionFromArray(decklist, args)
     },
     sideboard: {
-      type: new GraphQLList(OwnedCard.Definition),
+      type: OwnedCardConnection,
       description: `A list of owned cards that are use in this deck's sideboard.`,
-      resolve: type => loadRelated(type.id, Models.Deck, `sideboard`)
+      args: { ...connectionArgs, ...OwnedCardFilter, ...OwnedCardOrder },
+      junction: junction(`sideboard`),
+      where,
+      orderBy,
+      resolve: ({ sideboard }, args) => connectionFromArray(sideboard, args)
     }
   })
 })
 
+export const { connectionType: Connection } = connectionDefinitions({ nodeType: Definition })
+export const Filter = createFilter(Definition)
+export const Input = createInput(Definition)
+export const Order = createOrder(Definition)
+
 export const Queries = {
   deck: {
-    type: new GraphQLList(Definition),
+    type: new GqlList(Definition),
     description: `Returns a Deck.`,
-    args: {
-      id: { type: new GraphQLList(GraphQLID) },
-      filter: {
-        type: Filter
-      },
-      limit: { type: GraphQLInt },
-      offset: { type: GraphQLInt },
-      orderBy: { type: order(`deck`, Fields) }
-    },
-    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
+    args: { ...Filter, ...Order },
+    where,
+    orderBy,
+    resolve: read
   }
 }
 
@@ -93,19 +121,29 @@ export const Mutations = {
   createDeck: {
     type: Definition,
     description: `Creates a new Deck`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
+    args: { ...Input },
+    resolve: create
   },
   updateDeck: {
     type: Definition,
     description: `Updates an existing Deck, creates it if it does not already exist`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `name`)
+    args: { id: { type: new GqlNonNull(GqlID) }, ...Input },
+    resolve: update
   },
   deleteDeck: {
     type: Definition,
     description: `Deletes a Deck by id`,
-    args: { id: { type: GraphQLID } },
-    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) } },
+    resolve: destroy
   }
 }
+
+export {
+  Definition as Deck,
+  Connection as DeckConnection,
+  Filter as DeckFilter,
+  Input as DeckInput,
+  Order as DeckOrder
+}
+
+export default { Definition, Queries, Mutations }

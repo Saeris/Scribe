@@ -1,80 +1,108 @@
-import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLEnumType, GraphQLList, GraphQLObjectType, GraphQLInputObjectType } from 'graphql'
-import { create, destroy, loadRelated, order, read, update } from './utilities'
-import Models from '../models'
-import { Binder, Deck, OwnedCard, User } from './'
+import {
+  nodeInterface,
+  DateRange,
+  createFilter,
+  createInput,
+  createOrder,
+  create,
+  read,
+  update,
+  destroy,
+  sqlJoin,
+  junction,
+  orderBy,
+  where
+} from "@/utilities"
+import { BinderConnection, BinderFilter, BinderOrder } from "./binder"
+import { DeckConnection, DeckFilter, DeckOrder } from "./deck"
+import { OwnedCardConnection, OwnedCardFilter, OwnedCardOrder } from "./ownedCard"
+import { User, UserFilter, UserOrder } from "./user"
 
-export const Input = new GraphQLInputObjectType({
-  name: `CollectionInput`,
-  description: `Required fields for a new Collection object`,
-  fields: () => ({
-    owner: { type: new GraphQLNonNull(GraphQLID) }
-  })
-})
-
-const Filter = new GraphQLInputObjectType({
-  name: `CollectionFilter`,
-  description: `Queryable fields for Collection.`,
-  fields: () => ({
-    owner:   { type: new GraphQLList(GraphQLID) },
-    cards:   { type: new GraphQLList(GraphQLID) },
-    binders: { type: new GraphQLList(GraphQLID) },
-    decks:   { type: new GraphQLList(GraphQLID) }
-  })
-})
-
-const Fields = new GraphQLEnumType({
-  name: `CollectionFields`,
-  description: `Field names for Collection.`,
-  values: {
-    owner: { value: `owner` }
-  }
-})
-
-export const Definition = new GraphQLObjectType({
+export const Definition = new GqlObject({
   name: `Collection`,
   description: `A Collection object`,
-  fields: () => ({
+  interfaces: [nodeInterface],
+  sqlTable: `collection`,
+  uniqueKey: `id`,
+  timestamps: table => table.timestamps(),
+  fields: disabled => ({
+    globalId: {
+      ...globalId(),
+      description: `The global ID for the Relay spec`,
+      sqlDeps: [`id`]
+    },
     id: {
-      type: GraphQLID,
-      description: `A unique id for this collection.`
+      type: new GqlNonNull(GqlID),
+      description: `A unique id for this collection.`,
+      sqlColumn: `id`,
+      column: table => table.string(`id`).notNullable().primary().unique()
+    },
+    created: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `created`,
+      sortable: true,
+      filter: { type: DateRange }
+    },
+    updated: {
+      type: new GqlNonNull(GqlDateTime),
+      sqlColumn: `updated`,
+      sortable: true,
+      filter: { type: DateRange }
     },
     owner: {
-      type: User.Definition,
+      type: new GqlNonNull(User),
       description: `A unique id for this collection.`,
-      resolve: type => load(type.owner, Models.User)
+      sqlColumn: `owner`,
+      column: table => table.string(`owner`).notNullable(),
+      input: { type: new GqlNonNull(GqlID) },
+      args: { ...UserFilter, ...UserOrder },
+      where,
+      orderBy,
+      sqlJoin: sqlJoin(`owner`)
     },
     cards: {
-      type: new GraphQLList(OwnedCard.Definition),
+      type: OwnedCardConnection,
       description: `A list of cards that belong to this collection.`,
-      resolve: type => loadRelated(type.id, Models.Collection, `cards`)
+      args: { ...connectionArgs, ...OwnedCardFilter, ...OwnedCardOrder },
+      junction: junction(`collectioncards`),
+      where,
+      orderBy,
+      resolve: ({ cards }, args) => connectionFromArray(cards, args)
     },
     binders: {
-      type: new GraphQLList(Binder.Definition),
+      type: BinderConnection,
       description: `A list of binders that belong to this collection.`,
-      resolve: type => loadRelated(type.id, Models.Collection, `binders`)
+      args: { ...connectionArgs, ...BinderFilter, ...BinderOrder },
+      junction: junction(`binders`),
+      where,
+      orderBy,
+      resolve: ({ binders }, args) => connectionFromArray(binders, args)
     },
     decks: {
-      type: new GraphQLList(Deck.Definition),
+      type: DeckConnection,
       description: `A list of decks that belong to this collection.`,
-      resolve: type => loadRelated(type.id, Models.Collection, `decks`)
+      args: { ...connectionArgs, ...DeckFilter, ...DeckOrder },
+      junction: junction(`decks`),
+      where,
+      orderBy,
+      resolve: ({ decks }, args) => connectionFromArray(decks, args)
     }
   })
 })
 
+export const { connectionType: Connection } = connectionDefinitions({ nodeType: Definition })
+export const Filter = createFilter(Definition)
+export const Input = createInput(Definition)
+export const Order = createOrder(Definition)
+
 export const Queries = {
   collection: {
-    type: new GraphQLList(Definition),
+    type: new GqlList(Definition),
     description: `Returns a Collection.`,
-    args: {
-      id: { type: new GraphQLList(GraphQLID) },
-      filter: {
-        type: Filter
-      },
-      limit: { type: GraphQLInt },
-      offset: { type: GraphQLInt },
-      orderBy: { type: order(`collection`, Fields) }
-    },
-    resolve: (parent, args, context) => read(parent, args, context, Definition.name)
+    args: { ...Filter, ...Order },
+    where,
+    orderBy,
+    resolve: read
   }
 }
 
@@ -82,19 +110,29 @@ export const Mutations = {
   createCollection: {
     type: Definition,
     description: `Creates a new Collection`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => create(parent, args, context, Definition.name)
+    args: { ...Input },
+    resolve: create
   },
   updateCollection: {
     type: Definition,
     description: `Updates an existing Collection, creates it if it does not already exist`,
-    args: { input: { type: Input } },
-    resolve: (parent, args, context) => update(parent, args, context, Definition.name, `owner`)
+    args: { id: { type: new GqlNonNull(GqlID) }, ...Input },
+    resolve: update
   },
   deleteCollection: {
     type: Definition,
     description: `Deletes a Collection by id`,
-    args: { id: { type: GraphQLID } },
-    resolve: (parent, args, context) => destroy(parent, args, context, Definition.name)
+    args: { id: { type: new GqlNonNull(GqlID) } },
+    resolve: destroy
   }
 }
+
+export {
+  Definition as Collection,
+  Connection as CollectionConnection,
+  Filter as CollectionFilter,
+  Input as CollectionInput,
+  Order as CollectionOrder
+}
+
+export default { Definition, Queries, Mutations }
