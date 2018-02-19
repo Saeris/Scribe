@@ -1,0 +1,7 @@
+projects:
+  scribe:
+    schemaPath: "./schema.gql"
+    extensions:
+      schemaModule: "src/schema.js"
+      endpoints:
+        default: "http://localhost:${env:PORT}/graphql"

@@ -1,7 +1,4 @@
-export const orderBy = args => {
-  const sortBy = args.orderBy || `id`
-  return sortBy.reduce((hash, { field, sort }) => {
-    hash[field] = sort
-    return hash
-  }, {})
-}
+export const orderBy = ({ orderBy: by }) => by?.reduce((hash, { field, sort }) => {
+  hash[field] = sort
+  return hash
+}, {}) || { id: `desc` }

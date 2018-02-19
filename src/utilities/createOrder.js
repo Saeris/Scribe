@@ -52,6 +52,6 @@ export function createOrder(type) {
     orders.set(typeName, orderBy)
     return orderBy
   } catch (err) {
-    error(`Failed to run createOrder: ${typeName}`, err)
+    error(`Failed to run createOrder: ${typeName} \n`, err)
   }
 }

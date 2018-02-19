@@ -66,7 +66,7 @@ export const Definition = new GqlObject({
       filter: { type: DateRange }
     },
     language: {
-      type: Language,
+      type: !disabled && new GqlNonNull(Language),
       description: `The Language for this Ruling.`,
       column: table => table.string(`language`).notNullable(),
       input: { type: new GqlNonNull(GqlID) },

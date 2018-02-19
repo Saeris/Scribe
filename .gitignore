@@ -10,5 +10,5 @@ npm-debug.log*
 /electron.js*
 /release
 /test/coverage
-/src/scribe.sqlite
+/database.sqlite
 /src/images

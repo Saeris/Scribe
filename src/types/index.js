@@ -1,5 +1,6 @@
 export AbilityType from './abilityType'
 export Artist from './artist'
+export Authentication from "./authentication"
 export Binder from './binder'
 export Block from './block'
 export Booster from './booster'

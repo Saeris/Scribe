@@ -56,7 +56,7 @@ export const Definition = new GqlObject({
       filter: { type: new GqlList(new GqlNonNull(GqlString)) }
     },
     icon: {
-      type: new GqlNonNull(Icon),
+      type: !disabled && new GqlNonNull(Icon),
       description: `A CSS class used to display a mana symbol for this color.`,
       column: table => table.string(`icon`).notNullable(),
       input: { type: new GqlNonNull(GqlID) },
@@ -66,7 +66,7 @@ export const Definition = new GqlObject({
       sqlJoin: sqlJoin(`icon`)
     },
     identity: {
-      type: new GqlNonNull(ColorIdentity),
+      type: !disabled && new GqlNonNull(ColorIdentity),
       description: `The color identity of this color.`,
       column: table => table.string(`identity`).notNullable(),
       input: { type: new GqlNonNull(GqlID) },

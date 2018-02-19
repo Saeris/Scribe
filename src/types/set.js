@@ -67,7 +67,7 @@ export const Definition = new GqlObject({
       filter: { type: new GqlList(GqlString) }
     },
     block: {
-      type: Block,
+      type: !disabled && new GqlNonNull(Block),
       description: `The Block the Set belongs to.`,
       column: table => table.string(`block`).notNullable(),
       input: { type: new GqlNonNull(GqlID) },
@@ -77,7 +77,7 @@ export const Definition = new GqlObject({
       sqlJoin: sqlJoin(`block`)
     },
     type: {
-      type: SetType,
+      type: !disabled && new GqlNonNull(SetType),
       description: `The Set type.`,
       column: table => table.string(`type`).notNullable(),
       input: { type: new GqlNonNull(GqlID) },
@@ -87,7 +87,7 @@ export const Definition = new GqlObject({
       sqlJoin: sqlJoin(`type`)
     },
     icon: {
-      type: Icon,
+      type: !disabled && new GqlNonNull(Icon),
       description: `The Icon associated with the Set.`,
       column: table => table.string(`icon`).notNullable(),
       input: { type: new GqlNonNull(GqlID) },
@@ -112,7 +112,7 @@ export const Definition = new GqlObject({
       filter: { type: DateRange }
     },
     booster: {
-      type: Booster,
+      type: !disabled && new GqlNonNull(Booster),
       description: `A booster pack for this set`,
       column: table => table.string(`booster`).notNullable(),
       input: { type: new GqlNonNull(GqlID) },

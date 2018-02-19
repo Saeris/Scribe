@@ -60,7 +60,7 @@ export const Definition = new GqlObject({
       sqlJoin: sqlJoin(`card`)
     },
     set: {
-      type: CardSet,
+      type: !disabled && new GqlNonNull(CardSet),
       description: `The Set the Printing belongs to.`,
       column: table => table.string(`set`).notNullable(),
       input: { type: new GqlNonNull(GqlID) },
@@ -80,7 +80,7 @@ export const Definition = new GqlObject({
       resolve: ({ images }, args) => connectionFromArray(images, args)
     },
     artist: {
-      type: Artist,
+      type: !disabled && new GqlNonNull(Artist),
       description: `The artist of the image. This may not match what is on the card as MTGJSON corrects many card misprints.`,
       column: table => table.string(`artist`).notNullable(),
       input: { type: new GqlNonNull(GqlID) },

@@ -50,7 +50,7 @@ export const Definition = new GqlObject({
       filter: { type: DateRange }
     },
     owner: {
-      type: new GqlNonNull(User),
+      type: !disabled && new GqlNonNull(User),
       description: `A unique id for this collection.`,
       sqlColumn: `owner`,
       column: table => table.string(`owner`).notNullable(),

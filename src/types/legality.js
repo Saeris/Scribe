@@ -57,7 +57,7 @@ export const Definition = new GqlObject({
       resolve: ({ cards }, args) => connectionFromArray(cards, args)
     },
     format: {
-      type: Format,
+      type: !disabled && new GqlNonNull(Format),
       description: `The format the card is legal in.`,
       column: table => table.string(`format`).notNullable(),
       input: { type: new GqlNonNull(GqlID) },

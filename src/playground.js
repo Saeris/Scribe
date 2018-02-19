@@ -1,7 +1,7 @@
 import hapiPlayground from "graphql-playground-middleware-hapi"
 
 export default {
-  register: hapiPlayground,
+  plugin: hapiPlayground,
   options: {
     path: `/playground`,
     endpoint: `/graphql`

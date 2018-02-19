@@ -46,7 +46,7 @@ export const Definition = new GqlObject({
       filter: { type: DateRange }
     },
     card: {
-      type: Card,
+      type: !disabled && new GqlNonNull(Card),
       description: `The Card for which this is an Instance of.`,
       column: table => table.string(`card`).notNullable(),
       input: { type: new GqlNonNull(GqlID) },

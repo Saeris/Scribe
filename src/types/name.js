@@ -56,7 +56,7 @@ export const Definition = new GqlObject({
       filter: { type: new GqlList(GqlString) }
     },
     language: {
-      type: Language,
+      type: !disabled && new GqlNonNull(Language),
       description: `The Language for this Name.`,
       column: table => table.string(`language`).notNullable(),
       input: { type: new GqlNonNull(GqlID) },
@@ -66,7 +66,7 @@ export const Definition = new GqlObject({
       sqlJoin: sqlJoin(`language`)
     },
     card: {
-      type: Card,
+      type: !disabled && new GqlNonNull(Card),
       description: `The Card with this Name.`,
       column: table => table.string(`card`).notNullable(),
       input: { type: new GqlNonNull(GqlID) },

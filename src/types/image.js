@@ -64,7 +64,7 @@ export const Definition = new GqlObject({
       filter: { type: new GqlList(GqlString) }
     },
     language: {
-      type: Language,
+      type: !disabled && new GqlNonNull(Language),
       description: `The language image.`,
       sqlColumn: `language`,
       column: table => table.string(`language`).notNullable(),

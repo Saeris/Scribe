@@ -1,10 +1,7 @@
 import hapi from "hapi" // https://hapijs.com/
-import bell from "bell" // https://github.com/hapijs/bell
-import jwt from "hapi-auth-jwt2" // https://github.com/dwyl/hapi-auth-jwt2
 import monitor from "./monitor" // Monitoring and Logging
 //import limiter from "./limiter" // Rate Limiting
 import playground from "./playground" // GraphQL Playground Route
-import authentication from "./authentication"
 import api from "./api" // GraphQL API Endpoint
 
 const server = new hapi.Server({
@@ -15,15 +12,13 @@ const server = new hapi.Server({
 
 const plugins = [
   monitor,
-  //bell,
-  //jwt,
   api
 ]
 
 async function setup() {
   info(`Setting up server...`)
   try {
-    //if (LOCAL) plugins.push(playground)
+    if (LOCAL) plugins.push(playground)
     await server.register(plugins)
     //server.auth.strategy(`jwt`, `jwt`, authentication)
     info(`Successfully setup server!`)

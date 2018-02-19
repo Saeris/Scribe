@@ -66,7 +66,7 @@ export const Definition = new GqlObject({
       filter: { type: new GqlList(GqlString) }
     },
     language: {
-      type: Language,
+      type: !disabled && new GqlNonNull(Language),
       description: `The language code the reminder text of keyword is localized in.`,
       sqlColumn: `language`,
       column: table => table.string(`language`).notNullable(),

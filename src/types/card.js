@@ -80,7 +80,7 @@ export const Definition = new GqlObject({
       filter: { type: new GqlList(new GqlNonNull(GqlString)) }
     },
     layout: {
-      type: new GqlNonNull(Layout),
+      type: !disabled && new GqlNonNull(Layout),
       description: `The Card Layout.`,
       sqlColumn: `layout`,
       column: table => table.string(`layout`).notNullable(),
@@ -127,7 +127,7 @@ export const Definition = new GqlObject({
       resolve: ({ colors }, args) => connectionFromArray(colors, args)
     },
     colorIdentity: {
-      type: new GqlNonNull(ColorIdentity),
+      type: !disabled && new GqlNonNull(ColorIdentity),
       description: `The card colors by color code. [“Red”, “Blue”] becomes [“R”, “U”]`,
       sqlColumn: `colorIdentity`,
       column: table => table.string(`colorIdentity`).notNullable(),
@@ -305,7 +305,7 @@ export const Mutations = {
   createCard: {
     type: Definition,
     description: `Creates a new Card`,
-    args: { input: { type: Input } },
+    args: { ...Input },
     resolve: (parent, { input }, context) => {
       const { names, colors, supertypes, types, subtypes, categories, abilityTypes, keywords, legalities, rulings, ...fields } = input //eslint-disable-line
       /*
