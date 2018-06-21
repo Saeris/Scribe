@@ -28,7 +28,8 @@
     "populate": "nodemon --watch scripts scripts/populate.js --exec babel-node --color --inspect=1338",
     "webpack": "./node_modules/.bin/webpack",
     "snyk-protect": "snyk protect",
-    "prepublish": "npm run snyk-protect"
+    "prepublish": "npm run snyk-protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -77,8 +78,8 @@
     "isomorphic-fetch": "^2.2.1",
     "jasmine": "^2.5.2",
     "jasmine-core": "^2.5.2",
-    "jsonwebtoken": "^7.1.9",
-    "karma": "^1.6.0",
+    "jsonwebtoken": "^8.0.0",
+    "karma": "^2.0.3",
     "karma-jasmine": "^1.0.2",
     "karma-mocha-reporter": "^2.2.1",
     "knex": "^0.13.0",
@@ -94,12 +95,12 @@
     "passport-oauth2": "^1.1.2",
     "present": "^1.0.0",
     "source-map-support": "^0.4.15",
-    "sqlite3": "^3.1.8",
+    "sqlite3": "^4.0.0",
     "test-runner-config": "^0.5.0",
     "webpack": "^2.5.1",
     "winston": "^2.3.0",
     "winston-loggly-bulk": "^2.0.0",
-    "snyk": "^1.42.6"
+    "snyk": "^1.83.0"
   },
   "snyk": true
 }
