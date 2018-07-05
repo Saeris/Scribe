@@ -28,7 +28,8 @@
     "populate": "nodemon --watch scripts scripts/populate.js --exec babel-node --color --inspect=1338",
     "webpack": "./node_modules/.bin/webpack",
     "snyk-protect": "snyk protect",
-    "prepublish": "npm run snyk-protect"
+    "prepublish": "npm run snyk-protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -78,7 +79,7 @@
     "jasmine": "^2.5.2",
     "jasmine-core": "^2.5.2",
     "jsonwebtoken": "^7.1.9",
-    "karma": "^1.6.0",
+    "karma": "^2.0.0",
     "karma-jasmine": "^1.0.2",
     "karma-mocha-reporter": "^2.2.1",
     "knex": "^0.13.0",
@@ -99,7 +100,7 @@
     "webpack": "^2.5.1",
     "winston": "^2.3.0",
     "winston-loggly-bulk": "^2.0.0",
-    "snyk": "^1.42.6"
+    "snyk": "^1.88.1"
   },
   "snyk": true
 }
