@@ -1,5 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.7.1
+version: v1.13.1
 ignore: {}
 # patches apply the minimum changes required to fix a vulnerability
 patch:
@@ -41,3 +41,8 @@ patch:
         patched: '2017-10-12T13:05:35.644Z'
     - karma > socket.io > socket.io-adapter > debug > ms:
         patched: '2017-10-12T13:05:35.644Z'
+  'npm:hoek:20180212':
+    - hapi-auth-jwt2 > jsonwebtoken > joi > hoek:
+        patched: '2018-12-13T04:51:03.255Z'
+    - hapi-auth-jwt2 > jsonwebtoken > joi > topo > hoek:
+        patched: '2018-12-13T04:51:03.255Z'
