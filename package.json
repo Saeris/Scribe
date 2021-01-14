@@ -78,7 +78,7 @@
     "jasmine": "^2.5.2",
     "jasmine-core": "^2.5.2",
     "jsonwebtoken": "^7.1.9",
-    "karma": "^1.6.0",
+    "karma": "^6.0.0",
     "karma-jasmine": "^1.0.2",
     "karma-mocha-reporter": "^2.2.1",
     "knex": "^0.13.0",
