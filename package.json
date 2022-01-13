@@ -61,7 +61,7 @@
     "del-cli": "^0.2.1",
     "dotenv": "^4.0.0",
     "errorhandler": "^1.5.0",
-    "eslint": "^3.19.0",
+    "eslint": "^4.0.0",
     "glob": "^7.1.1",
     "good": "^7.1.0",
     "good-winston": "^3.1.0",
